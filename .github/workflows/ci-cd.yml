@@ -70,35 +70,35 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ECR_REGISTRY,ECR_REPOSITORY,AWS_REGION
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: cp_main_be
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-        script: |
-          # 환경변수 확인
-          echo "ECR_REGISTRY: $ECR_REGISTRY"
-          echo "ECR_REPOSITORY: $ECR_REPOSITORY"
-          
-          # AWS CLI 설정 (EC2에서 ECR에 접근하기 위해)
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-          
-          # 1. 배포 서버에서 최신 버전의 'latest' 태그 이미지를 pull
-          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          
-          # 2. 기존에 실행 중인 컨테이너가 있다면 중지하고 삭제
-          if [ $(docker ps -a -q -f name=spring-app-container) ]; then
-            docker stop spring-app-container
-            docker rm spring-app-container
-          fi
-          
-          # 환경변수 로드
-          source /etc/environment
-          
-          # 3. 새 컨테이너를 실행
-          docker run -d --name spring-app-container -p 80:8080 \
-          -e DB_URL="$DB_URL" \
-          -e DB_USERNAME="$DB_USERNAME" \
-          -e DB_PASSWORD="$DB_PASSWORD" \
-          -e SPRING_PROFILES_ACTIVE=prod \
-          $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          script: |
+            # 하드코딩된 값으로 테스트
+            ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+            ECR_REPOSITORY="cp_main_be"
+            AWS_REGION="${{ secrets.AWS_REGION }}"
+            
+            echo "ECR_REGISTRY: $ECR_REGISTRY"
+            echo "ECR_REPOSITORY: $ECR_REPOSITORY"
+            echo "AWS_REGION: $AWS_REGION"
+            
+            # AWS CLI 설정
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+            
+            # 1. 이미지 pull
+            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            
+            # 2. 기존 컨테이너 정리
+            if [ $(docker ps -a -q -f name=spring-app-container) ]; then
+              docker stop spring-app-container
+              docker rm spring-app-container
+            fi
+            
+            # 환경변수 로드
+            source /etc/environment
+            
+            # 3. 새 컨테이너 실행
+            docker run -d --name spring-app-container -p 80:8080 \
+            -e DB_URL="$DB_URL" \
+            -e DB_USERNAME="$DB_USERNAME" \
+            -e DB_PASSWORD="$DB_PASSWORD" \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            $ECR_REGISTRY/$ECR_REPOSITORY:latest
