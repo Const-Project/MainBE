@@ -105,5 +105,5 @@ jobs:
             -e R2_BUCKET="${{ secrets.R2_BUCKET }}" \
             -e R2_ACCESS_KEY="${{ secrets.R2_ACCESS_KEY }}" \
             -e R2_SECRET_KEY="${{ secrets.R2_SECRET_KEY }}" \
-            
             $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            
