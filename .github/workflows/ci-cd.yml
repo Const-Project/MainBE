@@ -38,6 +38,17 @@ jobs:
       # 'build' 명령어는 'test' 작업을 포함하므로, 단위 테스트가 자동으로 실행됩니다.
       - name: Build with Gradle
         run: ./gradlew build
+        env:
+          # --- DB 관련 시크릿 추가 ---
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      
+          # --- 기존 R2 관련 시크릿 ---
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
 
       # 5. AWS 자격 증명 설정 (OIDC 방식)
       - name: Configure AWS credentials using OIDC
