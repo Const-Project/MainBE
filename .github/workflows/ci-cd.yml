@@ -101,4 +101,9 @@ jobs:
             -e DB_USERNAME="$DB_USERNAME" \
             -e DB_PASSWORD="$DB_PASSWORD" \
             -e SPRING_PROFILES_ACTIVE=prod \
+            -e R2_ENDPOINT="${{ secrets.R2_ENDPOINT }}" \
+            -e R2_BUCKET="${{ secrets.R2_BUCKET }}" \
+            -e R2_ACCESS_KEY="${{ secrets.R2_ACCESS_KEY }}" \
+            -e R2_SECRET_KEY="${{ secrets.R2_SECRET_KEY }}" \
+            
             $ECR_REGISTRY/$ECR_REPOSITORY:latest
