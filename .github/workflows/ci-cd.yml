@@ -96,7 +96,7 @@ jobs:
             source /etc/environment
             
             # 3. 새 컨테이너 실행
-            docker run -d --name spring-app-container -p 80:8080 \
+            docker run -d --name spring-app-container -p 8080:8080 \
             -e DB_URL="$DB_URL" \
             -e DB_USERNAME="$DB_USERNAME" \
             -e DB_PASSWORD="$DB_PASSWORD" \
