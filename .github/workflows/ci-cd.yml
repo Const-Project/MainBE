@@ -12,12 +12,12 @@ permissions:
   contents: read
 
 jobs:
-  # 'build-and-deploy' 라는 이름의 작업 정의
-  build-and-deploy:
-    # 이 작업은 GitHub가 제공하는 최신 Ubuntu 가상머신에서 실행
+  # 빌드 및 테스트 작업 (항상 실행)
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      build-success: ${{ steps.build-status.outputs.success }}
     
-    # 작업 내에서 실행될 단계들
     steps:
       # 1. 소스 코드 체크아웃
       - name: Checkout Source Code
@@ -35,7 +35,6 @@ jobs:
         run: chmod +x ./gradlew
 
       # 4. Gradle로 빌드 및 단위 테스트 실행
-      # 'build' 명령어는 'test' 작업을 포함하므로, 단위 테스트가 자동으로 실행됩니다.
       - name: Build with Gradle
         run: ./gradlew build
         env:
@@ -50,31 +49,95 @@ jobs:
           R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
           R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
 
-      # 5. AWS 자격 증명 설정 (OIDC 방식)
+      # 5. 빌드 성공 상태 설정
+      - name: Set build success status
+        id: build-status
+        run: echo "success=true" >> $GITHUB_OUTPUT
+
+  # EC2 상태 확인 작업
+  check-ec2:
+    runs-on: ubuntu-latest
+    needs: build
+    outputs:
+      ec2-available: ${{ steps.check-ec2-status.outputs.available }}
+    
+    steps:
+      # EC2 인스턴스 상태 확인
+      - name: Check EC2 instance status
+        id: check-ec2-status
+        run: |
+          # EC2에 ping 테스트 (timeout 10초)
+          if timeout 10 nc -z ${{ secrets.EC2_HOST }} 22 2>/dev/null; then
+            echo "EC2 instance is reachable"
+            echo "available=true" >> $GITHUB_OUTPUT
+          else
+            echo "EC2 instance is not reachable or stopped"
+            echo "available=false" >> $GITHUB_OUTPUT
+          fi
+        continue-on-error: true
+
+  # Docker 이미지 빌드 및 ECR 푸시 (EC2가 사용 가능할 때만)
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    needs: [build, check-ec2]
+    if: needs.check-ec2.outputs.ec2-available == 'true'
+    outputs:
+      image-pushed: ${{ steps.push-status.outputs.success }}
+    
+    steps:
+      # 1. 소스 코드 체크아웃
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 2. AWS 자격 증명 설정 (OIDC 방식)
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # 6. Amazon ECR에 로그인
+      # 3. Amazon ECR에 로그인
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 7. Docker 이미지 빌드, 태깅, ECR에 푸시
+      # 4. Docker 이미지 빌드, 태깅, ECR에 푸시
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: cp_main_be # 1단계에서 생성한 ECR 리포지토리 이름
-          IMAGE_TAG: ${{ github.sha }}   # Git 커밋 해시를 이미지 태그로 사용하여 버전을 관리
+          ECR_REPOSITORY: cp_main_be
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
 
-      # 8. EC2에 접속하여 배포 스크립트 실행
+      # 5. 이미지 푸시 성공 상태 설정
+      - name: Set push success status
+        id: push-status
+        run: echo "success=true" >> $GITHUB_OUTPUT
+
+  # EC2 배포 작업 (이미지 푸시가 성공했을 때만)
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, check-ec2, build-and-push-image]
+    if: needs.build-and-push-image.outputs.image-pushed == 'true'
+    
+    steps:
+      # 1. AWS 자격 증명 설정 (ECR 레지스트리 정보 가져오기 위해)
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # 2. Amazon ECR에 로그인 (레지스트리 정보 가져오기 위해)
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 3. EC2에 접속하여 배포 스크립트 실행
       - name: Deploy to EC2 instance
         uses: appleboy/ssh-action@master
         with:
@@ -117,4 +180,32 @@ jobs:
             -e R2_ACCESS_KEY="${{ secrets.R2_ACCESS_KEY }}" \
             -e R2_SECRET_KEY="${{ secrets.R2_SECRET_KEY }}" \
             $ECR_REGISTRY/$ECR_REPOSITORY:latest
-            
+
+  # 워크플로우 실행 결과 요약
+  summary:
+    runs-on: ubuntu-latest
+    needs: [build, check-ec2, build-and-push-image, deploy]
+    if: always()
+    
+    steps:
+      - name: Workflow Summary
+        run: |
+          echo "## 워크플로우 실행 결과" >> $GITHUB_STEP_SUMMARY
+          echo "| 단계 | 상태 |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 빌드 및 테스트 | ${{ needs.build.result == 'success' && '✅ 성공' || '❌ 실패' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| EC2 상태 확인 | ${{ needs.check-ec2.outputs.ec2-available == 'true' && '✅ 사용 가능' || '⚠️ 사용 불가' }} |" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.check-ec2.outputs.ec2-available }}" == "true" ]]; then
+            echo "| Docker 이미지 빌드/푸시 | ${{ needs.build-and-push-image.result == 'success' && '✅ 성공' || '❌ 실패' }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| EC2 배포 | ${{ needs.deploy.result == 'success' && '✅ 성공' || '❌ 실패' }} |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Docker 이미지 빌드/푸시 | ⏭️ 건너뜀 (EC2 사용 불가) |" >> $GITHUB_STEP_SUMMARY
+            echo "| EC2 배포 | ⏭️ 건너뜀 (EC2 사용 불가) |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.check-ec2.outputs.ec2-available }}" == "false" ]]; then
+            echo "💡 **참고**: EC2 인스턴스가 중지되어 있거나 접근할 수 없어서 배포 단계를 건너뛰었습니다." >> $GITHUB_STEP_SUMMARY
+            echo "빌드와 테스트는 정상적으로 완료되었습니다." >> $GITHUB_STEP_SUMMARY
+          fi
