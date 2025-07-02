@@ -14,6 +14,9 @@ COPY gradle gradle
 COPY build.gradle .
 COPY settings.gradle .
 
+# gradlew 파일에 실행 권한 부여
+RUN chmod +x ./gradlew
+
 # Gradle 의존성을 다운로드합니다. 소스코드가 변경되어도 이 레이어는 캐시로 재사용됩니다.
 RUN ./gradlew dependencies
 
