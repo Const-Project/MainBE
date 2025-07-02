@@ -11,7 +11,7 @@ on:
 # OIDC 토큰 요청을 위한 권한 설정 (필수)
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 jobs:
   # 코드 포맷팅 및 기본 검증 (항상 첫 번째로 실행)
