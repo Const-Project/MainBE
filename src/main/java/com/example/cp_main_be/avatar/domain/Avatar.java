@@ -1,9 +1,8 @@
 package com.example.cp_main_be.avatar.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 @Entity
 @Getter
@@ -15,9 +14,7 @@ public class Avatar {
     @Column(name = "avatar_id")
     private Long id;
 
-    @Column(name = "avatar_name")
-    private String name;
-
     @Column(name = "image_url")
     private String imageUrl;
+
 }
