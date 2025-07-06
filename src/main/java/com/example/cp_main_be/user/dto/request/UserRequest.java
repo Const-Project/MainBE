@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserRequest {
 
-    private final Long userUuid;
-    private final Long userId;
-    private final String username;
+  private final Long userUuid;
+  private final Long userId;
+  private final String username;
 }

@@ -1,5 +1,8 @@
 package com.example.cp_main_be.image.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.example.cp_main_be.util.ApiResponse;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -33,19 +36,24 @@ class ImageProcessingServiceTest {
     mockWebServer.shutdown();
   }
 
-  // 테스트가 실행될 때, application.properties의 replicate.api.token 값을 동적으로 변경
   @DynamicPropertySource
   static void properties(DynamicPropertyRegistry registry) {
+    // WebClient 테스트를 위한 가짜 API 서버 주소
+    registry.add("replicate.api.url", () -> mockWebServer.url("").toString());
     registry.add("replicate.api.token", () -> "test-token");
-    // Replicate API URL을 가짜 웹 서버 주소로 변경하는 로직이 필요하지만,
-    // 현재 코드에서는 URL이 상수로 박혀있어 생략합니다. (실제로는 이 부분도 주입받도록 리팩토링 필요)
+
+    // DataSource 빈 생성을 위한 임시 H2 DB 정보
+    // 이 테스트는 DB를 직접 쓰진 않지만, @SpringBootTest가 DB 연결을 요구하므로 설정해줍니다.
+    registry.add("spring.datasource.url", () -> "jdbc:h2:mem:testdb");
+    registry.add("spring.datasource.driver-class-name", () -> "org.h2.Driver");
+    registry.add("spring.datasource.username", () -> "sa");
+    registry.add("spring.datasource.password", () -> "");
   }
 
   @Test
   @DisplayName("AI 서버와의 통신이 모두 성공하면, 성공 ApiResponse를 반환한다")
   void processImageWithAi_success() throws Exception {
     // given (준비)
-    // MockWebServer가 반환할 가짜 응답들을 순서대로 준비
     String initialResponseJson =
         "{\"status\":\"starting\",\"urls\":{\"get\":\""
             + mockWebServer.url("/predictions/123")
@@ -69,20 +77,15 @@ class ImageProcessingServiceTest {
             .setBody(new okio.Buffer().write(finalImageBytes))
             .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE));
 
-    MockMultipartFile mockImageFile = new MockMultipartFile("image", new byte[0]);
+    MockMultipartFile mockImageFile =
+        new MockMultipartFile("image", "test.png", "image/png", new byte[0]);
 
     // when (실행)
-    // 주의: 현재 서비스 코드는 API URL이 하드코딩 되어 있어 실제 API로 요청을 보냅니다.
-    // 이 테스트가 성공하려면 서비스 코드에서 API URL을 외부에서 주입받도록 수정해야 합니다.
-    // e.g. @Value("${replicate.api.url}") private StringapiUrl;
-    // 그리고 @DynamicPropertySource에서 이 값을 mockWebServer.url("/v1/predictions").toString() 으로 설정해주어야
-    // 합니다.
-
-    // 아래는 URL이 동적으로 주입된다고 가정한 이상적인 실행 코드입니다.
-    // ApiResponse<byte[]> response = imageProcessingService.processImageWithAi(mockImageFile);
+    // 이제 서비스는 동적으로 주입된 MockWebServer URL로 요청을 보낸다.
+    ApiResponse<byte[]> response = imageProcessingService.processImageWithAi(mockImageFile);
 
     // then (검증)
-    // assertThat(response.isSuccess()).isTrue();
-    // assertThat(response.getData()).isEqualTo(finalImageBytes);
+    assertThat(response.isSuccess()).isTrue();
+    assertThat(response.getData()).isEqualTo(finalImageBytes);
   }
 }

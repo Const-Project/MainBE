@@ -11,18 +11,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserService {
 
-    private final UserRepository userRepository;
+  private final UserRepository userRepository;
 
-    public void saveUser(User user) {
-        this.userRepository.save(user);
-    }
+  public void saveUser(User user) {
+    this.userRepository.save(user);
+  }
 
-    public User findUserById(Long id) {
-        return this.userRepository.findById(id).orElse(null);
-    }
+  public User findUserById(Long id) {
+    return this.userRepository.findById(id).orElse(null);
+  }
 
-    // 실험용
-    public void deleteUser(Long userId) {
-        this.userRepository.deleteById(userId);
-    }
+  // 실험용
+  public void deleteUser(Long userId) {
+    this.userRepository.deleteById(userId);
+  }
 }
