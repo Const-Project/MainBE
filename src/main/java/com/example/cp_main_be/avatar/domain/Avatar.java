@@ -15,5 +15,9 @@ public class Avatar {
     @Column(name = "avatar_id")
     private Long id;
 
+    @Column(name = "avatar_name")
+    private String name;
 
+    @Column(name = "image_url")
+    private String imageUrl;
 }
