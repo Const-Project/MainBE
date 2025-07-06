@@ -1,8 +1,7 @@
-package com.example.cp_main_be.user.presentation;
+package com.example.cp_main_be.user.service;
 
 import com.example.cp_main_be.user.domain.User;
 import com.example.cp_main_be.user.domain.UserStatus;
-import com.example.cp_main_be.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
-class UserControllerTest {
+class UserServiceTest {
 
     @Autowired
     private UserService userService;
