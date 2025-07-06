@@ -1,4 +1,4 @@
-package com.example.cp_main_be.user.presentation;
+package com.example.cp_main_be.user.service;
 
 <<<<<<< HEAD
 import com.example.cp_main_be.config.AbstractContainerBaseTest;
@@ -6,7 +6,6 @@ import com.example.cp_main_be.config.AbstractContainerBaseTest;
 >>>>>>> a79dc75 (feat: User 엔티티 개발, 테스트 코드 작성, 닉네임으로 user 정보 저장하는 api 개발. 테스트 코드용 의존성 추가 h2 db)
 import com.example.cp_main_be.user.domain.User;
 import com.example.cp_main_be.user.domain.UserStatus;
-import com.example.cp_main_be.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +83,7 @@ class UserControllerTest extends AbstractContainerBaseTest {
         "spring.datasource.password=",
         "spring.jpa.hibernate.ddl-auto=create-drop"
 })
-class UserControllerTest {
+class UserServiceTest {
 
     @Autowired
     private UserService userService;
