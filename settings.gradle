@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        // 아래 줄을 추가해 주세요.
+        gradlePluginPortal()
+
+        // 기존에 있던 다른 저장소 설정 (예: mavenCentral)
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'CP_Main_BE'
+
+
