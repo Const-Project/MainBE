@@ -2,69 +2,90 @@ package com.example.cp_main_be.user.presentation;
 
 import com.example.cp_main_be.config.AbstractContainerBaseTest;
 import com.example.cp_main_be.user.domain.User;
-import com.example.cp_main_be.user.domain.UserStatus;
-import com.example.cp_main_be.user.service.UserService;
-import org.junit.jupiter.api.Assertions;
+import com.example.cp_main_be.user.domain.repository.UserRepository;
+import com.example.cp_main_be.user.dto.request.UserRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @SpringBootTest
+@AutoConfigureMockMvc
 @Transactional
 class UserControllerTest extends AbstractContainerBaseTest {
 
-  @Autowired private UserService userService;
+    @Autowired
+    private MockMvc mockMvc;
 
-  @DynamicPropertySource
-  static void properties(DynamicPropertyRegistry registry) {
-    registry.add("replicate.api.token", () -> "dummy-token-for-user-test");
-  }
+    @Autowired
+    private ObjectMapper objectMapper;
 
-  @Test
-  public void 회원_생성시_uuid가_자동으로_생기는가() throws Exception {
-    // given
-    User user = new User();
-    // when
-    user.setUsername("test");
-    userService.saveUser(user);
-    // then
-    //        System.out.println("user.getUuid = " + user.getUuid());
-    Assertions.assertNotNull(user.getUuid());
-  }
+    @Autowired
+    private UserRepository userRepository;
 
-  @Test
-  public void 유저_이름이_없으면_오류() throws Exception {
-    // given
-    User user = new User();
-    // when
-    user.setEmail("test@example.com");
-    user.setPasswordHash("hashedpassword");
-    user.setLevel(1L); // '1L' 대신 '1'로 변경하여 불필요한 경고 제거
-    user.setExperiencePoints(0);
-    user.setTemperatureScore(0);
-    user.setStatus(UserStatus.ACTIVE);
+    @DisplayName("닉네임을 받아 유저를 등록한다.")
+    @Test
+    void register() throws Exception {
+        // given
+        UserRequest userRequest = new UserRequest(UUID.randomUUID(),1L,"test");
+        String requestBody = objectMapper.writeValueAsString(userRequest);
 
-    // then
-    Assertions.assertThrows(
-        DataIntegrityViolationException.class,
-        () -> {
-          userService.saveUser(user);
-        });
-  }
+        // when
+        ResultActions result = mockMvc.perform(post("/api/v1/register/nickname")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
-  @Test
-  public void 유저생성성공() throws Exception {
-    // given
-    User user = new User();
-    // when
-    user.setUsername("test");
-    userService.saveUser(user);
-    User user1 = userService.findUserById(user.getId());
-    // then
-    Assertions.assertEquals(user.getId(), user1.getId());
-  }
+        // then
+        result.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.username").value("test-nickname"))
+                .andExpect(jsonPath("$.data.uuid").isNotEmpty());
+    }
+
+    @DisplayName("UUID로 유저 정보를 조회한다.")
+    @Test
+    void getUserInfo_success() throws Exception {
+        // given
+        // 테스트를 위해 미리 유저를 한 명 저장
+        User savedUser = userRepository.save(User.builder().username("existing-user").build());
+        UUID userUuid = savedUser.getUuid();
+
+        // when
+        ResultActions result = mockMvc.perform(get("/api/v1/users/{uuid}", userUuid));
+
+        // then
+        result.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.username").value("existing-user"))
+                .andExpect(jsonPath("$.data.uuid").value(userUuid.toString()));
+    }
+
+    @DisplayName("존재하지 않는 UUID로 유저 정보를 조회하면 404 에러가 발생한다.")
+    @Test
+    void getUserInfo_fail_whenUserNotFound() throws Exception {
+        // given
+        UUID nonExistentUuid = UUID.randomUUID();
+
+        // when
+        ResultActions result = mockMvc.perform(get("/api/v1/users/{uuid}", nonExistentUuid));
+
+        // then
+        result.andDo(print())
+                .andExpect(status().isNotFound()); // UserNotFoundException이 404로 변환되는지 확인
+    }
 }
