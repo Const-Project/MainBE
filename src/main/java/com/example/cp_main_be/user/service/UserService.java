@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -20,6 +22,8 @@ public class UserService {
   public User findUserById(Long id) {
     return this.userRepository.findById(id).orElse(null);
   }
+
+  public User findUserByUuid(UUID uuid) {return this.userRepository.findByUuid(uuid).orElse(null);}
 
   // 실험용
   public void deleteUser(Long userId) {
