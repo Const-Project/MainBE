@@ -52,7 +52,7 @@ class UserControllerTest extends AbstractContainerBaseTest {
         result.andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.username").value("test-nickname"))
+                .andExpect(jsonPath("$.data.username").value("test"))
                 .andExpect(jsonPath("$.data.uuid").isNotEmpty());
     }
 
