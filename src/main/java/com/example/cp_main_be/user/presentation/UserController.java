@@ -6,11 +6,10 @@ import com.example.cp_main_be.user.dto.response.UserResponse;
 import com.example.cp_main_be.user.service.UserService;
 import com.example.cp_main_be.util.ApiResponse;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
