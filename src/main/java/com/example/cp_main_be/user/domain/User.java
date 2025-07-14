@@ -6,15 +6,15 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
   @Id
@@ -37,11 +37,11 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Avatar> avatars = new ArrayList<>();
 
-  private Long level;
+  @Builder.Default private Long level = 1L; // 기본 레벨 설정
 
-  private Integer experiencePoints;
+  @Builder.Default private Integer experiencePoints = 0; // 기본 경험치 설정
 
-  private Integer temperatureScore;
+  @Builder.Default private Integer temperatureScore = 0; // 기본 온도 점수 설정
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
@@ -57,9 +57,6 @@ public class User {
     this.uuid = UUID.randomUUID();
     this.createdAt = LocalDateTime.now();
     this.updatedAt = LocalDateTime.now(); // 최초 생성 시 updated_at도 설정
-    if (this.level == null) this.level = 1L; // 기본 레벨 설정
-    if (this.experiencePoints == null) this.experiencePoints = 0; // 기본 경험치 설정
-    if (this.temperatureScore == null) this.temperatureScore = 0; // 기본 온도 점수 설정
     if (this.status == null) this.status = UserStatus.ACTIVE; // 기본 상태 설정
   }
 
