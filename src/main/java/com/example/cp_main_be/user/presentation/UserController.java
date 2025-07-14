@@ -6,6 +6,7 @@ import com.example.cp_main_be.user.dto.response.UserResponse;
 import com.example.cp_main_be.user.service.UserService;
 import com.example.cp_main_be.util.ApiResponse;
 import jakarta.validation.Valid;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,4 +38,10 @@ public class UserController {
   //        return ResponseEntity.ok().build();
   //    }
 
+  @GetMapping("/users/{uuid}")
+  public ResponseEntity<ApiResponse<UserResponse>> getUserInfo(@PathVariable UUID uuid) {
+    User user = userService.findUserByUuid(uuid);
+    UserResponse userResponse = new UserResponse(user.getId(), user.getUsername(), user.getUuid());
+    return ResponseEntity.ok(ApiResponse.success(userResponse));
+  }
 }
