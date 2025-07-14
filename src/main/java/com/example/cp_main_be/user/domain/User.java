@@ -1,7 +1,10 @@
 package com.example.cp_main_be.user.domain;
 
+import com.example.cp_main_be.avatar.domain.Avatar;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +33,9 @@ public class User {
   private String passwordHash;
 
   private String profileImageUrl;
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Avatar> avatars = new ArrayList<>();
 
   private Long level;
 
