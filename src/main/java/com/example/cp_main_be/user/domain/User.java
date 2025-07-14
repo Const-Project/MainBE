@@ -33,8 +33,6 @@ public class User {
 
   @Builder.Default private Long level = 1L; // 기본 레벨 설정
 
-  @Builder.Default private Integer experiencePoints = 0; // 기본 경험치 설정
-
   @Builder.Default private Integer temperatureScore = 0; // 기본 온도 점수 설정
 
   @Column(nullable = false)
