@@ -8,6 +8,8 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Avatar {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
