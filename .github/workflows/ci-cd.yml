@@ -6,6 +6,7 @@ on:
   push:
     branches: [ develop ]
   pull_request:
+    types: [ opened, edited ] # PR 생성/수정 시에만 동작하도록 타입 명시
     branches: [ develop ]
 
 # PR 생성, 코드 수정, AWS OIDC 토큰 요청을 위한 권한 설정
@@ -21,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       build-success: ${{ steps.build-status.outputs.success }}
-      
+
     steps:
       # 1. 소스 코드 체크아웃
       - name: Checkout Source Code
@@ -33,6 +34,25 @@ jobs:
         with:
           java-version: '17'
           distribution: 'corretto'
+
+      # === [추가된 부분] PR 템플릿 검사기 ===
+      - name: Check PR Template
+        if: github.event_name == 'pull_request' && github.event.pull_request.body == ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            // 템플릿 파일이 있는 경로를 정확히 지정해야 합니다.
+            // 예: .github/pr_templates/for_develop.md
+            const template = fs.readFileSync('.github/pr_templates/for_develop.md', 'utf8');
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🚨 **PR 본문이 비어있습니다!**\n\n아래 템플릿을 복사하여 PR 내용을 작성해주세요.\n\n---\n\n${template}`
+            });
+            core.setFailed('PR 본문을 템플릿에 맞게 작성해주세요.');
+      # =======================================
 
       # 3. Gradle 캐시 설정
       - name: Cache Gradle packages
@@ -80,15 +100,15 @@ jobs:
       # 중요: PR이 생성되지 않았을 때만(코드 포맷이 완벽할 때만) 빌드/테스트를 진행합니다.
       - name: Build with Gradle
         if: steps.create_pr.outputs.pull-request-number == ''
-        run: ./gradlew build
         env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
-          R2_BUCKET: ${{ secrets.R2_BUCKET }}
-          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
-          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          # Spring Boot는 이 환경 변수(API_TOKEN)를 인식하여
+          # application.properties의 ${API_TOKEN} 플레이스홀더를 치환합니다.
+          API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          # 만약 테스트 DB 등 다른 환경 변수가 필요하다면 아래와 같이 추가할 수 있습니다.
+          # DB_URL: ${{ secrets.DB_URL_TEST }}
+          # DB_USERNAME: ${{ secrets.DB_USERNAME_TEST }}
+          # DB_PASSWORD: ${{ secrets.DB_PASSWORD_TEST }}
+        run: ./gradlew build
 
       # 8. 테스트 결과 업로드
       - name: Publish Test Results
@@ -107,8 +127,6 @@ jobs:
 
   # ====================================================================
   # 이하 배포 관련 Job들은 'build' Job의 최종 성공 여부에 따라 실행됩니다.
-  # build Job에서 PR이 생성되어 빌드를 건너뛰면, build-success가 true가 되지 않으므로
-  # 아래 Job들은 자동으로 실행되지 않습니다.
   # ====================================================================
 
   # EC2 상태 확인 작업
