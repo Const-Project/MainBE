@@ -16,6 +16,7 @@ public class AvatarService {
     public void save(Avatar avatar) {
         avatarRepository.save(avatar);
     }
+
     public List<Avatar> getAllAvatar() {
         return avatarRepository.findAll();
     }
