@@ -43,7 +43,6 @@ class UserServiceTest extends AbstractContainerBaseTest {
     user.setEmail("test@example.com");
     user.setPasswordHash("hashedpassword");
     user.setLevel(1L); // '1L' 대신 '1'로 변경하여 불필요한 경고 제거
-    user.setExperiencePoints(0);
     user.setTemperatureScore(0);
     user.setStatus(UserStatus.ACTIVE);
 

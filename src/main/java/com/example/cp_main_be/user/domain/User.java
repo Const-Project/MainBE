@@ -1,10 +1,7 @@
 package com.example.cp_main_be.user.domain;
 
-import com.example.cp_main_be.avatar.domain.Avatar;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import lombok.*;
 
@@ -34,12 +31,7 @@ public class User {
 
   private String profileImageUrl;
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<Avatar> avatars = new ArrayList<>();
-
   @Builder.Default private Long level = 1L; // 기본 레벨 설정
-
-  @Builder.Default private Integer experiencePoints = 0; // 기본 경험치 설정
 
   @Builder.Default private Integer temperatureScore = 0; // 기본 온도 점수 설정
 
