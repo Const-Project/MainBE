@@ -1,9 +1,14 @@
 package com.example.cp_main_be.user.domain;
 
+import com.example.cp_main_be.avatar.domain.Avatar;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "users")
@@ -31,6 +36,10 @@ public class User {
 
   private String profileImageUrl;
 
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true) // User와 Avatar의 1:N 관계 설정
+  @Builder.Default
+  private List<Avatar> avatarList = new ArrayList<>(); // 아바타 목록 추가
+
   @Builder.Default private Long level = 1L; // 기본 레벨 설정
 
   @Builder.Default private Integer temperatureScore = 0; // 기본 온도 점수 설정
@@ -42,6 +51,7 @@ public class User {
   private LocalDateTime updatedAt;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   private UserStatus status;
 
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
