@@ -1,6 +1,5 @@
 package com.example.cp_main_be.avatar.presentation;
 
-
 import com.example.cp_main_be.avatar.dto.response.AvatarResponse;
 import com.example.cp_main_be.avatar.service.AvatarService;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1")
 public class AvatarController {
 
-    private final AvatarService avatarService;
+  private final AvatarService avatarService;
 
-    @GetMapping("/register/avatars")
-    public ResponseEntity<AvatarResponse> selectableAvatars() {
-        AvatarResponse avatarResponse = new AvatarResponse(avatarService.getAllAvatar());
-        return ResponseEntity.ok(avatarResponse);
-    }
+  @GetMapping("/register/avatars")
+  public ResponseEntity<AvatarResponse> selectableAvatars() {
+    AvatarResponse avatarResponse = new AvatarResponse(avatarService.getAllAvatar());
+    return ResponseEntity.ok(avatarResponse);
+  }
 }
