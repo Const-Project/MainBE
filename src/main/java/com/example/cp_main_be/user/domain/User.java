@@ -56,7 +56,6 @@ public class User {
 
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
   protected void onCreate() {
-    this.uuid = UUID.randomUUID();
     this.createdAt = LocalDateTime.now();
     this.updatedAt = LocalDateTime.now(); // 최초 생성 시 updated_at도 설정
     if (this.status == null) this.status = UserStatus.ACTIVE; // 기본 상태 설정

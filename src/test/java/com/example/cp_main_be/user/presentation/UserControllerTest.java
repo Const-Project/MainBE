@@ -17,6 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.UUID;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,6 +161,31 @@ class UserControllerTest extends AbstractContainerBaseTest {
             .andExpect(jsonPath("$.success").value(false))
             .andExpect(jsonPath("$.error.code").value("USER_NOT_FOUND"))
             .andExpect(jsonPath("$.error.message").value("해당 ID의 사용자를 찾을 수 없습니다 : " + nonExistentUserId));
+  }
+
+  @DisplayName("유저의 UUID를 등록한다.")
+  @Test
+  public void saveUuid_success() throws Exception {
+    //given
+    User savedUser = userRepository.save(User.builder().username("testUser").build());
+    UserRequest userRequest = new UserRequest(UUID.randomUUID(), savedUser.getId(), "testUser");
+    String requestBody = objectMapper.writeValueAsString(userRequest);
+
+    //when
+    ResultActions result =
+            mockMvc.perform(
+                    post("/api/v1/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestBody));
+
+    //then
+    result
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
+
+    User updatedUser = userRepository.findById(savedUser.getId()).get();
+    Assertions.assertThat(updatedUser.getUuid()).isEqualTo(userRequest.getUserUuid());
   }
 
   @DisplayName("아바타 등록 실패 - 아바타를 찾을 수 없음")

@@ -36,6 +36,16 @@ public class UserController {
     return ResponseEntity.ok(ApiResponse.success(userResponse));
   }
 
+  @PostMapping("/register")
+  public ResponseEntity<ApiResponse<Void>> saveUuid(
+          @RequestBody @Valid UserRequest userRequest) {
+    User user = userService.findUserById(userRequest.getUserId());
+    user.setUuid(userRequest.getUserUuid());
+    userService.saveUser(user);
+
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
   /**
    * request를 통해 어떤 유저가 어떤 아바타를 저장하는지 받고,
    * 각 아바타와 유저를 조회해서 user의 avatarList에 추가한다.
