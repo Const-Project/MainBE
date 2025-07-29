@@ -1,13 +1,17 @@
-package com.example.cp_main_be.domain.avatar.dto.response;
+package com.example.cp_main_be.avatar.dto.response;
 
-import com.example.cp_main_be.domain.avatar.domain.Avatar;
-import java.util.List;
-import lombok.Getter;
+import com.example.cp_main_be.avatar.domain.Avatar;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+@AllArgsConstructor
 public class AvatarResponse {
 
-  private final List<Avatar> avatars;
+
+    List<Avatar> avatars = new ArrayList<>();
 }

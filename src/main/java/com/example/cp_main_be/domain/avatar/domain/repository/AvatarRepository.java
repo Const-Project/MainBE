@@ -1,6 +1,12 @@
-package com.example.cp_main_be.domain.avatar.domain.repository;
+package com.example.cp_main_be.avatar.domain.repository;
 
-import com.example.cp_main_be.domain.avatar.domain.Avatar;
+import com.example.cp_main_be.avatar.domain.Avatar;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface AvatarRepository extends JpaRepository<Avatar, Long> {}
+import java.util.List;
+
+public interface AvatarRepository extends JpaRepository<Avatar, Long> {
+
+    List<Avatar> findByIsDefaultAvatarTrue(); // 기본 아바타 조회
+    List<Avatar> findByUserIdAndIsDefaultAvatarFalse(Long userId); // 특정 유저가 소유한 아바타 조회
+}
