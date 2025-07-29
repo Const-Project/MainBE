@@ -6,9 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.cp_main_be.config.AbstractContainerBaseTest;
-import com.example.cp_main_be.user.domain.User;
-import com.example.cp_main_be.user.domain.repository.UserRepository;
-import com.example.cp_main_be.user.dto.request.UserRequest;
+import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.user.dto.request.UserRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
