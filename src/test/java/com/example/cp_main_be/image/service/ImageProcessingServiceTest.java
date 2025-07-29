@@ -1,8 +1,7 @@
-package com.example.cp_main_be.image.service;
+package com.example.cp_main_be.domain.image.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.cp_main_be.domain.image.service.ImageProcessingService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;

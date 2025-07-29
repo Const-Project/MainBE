@@ -1,69 +1,124 @@
-package com.example.cp_main_be.user.service;
+package com.example.cp_main_be.domain.user.service;
 
-import com.example.cp_main_be.config.AbstractContainerBaseTest;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.UserStatus;
-import com.example.cp_main_be.domain.user.service.UserService;
+import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@Transactional
-class UserServiceTest extends AbstractContainerBaseTest {
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
 
-  @Autowired private UserService userService;
+  @Mock private UserRepository userRepository;
 
-  @DynamicPropertySource
-  static void properties(DynamicPropertyRegistry registry) {
-    registry.add("replicate.api.token", () -> "dummy-token-for-user-test");
-  }
+  @InjectMocks private UserService userService;
 
+  @DisplayName("회원 생성시 uuid가 자동으로 생기는가")
   @Test
-  public void 회원_생성시_uuid가_자동으로_생기는가() throws Exception {
+  void 회원_생성시_uuid가_자동으로_생기는가() {
     // given
-    User user = new User();
+    User user = User.builder().username("test").build();
+
+    // Simulate the @PrePersist behavior
+    doAnswer(
+            invocation -> {
+              User argUser = invocation.getArgument(0);
+              argUser.setUuid(UUID.randomUUID()); // Set UUID on the passed object
+              return null; // saveUser is void, so return null
+            })
+        .when(userRepository)
+        .save(any(User.class));
+
     // when
-    user.setUsername("test");
     userService.saveUser(user);
+
     // then
-    //        System.out.println("user.getUuid = " + user.getUuid());
-    Assertions.assertNotNull(user.getUuid());
+    Assertions.assertNotNull(user.getUuid()); // Now the 'user' object should have a UUID
+    verify(userRepository).save(any(User.class));
   }
 
+  @DisplayName("유저 이름이 없으면 오류")
   @Test
-  public void 유저_이름이_없으면_오류() throws Exception {
+  void 유저_이름이_없으면_오류() {
     // given
-    User user = new User();
-    // when
-    user.setEmail("test@example.com");
-    user.setPasswordHash("hashedpassword");
-    user.setLevel(1L); // '1L' 대신 '1'로 변경하여 불필요한 경고 제거
-    user.setTemperatureScore(0);
-    user.setStatus(UserStatus.ACTIVE);
+    User user =
+        User.builder()
+            .email("test@example.com")
+            .passwordHash("hashedpassword")
+            .level(1L)
+            .temperatureScore(0)
+            .status(UserStatus.ACTIVE)
+            .build();
+    doThrow(DataIntegrityViolationException.class).when(userRepository).save(any(User.class));
 
-    // then
+    // when & then
     Assertions.assertThrows(
         DataIntegrityViolationException.class,
         () -> {
           userService.saveUser(user);
         });
+    verify(userRepository).save(any(User.class));
   }
 
+  @DisplayName("유저생성성공")
   @Test
-  public void 유저생성성공() throws Exception {
+  void 유저생성성공() {
     // given
-    User user = new User();
+    Long userId = 1L;
+    UUID userUuid = UUID.randomUUID();
+    User user = User.builder().id(userId).uuid(userUuid).username("test").build();
+    given(userRepository.findById(userId)).willReturn(Optional.of(user));
+
     // when
-    user.setUsername("test");
-    userService.saveUser(user);
-    User user1 = userService.findUserById(user.getId());
+    User foundUser = userService.findUserById(userId);
+
     // then
-    Assertions.assertEquals(user.getId(), user1.getId());
+    Assertions.assertEquals(userId, foundUser.getId());
+    Assertions.assertEquals(userUuid, foundUser.getUuid());
+    Assertions.assertEquals("test", foundUser.getUsername());
+    verify(userRepository).findById(userId);
+  }
+
+  @DisplayName("UUID로 유저 조회 성공")
+  @Test
+  void findUserByUuid_success() {
+    // given
+    UUID userUuid = UUID.randomUUID();
+    User user = User.builder().uuid(userUuid).username("testuser").build();
+    given(userRepository.findByUuid(userUuid)).willReturn(Optional.of(user));
+
+    // when
+    User foundUser = userService.findUserByUuid(userUuid);
+
+    // then
+    Assertions.assertEquals(userUuid, foundUser.getUuid());
+    verify(userRepository).findByUuid(userUuid);
+  }
+
+  @DisplayName("유저 삭제 성공")
+  @Test
+  void deleteUser_success() {
+    // given
+    Long userId = 1L;
+
+    // when
+    userService.deleteUser(userId);
+
+    // then
+    verify(userRepository).deleteById(userId);
   }
 }

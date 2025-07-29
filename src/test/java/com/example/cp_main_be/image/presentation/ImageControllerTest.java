@@ -1,11 +1,10 @@
-package com.example.cp_main_be.image.presentation;
+package com.example.cp_main_be.domain.image.presentation;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.example.cp_main_be.domain.image.presentation.ImageController;
 import com.example.cp_main_be.domain.image.service.ImageProcessingService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import org.junit.jupiter.api.DisplayName;
