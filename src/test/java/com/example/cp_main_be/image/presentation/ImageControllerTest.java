@@ -5,8 +5,9 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.example.cp_main_be.image.service.ImageProcessingService;
-import com.example.cp_main_be.util.ApiResponse;
+import com.example.cp_main_be.domain.image.presentation.ImageController;
+import com.example.cp_main_be.domain.image.service.ImageProcessingService;
+import com.example.cp_main_be.global.util.ApiResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

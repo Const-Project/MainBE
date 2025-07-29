@@ -1,8 +1,9 @@
 package com.example.cp_main_be.user.service;
 
 import com.example.cp_main_be.config.AbstractContainerBaseTest;
-import com.example.cp_main_be.user.domain.User;
-import com.example.cp_main_be.user.domain.UserStatus;
+import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.user.domain.UserStatus;
+import com.example.cp_main_be.domain.user.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
