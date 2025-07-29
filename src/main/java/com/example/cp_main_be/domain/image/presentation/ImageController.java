@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.image.presentation; // 패키지는 적절히 변경
+package com.example.cp_main_be.domain.image.presentation;
 
 import com.example.cp_main_be.domain.image.service.ImageProcessingService;
 import com.example.cp_main_be.global.util.ApiResponse;
