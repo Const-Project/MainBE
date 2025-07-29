@@ -9,12 +9,11 @@ import com.example.cp_main_be.domain.user.dto.response.UserResponse;
 import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,24 +36,22 @@ public class UserController {
   }
 
   @PostMapping("/register")
-  public ResponseEntity<ApiResponse<Void>> saveUuid(
-          @RequestBody @Valid UserRequest userRequest) {
+  public ResponseEntity<ApiResponse<Void>> saveUuid(@RequestBody @Valid UserRequest userRequest) {
     User user = userService.findUserById(userRequest.getUserId());
     userService.saveUserUuid(user.getId(), userRequest.getUserUuid());
 
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  /**
-   * request를 통해 어떤 유저가 어떤 아바타를 저장하는지 받고,
-   * 각 아바타와 유저를 조회해서 user의 avatarList에 추가한다.
-   */
+  /** request를 통해 어떤 유저가 어떤 아바타를 저장하는지 받고, 각 아바타와 유저를 조회해서 user의 avatarList에 추가한다. */
   @PostMapping("/register/myavatar")
-  public ResponseEntity<ApiResponse<Void>> registerMyAvatar(@RequestBody @Valid UserAvatarRequest request) {
+  public ResponseEntity<ApiResponse<Void>> registerMyAvatar(
+      @RequestBody @Valid UserAvatarRequest request) {
     // 1. 유저 조회
     User findUser = userService.findUserById(request.getUserId());
     if (findUser == null) {
-      return ResponseEntity.badRequest().body(ApiResponse.failure("USER_NOT_FOUND", "사용자를 찾을 수 없습니다."));
+      return ResponseEntity.badRequest()
+          .body(ApiResponse.failure("USER_NOT_FOUND", "사용자를 찾을 수 없습니다."));
     }
 
     // avatarList가 null일 경우 초기화하는 방어 코드
@@ -65,7 +62,8 @@ public class UserController {
     // 2. 아바타 조회
     Avatar findAvatar = avatarService.findAvatarById(request.getAvatarId());
     if (findAvatar == null) {
-      return ResponseEntity.badRequest().body(ApiResponse.failure("AVATAR_NOT_FOUND", "아바타를 찾을 수 없습니다."));
+      return ResponseEntity.badRequest()
+          .body(ApiResponse.failure("AVATAR_NOT_FOUND", "아바타를 찾을 수 없습니다."));
     }
 
     // 레벨에 안맞으면 아바타 추가 못함, 추후 기준에 따라 달라질 듯

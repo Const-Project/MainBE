@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.user.domain;
 
-import com.example.cp_main_be.domain.garden.domain.Garden;
 import com.example.cp_main_be.domain.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.garden.domain.Garden;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,7 +37,10 @@ public class User {
 
   private String profileImageUrl;
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true) // User와 Avatar의 1:N 관계 설정
+  @OneToMany(
+      mappedBy = "user",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true) // User와 Avatar의 1:N 관계 설정
   @Builder.Default
   private List<Avatar> avatarList = new ArrayList<>(); // 아바타 목록 추가
 

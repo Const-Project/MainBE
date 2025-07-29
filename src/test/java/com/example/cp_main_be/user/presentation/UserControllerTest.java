@@ -1,5 +1,15 @@
 package com.example.cp_main_be.user.presentation;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.example.cp_main_be.domain.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.avatar.domain.repository.AvatarRepository;
 import com.example.cp_main_be.domain.avatar.service.AvatarService;
@@ -11,6 +21,8 @@ import com.example.cp_main_be.domain.user.presentation.UserController;
 import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +31,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import java.util.ArrayList;
-import java.util.UUID;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UserController.class)
 class UserControllerTest {
@@ -109,8 +108,15 @@ class UserControllerTest {
   @Test
   void register_myavatar_success() throws Exception {
     // given
-    User testUser = User.builder().id(1L).username("avatarUser").avatarList(new ArrayList<>()).build();
-    Avatar testAvatar = Avatar.builder().id(1L).imageUrl("http://example.com/test_avatar.png").user(testUser).isDefaultAvatar(false).build();
+    User testUser =
+        User.builder().id(1L).username("avatarUser").avatarList(new ArrayList<>()).build();
+    Avatar testAvatar =
+        Avatar.builder()
+            .id(1L)
+            .imageUrl("http://example.com/test_avatar.png")
+            .user(testUser)
+            .isDefaultAvatar(false)
+            .build();
 
     // Mock the service calls that the controller will make
     // Assuming userService.findUserById and avatarService.findAvatarById are called
@@ -123,16 +129,16 @@ class UserControllerTest {
 
     // when
     ResultActions result =
-            mockMvc.perform(
-                    post("/api/v1/register/myavatar")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody));
+        mockMvc.perform(
+            post("/api/v1/register/myavatar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
     // then
     result
-            .andDo(print())
-            .andExpect(status().isOk()) // Expect 200 OK
-            .andExpect(jsonPath("$.success").value(true)); // Expect success response
+        .andDo(print())
+        .andExpect(status().isOk()) // Expect 200 OK
+        .andExpect(jsonPath("$.success").value(true)); // Expect success response
 
     // Verify that the service methods were called
     verify(userService).findUserById(testUser.getId());
@@ -147,26 +153,30 @@ class UserControllerTest {
     Long dummyAvatarId = 1L;
 
     given(userService.findUserById(nonExistentUserId))
-            .willThrow(new UserNotFoundException("해당 ID의 사용자를 찾을 수 없습니다 : " + nonExistentUserId));
+        .willThrow(new UserNotFoundException("해당 ID의 사용자를 찾을 수 없습니다 : " + nonExistentUserId));
 
     UserAvatarRequest request = new UserAvatarRequest(nonExistentUserId, dummyAvatarId);
     String requestBody = objectMapper.writeValueAsString(request);
 
     // when
-    ResultActions result = mockMvc.perform(post("/api/v1/register/myavatar")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(requestBody));
+    ResultActions result =
+        mockMvc.perform(
+            post("/api/v1/register/myavatar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
     // then
     // 1. HTTP 상태 코드가 404 Not Found인지 확인합니다.
-    result.andDo(print())
-            .andExpect(status().isNotFound())
-            // 2. 응답 JSON의 'success' 필드가 false인지 확인합니다.
-            .andExpect(jsonPath("$.success").value(false))
-            // 3. 에러 코드가 "USER_NOT_FOUND"인지 확인합니다.
-            .andExpect(jsonPath("$.error.code").value("USER_NOT_FOUND"))
-            // 4. 에러 메시지가 예상과 일치하는지 확인합니다.
-            .andExpect(jsonPath("$.error.message").value("해당 ID의 사용자를 찾을 수 없습니다 : " + nonExistentUserId));
+    result
+        .andDo(print())
+        .andExpect(status().isNotFound())
+        // 2. 응답 JSON의 'success' 필드가 false인지 확인합니다.
+        .andExpect(jsonPath("$.success").value(false))
+        // 3. 에러 코드가 "USER_NOT_FOUND"인지 확인합니다.
+        .andExpect(jsonPath("$.error.code").value("USER_NOT_FOUND"))
+        // 4. 에러 메시지가 예상과 일치하는지 확인합니다.
+        .andExpect(
+            jsonPath("$.error.message").value("해당 ID의 사용자를 찾을 수 없습니다 : " + nonExistentUserId));
 
     verify(userService).findUserById(nonExistentUserId);
   }
@@ -179,10 +189,7 @@ class UserControllerTest {
     UUID testUserUuid = UUID.randomUUID();
     String testUsername = "testUser";
 
-    User foundUser = User.builder()
-            .id(testUserId)
-            .username(testUsername)
-            .build();
+    User foundUser = User.builder().id(testUserId).username(testUsername).build();
     given(userService.findUserById(testUserId)).willReturn(foundUser);
 
     // 2. userService.saveUserUuid() 목킹:
@@ -195,16 +202,13 @@ class UserControllerTest {
 
     // when
     ResultActions result =
-            mockMvc.perform(
-                    post("/api/v1/register") // User UUID를 등록하는 엔드포인트
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody));
+        mockMvc.perform(
+            post("/api/v1/register") // User UUID를 등록하는 엔드포인트
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
     // then
-    result
-            .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.success").value(true));
+    result.andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.success").value(true));
 
     verify(userService).findUserById(testUserId);
     verify(userService).saveUserUuid(testUserId, testUserUuid);
@@ -219,7 +223,8 @@ class UserControllerTest {
 
     // 1. userService.findUserById() 목킹:
     // 컨트롤러가 유저를 먼저 찾으므로, 이 테스트에서는 유저가 존재한다고 가정하고 유효한 User 객체를 반환하도록 함
-    User foundUser = User.builder().id(testUserId).username("testUser").avatarList(new ArrayList<>()).build();
+    User foundUser =
+        User.builder().id(testUserId).username("testUser").avatarList(new ArrayList<>()).build();
     given(userService.findUserById(testUserId)).willReturn(foundUser);
 
     // 2. avatarService.findAvatarById() 목킹:
@@ -232,18 +237,18 @@ class UserControllerTest {
 
     // when
     ResultActions result =
-            mockMvc.perform(
-                    post("/api/v1/register/myavatar")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestBody));
+        mockMvc.perform(
+            post("/api/v1/register/myavatar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestBody));
 
     // then
     result
-            .andDo(print())
-            .andExpect(status().isBadRequest()) // 컨트롤러에서 badRequest를 반환하므로 400 예상
-            .andExpect(jsonPath("$.success").value(false)) // 실패 응답 예상
-            .andExpect(jsonPath("$.error.code").value("AVATAR_NOT_FOUND")) // 에러 코드 검증
-            .andExpect(jsonPath("$.error.message").value("아바타를 찾을 수 없습니다.")); // 에러 메시지 검증
+        .andDo(print())
+        .andExpect(status().isBadRequest()) // 컨트롤러에서 badRequest를 반환하므로 400 예상
+        .andExpect(jsonPath("$.success").value(false)) // 실패 응답 예상
+        .andExpect(jsonPath("$.error.code").value("AVATAR_NOT_FOUND")) // 에러 코드 검증
+        .andExpect(jsonPath("$.error.message").value("아바타를 찾을 수 없습니다.")); // 에러 메시지 검증
 
     // verify
     verify(userService).findUserById(testUserId);
@@ -251,5 +256,4 @@ class UserControllerTest {
     // 아바타를 찾지 못했으므로 userService.saveUser는 호출되지 않아야 함
     verify(userService, org.mockito.Mockito.never()).saveUser(any(User.class));
   }
-
 }

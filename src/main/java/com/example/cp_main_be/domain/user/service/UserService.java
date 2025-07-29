@@ -3,7 +3,6 @@ package com.example.cp_main_be.domain.user.service;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
-
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
