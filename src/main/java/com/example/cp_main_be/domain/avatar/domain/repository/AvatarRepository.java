@@ -1,6 +1,6 @@
-package com.example.cp_main_be.avatar.domain.repository;
+package com.example.cp_main_be.domain.avatar.domain.repository;
 
-import com.example.cp_main_be.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.avatar.domain.Avatar;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

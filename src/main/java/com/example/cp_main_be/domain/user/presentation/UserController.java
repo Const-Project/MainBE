@@ -1,25 +1,20 @@
 package com.example.cp_main_be.domain.user.presentation;
 
+import com.example.cp_main_be.domain.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.avatar.service.AvatarService;
 import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.user.dto.request.UserAvatarRequest;
 import com.example.cp_main_be.domain.user.dto.request.UserRequest;
 import com.example.cp_main_be.domain.user.dto.response.UserResponse;
 import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
-import com.example.cp_main_be.avatar.domain.Avatar;
-import com.example.cp_main_be.avatar.service.AvatarService;
-import com.example.cp_main_be.user.domain.User;
-import com.example.cp_main_be.user.dto.request.UserAvatarRequest;
-import com.example.cp_main_be.user.dto.request.UserRequest;
-import com.example.cp_main_be.user.dto.response.UserResponse;
-import com.example.cp_main_be.user.service.UserService;
-import com.example.cp_main_be.util.ApiResponse;
 import jakarta.validation.Valid;
-
-import java.util.ArrayList;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,8 +40,7 @@ public class UserController {
   public ResponseEntity<ApiResponse<Void>> saveUuid(
           @RequestBody @Valid UserRequest userRequest) {
     User user = userService.findUserById(userRequest.getUserId());
-    user.setUuid(userRequest.getUserUuid());
-    userService.saveUser(user);
+    userService.saveUserUuid(user.getId(), userRequest.getUserUuid());
 
     return ResponseEntity.ok(ApiResponse.success(null));
   }

@@ -1,4 +1,4 @@
-package com.example.cp_main_be.user.dto.request;
+package com.example.cp_main_be.domain.user.dto.request;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

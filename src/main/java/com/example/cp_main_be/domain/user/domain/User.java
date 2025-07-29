@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.user.domain;
 
 import com.example.cp_main_be.domain.garden.domain.Garden;
-import com.example.cp_main_be.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.avatar.domain.Avatar;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

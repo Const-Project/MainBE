@@ -1,8 +1,7 @@
-package com.example.cp_main_be.avatar.domain;
+package com.example.cp_main_be.domain.avatar.domain;
 
-import com.example.cp_main_be.user.domain.User;
+import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity

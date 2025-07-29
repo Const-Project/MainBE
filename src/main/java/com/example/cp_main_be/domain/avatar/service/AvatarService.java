@@ -1,7 +1,7 @@
-package com.example.cp_main_be.avatar.service;
+package com.example.cp_main_be.domain.avatar.service;
 
-import com.example.cp_main_be.avatar.domain.Avatar;
-import com.example.cp_main_be.avatar.domain.repository.AvatarRepository;
+import com.example.cp_main_be.domain.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.avatar.domain.repository.AvatarRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

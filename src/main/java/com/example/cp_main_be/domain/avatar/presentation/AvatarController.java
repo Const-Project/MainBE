@@ -1,8 +1,8 @@
-package com.example.cp_main_be.avatar.presentation;
+package com.example.cp_main_be.domain.avatar.presentation;
 
 
-import com.example.cp_main_be.avatar.dto.response.AvatarResponse;
-import com.example.cp_main_be.avatar.service.AvatarService;
+import com.example.cp_main_be.domain.avatar.dto.response.AvatarResponse;
+import com.example.cp_main_be.domain.avatar.service.AvatarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
