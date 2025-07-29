@@ -2,8 +2,10 @@ package com.example.cp_main_be.avatar.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.example.cp_main_be.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.avatar.domain.Avatar;
 import java.util.List;
+
+import com.example.cp_main_be.domain.avatar.service.AvatarService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

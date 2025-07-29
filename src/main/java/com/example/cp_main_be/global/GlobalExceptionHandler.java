@@ -1,7 +1,7 @@
 package com.example.cp_main_be.global;
 
 import com.example.cp_main_be.global.exception.UserNotFoundException;
-import com.example.cp_main_be.util.ApiResponse;
+import com.example.cp_main_be.global.util.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
