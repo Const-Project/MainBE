@@ -1,7 +1,10 @@
 package com.example.cp_main_be.domain.user.domain;
 
+import com.example.cp_main_be.domain.garden.domain.Garden;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.*;
 
@@ -43,6 +46,10 @@ public class User {
 
   @Enumerated(EnumType.STRING)
   private UserStatus status;
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<Garden> gardens = new ArrayList<>();
 
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
   protected void onCreate() {

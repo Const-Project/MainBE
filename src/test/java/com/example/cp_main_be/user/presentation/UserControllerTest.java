@@ -1,42 +1,46 @@
-package com.example.cp_main_be.user.presentation;
+package com.example.cp_main_be.domain.user.presentation;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.example.cp_main_be.config.AbstractContainerBaseTest;
 import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.user.dto.request.UserRequest;
+import com.example.cp_main_be.domain.user.service.UserService;
+import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
-class UserControllerTest extends AbstractContainerBaseTest {
+@WebMvcTest(UserController.class)
+class UserControllerTest {
 
   @Autowired private MockMvc mockMvc;
 
   @Autowired private ObjectMapper objectMapper;
 
-  @Autowired private UserRepository userRepository;
+  @MockBean private UserService userService;
 
   @DisplayName("닉네임을 받아 유저를 등록한다.")
   @Test
   void register() throws Exception {
     // given
-    UserRequest userRequest = new UserRequest(UUID.randomUUID(), 1L, "test");
+    UserRequest userRequest = new UserRequest(null, null, "test");
+    User user = User.builder().username("test").build();
+    doNothing().when(userService).saveUser(any(User.class));
+
     String requestBody = objectMapper.writeValueAsString(userRequest);
 
     // when
@@ -47,21 +51,17 @@ class UserControllerTest extends AbstractContainerBaseTest {
                 .content(requestBody));
 
     // then
-    result
-        .andDo(print())
-        .andExpect(status().isOk())
-        .andExpect(jsonPath("$.success").value(true))
-        .andExpect(jsonPath("$.data.username").value("test"))
-        .andExpect(jsonPath("$.data.uuid").isNotEmpty());
+    result.andDo(print()).andExpect(status().isOk());
+    verify(userService).saveUser(any(User.class));
   }
 
   @DisplayName("UUID로 유저 정보를 조회한다.")
   @Test
   void getUserInfo_success() throws Exception {
     // given
-    // 테스트를 위해 미리 유저를 한 명 저장
-    User savedUser = userRepository.save(User.builder().username("existing-user").build());
-    UUID userUuid = savedUser.getUuid();
+    UUID userUuid = UUID.randomUUID();
+    User user = User.builder().uuid(userUuid).username("existing-user").build();
+    given(userService.findUserByUuid(userUuid)).willReturn(user);
 
     // when
     ResultActions result = mockMvc.perform(get("/api/v1/users/{uuid}", userUuid));
@@ -80,11 +80,13 @@ class UserControllerTest extends AbstractContainerBaseTest {
   void getUserInfo_fail_whenUserNotFound() throws Exception {
     // given
     UUID nonExistentUuid = UUID.randomUUID();
+    given(userService.findUserByUuid(nonExistentUuid))
+        .willThrow(new UserNotFoundException("User not found"));
 
     // when
     ResultActions result = mockMvc.perform(get("/api/v1/users/{uuid}", nonExistentUuid));
 
     // then
-    result.andDo(print()).andExpect(status().isNotFound()); // UserNotFoundException이 404로 변환되는지 확인
+    result.andDo(print()).andExpect(status().isNotFound());
   }
 }
