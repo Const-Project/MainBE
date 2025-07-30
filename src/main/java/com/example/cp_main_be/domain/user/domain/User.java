@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.user.domain;
 
+import com.example.cp_main_be.domain.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.garden.domain.Garden;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -7,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "users")
@@ -34,6 +37,13 @@ public class User {
 
   private String profileImageUrl;
 
+  @OneToMany(
+      mappedBy = "user",
+      cascade = CascadeType.ALL,
+      orphanRemoval = true) // User와 Avatar의 1:N 관계 설정
+  @Builder.Default
+  private List<Avatar> avatarList = new ArrayList<>(); // 아바타 목록 추가
+
   @Builder.Default private Long level = 1L; // 기본 레벨 설정
 
   @Builder.Default private Integer temperatureScore = 0; // 기본 온도 점수 설정
@@ -45,6 +55,7 @@ public class User {
   private LocalDateTime updatedAt;
 
   @Enumerated(EnumType.STRING)
+  @JdbcTypeCode(SqlTypes.VARCHAR)
   private UserStatus status;
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -53,7 +64,6 @@ public class User {
 
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
   protected void onCreate() {
-    this.uuid = UUID.randomUUID();
     this.createdAt = LocalDateTime.now();
     this.updatedAt = LocalDateTime.now(); // 최초 생성 시 updated_at도 설정
     if (this.status == null) this.status = UserStatus.ACTIVE; // 기본 상태 설정

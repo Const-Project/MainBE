@@ -3,6 +3,7 @@ package com.example.cp_main_be.domain.user.service;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,5 +35,13 @@ public class UserService {
   // 실험용
   public void deleteUser(Long userId) {
     this.userRepository.deleteById(userId);
+  }
+
+  public void saveUserUuid(Long userId, UUID uuid) {
+    Optional<User> userById = userRepository.findById(userId);
+    if (userById.isPresent()) {
+      User user = userById.get();
+      user.setUuid(uuid);
+    }
   }
 }
