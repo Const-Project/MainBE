@@ -2,8 +2,10 @@ package com.example.cp_main_be.domain.user.service;
 
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.user.dto.request.UserRequest;
+import com.example.cp_main_be.domain.user.dto.response.UserResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
-import java.util.Optional;
+import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,24 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final JwtTokenProvider jwtTokenProvider;
+
+  public UserResponse registerUser(UserRequest userRequest) {
+    User user =
+        User.builder()
+            .uuid(userRequest.getUuid() != null ? userRequest.getUuid() : UUID.randomUUID())
+            .username(userRequest.getUsername())
+            .profileImageUrl(userRequest.getAvatarUrl())
+            .build();
+
+    userRepository.save(user);
+
+    String accessToken = jwtTokenProvider.generateAccessToken(user.getUuid().toString());
+    String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUuid().toString());
+
+    return new UserResponse(
+        user.getId(), user.getUsername(), user.getUuid(), accessToken, refreshToken);
+  }
 
   public void saveUser(User user) {
     this.userRepository.save(user);
@@ -35,13 +55,5 @@ public class UserService {
   // 실험용
   public void deleteUser(Long userId) {
     this.userRepository.deleteById(userId);
-  }
-
-  public void saveUserUuid(Long userId, UUID uuid) {
-    Optional<User> userById = userRepository.findById(userId);
-    if (userById.isPresent()) {
-      User user = userById.get();
-      user.setUuid(uuid);
-    }
   }
 }

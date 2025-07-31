@@ -1,6 +1,5 @@
-package com.example.cp_main_be.domain.user.dto.response;
+package com.example.cp_main_be.domain.auth.dto.response;
 
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,11 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
-
-  private Long id;
-  private String username;
-  private UUID uuid;
+public class TokenRefreshResponse {
   private String accessToken;
   private String refreshToken;
 }
