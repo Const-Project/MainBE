@@ -36,8 +36,34 @@ public class UserService {
         user.getId(), user.getUsername(), user.getUuid(), accessToken, refreshToken);
   }
 
+  public void updateAvatar(Long userId, String newAvatarUrl) {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+    user.setProfileImageUrl(newAvatarUrl);
+    userRepository.save(user);
+  }
+
+  public void updateNickname(Long userId, String newNickname) {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+    user.setUsername(newNickname);
+    userRepository.save(user);
+  }
+
   public void saveUser(User user) {
     this.userRepository.save(user);
+  }
+
+  public void deleteUser(Long userId) {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+    userRepository.delete(user);
   }
 
   public User findUserById(Long id) {

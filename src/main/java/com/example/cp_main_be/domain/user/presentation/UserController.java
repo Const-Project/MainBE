@@ -71,6 +71,35 @@ public class UserController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
+  @DeleteMapping("/users/me")
+  public ResponseEntity<ApiResponse<Void>> deleteUser() {
+    String userUuid =
+        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    User user = userService.findUserByUuid(UUID.fromString(userUuid));
+    userService.deleteUser(user.getId());
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
+  @PatchMapping("/users/me/avatar")
+  public ResponseEntity<ApiResponse<Void>> updateAvatar(
+      @RequestBody @Valid AvatarChangeRequest request) {
+    String userUuid =
+        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    User user = userService.findUserByUuid(UUID.fromString(userUuid));
+    userService.updateAvatar(user.getId(), request.getNewAvatarUrl());
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
+  @PatchMapping("/users/me/nickname")
+  public ResponseEntity<ApiResponse<Void>> updateNickname(
+      @RequestBody @Valid NicknameChangeRequest request) {
+    String userUuid =
+        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    User user = userService.findUserByUuid(UUID.fromString(userUuid));
+    userService.updateNickname(user.getId(), request.getNewNickname());
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
   @GetMapping("/users/me")
   public ResponseEntity<ApiResponse<UserResponse>> getMyInfo() {
     // SecurityContextHolder에서 현재 인증된 사용자(UUID)를 가져옴
