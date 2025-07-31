@@ -48,7 +48,7 @@ class CommentServiceTest {
 
     // then
     Assertions.assertNotNull(createdComment);
-    Assertions.assertEquals(content, createdComment.getContent());
+    Assertions.assertEquals(request.getContent(), createdComment.getContent());
     Assertions.assertEquals(writerId, createdComment.getWriter().getId());
     Assertions.assertEquals(request.getTargetId(), createdComment.getTargetId());
     Assertions.assertEquals(request.getTargetType(), createdComment.getTargetType());

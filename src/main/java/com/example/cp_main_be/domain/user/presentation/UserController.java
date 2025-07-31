@@ -1,18 +1,17 @@
 package com.example.cp_main_be.domain.user.presentation;
 
-import com.example.cp_main_be.domain.avatar.domain.Avatar;
-import com.example.cp_main_be.domain.avatar.service.AvatarService;
 import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.dto.request.UserAvatarRequest;
+import com.example.cp_main_be.domain.user.dto.request.AvatarChangeRequest;
+import com.example.cp_main_be.domain.user.dto.request.NicknameChangeRequest;
 import com.example.cp_main_be.domain.user.dto.request.UserRequest;
 import com.example.cp_main_be.domain.user.dto.response.UserResponse;
 import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
   private final UserService userService;
-  private final AvatarService avatarService;
 
   /** 유저 등록 및 토큰 발급 */
   @PostMapping("/register")
@@ -31,45 +29,13 @@ public class UserController {
     return ResponseEntity.ok(ApiResponse.success(userResponse));
   }
 
-  @PostMapping("/register")
-  public ResponseEntity<ApiResponse<Void>> saveUuid(@RequestBody @Valid UserRequest userRequest) {
-    User user = userService.findUserById(userRequest.getUserId());
-    userService.saveUserUuid(user.getId(), userRequest.getUserUuid());
-
-    return ResponseEntity.ok(ApiResponse.success(null));
-  }
-
-  /** request를 통해 어떤 유저가 어떤 아바타를 저장하는지 받고, 각 아바타와 유저를 조회해서 user의 avatarList에 추가한다. */
-  @PostMapping("/register/myavatar")
-  public ResponseEntity<ApiResponse<Void>> registerMyAvatar(
-      @RequestBody @Valid UserAvatarRequest request) {
-    // 1. 유저 조회
-    User findUser = userService.findUserById(request.getUserId());
-    if (findUser == null) {
-      return ResponseEntity.badRequest()
-          .body(ApiResponse.failure("USER_NOT_FOUND", "사용자를 찾을 수 없습니다."));
-    }
-
-    // avatarList가 null일 경우 초기화하는 방어 코드
-    if (findUser.getAvatarList() == null) {
-      findUser.setAvatarList(new ArrayList<>());
-    }
-
-    // 2. 아바타 조회
-    Avatar findAvatar = avatarService.findAvatarById(request.getAvatarId());
-    if (findAvatar == null) {
-      return ResponseEntity.badRequest()
-          .body(ApiResponse.failure("AVATAR_NOT_FOUND", "아바타를 찾을 수 없습니다."));
-    }
-
-    // 레벨에 안맞으면 아바타 추가 못함, 추후 기준에 따라 달라질 듯
-
-    // 레벨에 맞으면 아바타 리스트에 넣을 수 있다. (최대 3개)
-    findUser.getAvatarList().add(findAvatar);
-    userService.saveUser(findUser);
-
-    return ResponseEntity.ok(ApiResponse.success(null));
-  }
+  //    @DeleteMapping("/register/nickname")
+  //    public ResponseEntity<Void> delete(@RequestBody @Valid UserRequest userRequest) {
+  //        User user = userService.findUserById(userRequest.getUserId());
+  //
+  //        userService.deleteUser(user.getId());
+  //        return ResponseEntity.ok().build();
+  //    }
 
   @DeleteMapping("/users/me")
   public ResponseEntity<ApiResponse<Void>> deleteUser() {

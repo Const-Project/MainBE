@@ -77,9 +77,4 @@ public class UserService {
         .findByUuid(uuid)
         .orElseThrow(() -> new UserNotFoundException("해당 UUID의 사용자를 찾을 수 없습니다 : " + uuid));
   }
-
-  // 실험용
-  public void deleteUser(Long userId) {
-    this.userRepository.deleteById(userId);
-  }
 }

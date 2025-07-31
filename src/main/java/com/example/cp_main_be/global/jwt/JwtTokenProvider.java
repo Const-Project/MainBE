@@ -47,7 +47,7 @@ public class JwtTokenProvider {
   }
 
   public String getUuidFromToken(String token) {
-    return Jwts.parserBuilder()
+    return Jwts.parser()
         .setSigningKey(getSigningKey())
         .build()
         .parseClaimsJws(token)
@@ -57,7 +57,7 @@ public class JwtTokenProvider {
 
   public boolean validateToken(String token) {
     try {
-      Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
+      Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
       return true;
     } catch (Exception e) {
       // TODO: Handle specific exceptions (ExpiredJwtException, UnsupportedJwtException, etc.)

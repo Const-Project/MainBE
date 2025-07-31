@@ -6,17 +6,26 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.example.cp_main_be.domain.image.service.ImageProcessingService;
+import com.example.cp_main_be.global.config.WebClientConfig; // WebClientConfig import 추가
 import com.example.cp_main_be.global.util.ApiResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import; // Import 어노테이션 추가
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(ImageController.class) // ImageController만 테스트
+@Import(WebClientConfig.class) // WebClientConfig 로드
+@TestPropertySource(
+    properties = {
+      "replicate.api.token=test-token",
+      "replicate.api.url=http://localhost:8080" // MockWebServer URL
+    })
 class ImageControllerTest {
 
   @Autowired private MockMvc mockMvc; // HTTP 요청을 흉내내는 객체

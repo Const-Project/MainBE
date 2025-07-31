@@ -15,10 +15,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.TestPropertySource; // TestPropertySource 추가
 
 @SpringBootTest
+@TestPropertySource(
+    properties = {
+      "replicate.api.token=test-token",
+      "spring.datasource.url=jdbc:h2:mem:testdb",
+      "spring.datasource.driver-class-name=org.h2.Driver",
+      "spring.datasource.username=sa",
+      "spring.datasource.password="
+    }) // 환경 변수 설정
 class ImageProcessingServiceTest {
 
   @Autowired private ImageProcessingService imageProcessingService;
@@ -36,19 +43,7 @@ class ImageProcessingServiceTest {
     mockWebServer.shutdown();
   }
 
-  @DynamicPropertySource
-  static void properties(DynamicPropertyRegistry registry) {
-    // WebClient 테스트를 위한 가짜 API 서버 주소
-    registry.add("replicate.api.url", () -> mockWebServer.url("").toString());
-    registry.add("replicate.api.token", () -> "test-token");
-
-    // DataSource 빈 생성을 위한 임시 H2 DB 정보
-    // 이 테스트는 DB를 직접 쓰진 않지만, @SpringBootTest가 DB 연결을 요구하므로 설정해줍니다.
-    registry.add("spring.datasource.url", () -> "jdbc:h2:mem:testdb");
-    registry.add("spring.datasource.driver-class-name", () -> "org.h2.Driver");
-    registry.add("spring.datasource.username", () -> "sa");
-    registry.add("spring.datasource.password", () -> "");
-  }
+  // DynamicPropertySource 제거
 
   @Test
   @DisplayName("AI 서버와의 통신이 모두 성공하면, 성공 ApiResponse를 반환한다")
