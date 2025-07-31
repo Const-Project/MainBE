@@ -9,6 +9,10 @@ import static org.mockito.Mockito.verify;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.UserStatus;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.user.dto.request.UserRequest;
+import com.example.cp_main_be.domain.user.dto.response.UserResponse;
+import com.example.cp_main_be.global.exception.UserNotFoundException;
+import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -24,6 +28,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 class UserServiceTest {
 
   @Mock private UserRepository userRepository;
+  @Mock private JwtTokenProvider jwtTokenProvider;
 
   @InjectMocks private UserService userService;
 
@@ -114,11 +119,130 @@ class UserServiceTest {
   void deleteUser_success() {
     // given
     Long userId = 1L;
+    User user = User.builder().id(userId).username("test").build();
+    given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
     // when
     userService.deleteUser(userId);
 
     // then
-    verify(userRepository).deleteById(userId);
+    verify(userRepository).findById(userId);
+    verify(userRepository).delete(user);
+  }
+
+  @DisplayName("유저 삭제 실패 - 유저를 찾을 수 없음")
+  @Test
+  void deleteUser_fail_userNotFound() {
+    // given
+    Long userId = 1L;
+    given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+    // when & then
+    Assertions.assertThrows(UserNotFoundException.class, () -> userService.deleteUser(userId));
+    verify(userRepository).findById(userId);
+    verify(userRepository, org.mockito.Mockito.never()).delete(any(User.class));
+  }
+
+  @DisplayName("유저 등록 성공 - 새로운 유저")
+  @Test
+  void registerUser_success_new_user() {
+    // given
+    UserRequest userRequest = new UserRequest();
+    userRequest.setUsername("newuser");
+    userRequest.setAvatarUrl("http://example.com/avatar.png");
+
+    User newUser =
+        User.builder()
+            .id(1L)
+            .uuid(UUID.randomUUID())
+            .username("newuser")
+            .profileImageUrl("http://example.com/avatar.png")
+            .build();
+
+    given(userRepository.save(any(User.class))).willReturn(newUser);
+    given(jwtTokenProvider.generateAccessToken(any(String.class))).willReturn("testAccessToken");
+    given(jwtTokenProvider.generateRefreshToken(any(String.class))).willReturn("testRefreshToken");
+
+    // when
+    UserResponse response = userService.registerUser(userRequest);
+
+    // then
+    Assertions.assertNotNull(response);
+    Assertions.assertEquals("newuser", response.getUsername());
+    Assertions.assertEquals("testAccessToken", response.getAccessToken());
+    Assertions.assertEquals("testRefreshToken", response.getRefreshToken());
+    verify(userRepository).save(any(User.class));
+    verify(jwtTokenProvider).generateAccessToken(any(String.class));
+    verify(jwtTokenProvider).generateRefreshToken(any(String.class));
+  }
+
+  @DisplayName("닉네임 변경 성공")
+  @Test
+  void updateNickname_success() {
+    // given
+    Long userId = 1L;
+    String oldNickname = "oldname";
+    String newNickname = "newname";
+    User user = User.builder().id(userId).username(oldNickname).build();
+    given(userRepository.findById(userId)).willReturn(Optional.of(user));
+    given(userRepository.save(any(User.class))).willReturn(user);
+
+    // when
+    userService.updateNickname(userId, newNickname);
+
+    // then
+    Assertions.assertEquals(newNickname, user.getUsername());
+    verify(userRepository).findById(userId);
+    verify(userRepository).save(user);
+  }
+
+  @DisplayName("닉네임 변경 실패 - 유저를 찾을 수 없음")
+  @Test
+  void updateNickname_fail_userNotFound() {
+    // given
+    Long userId = 1L;
+    String newNickname = "newname";
+    given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+    // when & then
+    Assertions.assertThrows(
+        UserNotFoundException.class, () -> userService.updateNickname(userId, newNickname));
+    verify(userRepository).findById(userId);
+    verify(userRepository, org.mockito.Mockito.never()).save(any(User.class));
+  }
+
+  @DisplayName("아바타 변경 성공")
+  @Test
+  void updateAvatar_success() {
+    // given
+    Long userId = 1L;
+    String oldAvatarUrl = "http://old.com/avatar.png";
+    String newAvatarUrl = "http://new.com/avatar.png";
+    User user = User.builder().id(userId).profileImageUrl(oldAvatarUrl).build();
+    given(userRepository.findById(userId)).willReturn(Optional.of(user));
+    given(userRepository.save(any(User.class))).willReturn(user);
+
+    // when
+    userService.updateAvatar(userId, newAvatarUrl);
+
+    // then
+    Assertions.assertEquals(newAvatarUrl, user.getProfileImageUrl());
+    verify(userRepository).findById(userId);
+    verify(userRepository).save(user);
+  }
+
+  @DisplayName("아바타 변경 실패 - 유저를 찾을 수 없음")
+  @Test
+  void updateAvatar_fail_userNotFound() {
+    // given
+    Long userId = 1L;
+    String newAvatarUrl = "http://new.com/avatar.png";
+    given(userRepository.findById(userId)).willReturn(Optional.empty());
+
+    // when & then
+    Assertions.assertThrows(
+        UserNotFoundException.class, () -> userService.updateAvatar(userId, newAvatarUrl));
+    verify(userRepository).findById(userId);
+    verify(userRepository, org.mockito.Mockito.never()).save(any(User.class));
   }
 }
