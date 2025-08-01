@@ -1,4 +1,4 @@
-package com.example.cp_main_be.garden.service;
+package com.example.cp_main_be.domain.garden.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -7,7 +7,6 @@ import static org.mockito.BDDMockito.given;
 import com.example.cp_main_be.domain.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.garden.dto.GardenResponse;
-import com.example.cp_main_be.domain.garden.service.GardenService;
 import com.example.cp_main_be.domain.user.domain.User;
 import java.util.Optional;
 import java.util.UUID;
