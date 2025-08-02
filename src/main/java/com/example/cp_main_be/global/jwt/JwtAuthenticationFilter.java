@@ -8,8 +8,6 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -18,7 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtTokenProvider jwtTokenProvider;
-  private final UserDetailsService userDetailsService; // UserDetailsService는 사용자 정보를 로드하는 인터페이스
 
   @Override
   protected void doFilterInternal(
@@ -28,11 +25,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     if (token != null && jwtTokenProvider.validateToken(token)) {
       String uuid = jwtTokenProvider.getUuidFromToken(token);
-      // UserDetailsService를 사용하여 UserDetails 객체를 로드 (실제 구현에서는 UUID로 사용자 정보를 찾아 UserDetails를 생성해야 함)
-      UserDetails userDetails =
-          userDetailsService.loadUserByUsername(uuid); // 여기서는 UUID를 username처럼 사용
+      // UUID를 직접 Principal로 설정 (일관성 유지)
       UsernamePasswordAuthenticationToken authentication =
-          new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+          new UsernamePasswordAuthenticationToken(uuid, null, java.util.Collections.emptyList());
       SecurityContextHolder.getContext().setAuthentication(authentication);
     }
     filterChain.doFilter(request, response);

@@ -163,7 +163,12 @@ public class NotificationService {
         FirebaseMessaging.getInstance().send(message);
         log.info("푸시 알림 전송 성공: {}", notification.getContent());
       } catch (FirebaseMessagingException e) {
-        log.error("푸시 알림 전송 실패", e);
+        if ("UNREGISTERED".equals(e.getMessagingErrorCode().name())) {
+          log.warn("Device token is no longer valid. Deleting token: {}", deviceToken.getToken());
+          deviceTokenRepository.delete(deviceToken);
+        } else {
+          log.error("푸시 알림 전송 실패", e);
+        }
       }
     } else {
       log.warn("디바이스 토큰을 찾을 수 없어 푸시 알림을 전송할 수 없습니다. userId: {}", receiver.getId());

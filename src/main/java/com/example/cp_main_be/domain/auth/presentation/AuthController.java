@@ -20,7 +20,13 @@ public class AuthController {
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshAccessToken(
       @RequestHeader("Authorization") String refreshToken) {
-    TokenRefreshResponse response = authService.refreshAccessToken(refreshToken);
-    return ResponseEntity.ok(ApiResponse.success(response));
+    try {
+      TokenRefreshResponse response = authService.refreshAccessToken(refreshToken.substring(7));
+      return ResponseEntity.ok(ApiResponse.success(response));
+    } catch (RuntimeException e) {
+      // 리프레시 토큰 만료 시, 새로운 익명 계정 생성
+      TokenRefreshResponse response = authService.createNewAnonymousAccount();
+      return ResponseEntity.ok(ApiResponse.success(response));
+    }
   }
 }
