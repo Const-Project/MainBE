@@ -1,5 +1,7 @@
 package com.example.cp_main_be.domain.social.follow.service;
 
+import com.example.cp_main_be.domain.notification.domain.NotificationType;
+import com.example.cp_main_be.domain.notification.service.NotificationService;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.user.domain.User;
@@ -18,6 +20,7 @@ public class FollowService {
 
   private final FollowRepository followRepository;
   private final UserRepository userRepository;
+  private final NotificationService notificationService; // 알림 서비스 주입
 
   public void followUser(Long followerId, Long followingId) {
     User follower =
@@ -35,6 +38,10 @@ public class FollowService {
 
     Follow follow = Follow.builder().follower(follower).following(following).build();
     followRepository.save(follow);
+
+    // 알림 전송
+    notificationService.send(
+        following, follower, NotificationType.FOLLOW, "/users/" + follower.getId());
   }
 
   public void unfollowUser(Long followerId, Long followingId) {

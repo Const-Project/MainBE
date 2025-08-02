@@ -1,5 +1,9 @@
 package com.example.cp_main_be.domain.social.like.service;
 
+import com.example.cp_main_be.domain.notification.domain.NotificationType;
+import com.example.cp_main_be.domain.notification.service.NotificationService;
+import com.example.cp_main_be.domain.social.feed.domain.Feed;
+import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
 import com.example.cp_main_be.domain.social.like.domain.Like;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import com.example.cp_main_be.domain.user.domain.User;
@@ -16,6 +20,8 @@ public class LikeService {
 
   private final LikeRepository likeRepository;
   private final UserRepository userRepository;
+  private final FeedRepository feedRepository;
+  private final NotificationService notificationService;
 
   public void addLike(Long userId, Long targetId, String targetType) {
     User user =
@@ -29,6 +35,19 @@ public class LikeService {
 
     Like like = Like.builder().user(user).targetId(targetId).targetType(targetType).build();
     likeRepository.save(like);
+
+    if ("feed".equalsIgnoreCase(targetType)) {
+      Feed feed =
+          feedRepository
+              .findById(targetId)
+              .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
+      User receiver = feed.getUser();
+
+      // 자기 자신에게는 알림을 보내지 않음
+      if (!receiver.getId().equals(userId)) {
+        notificationService.send(receiver, user, NotificationType.FEED_LIKE, "/feeds/" + targetId);
+      }
+    }
   }
 
   public void removeLike(Long userId, Long targetId, String targetType) {

@@ -1,5 +1,7 @@
 package com.example.cp_main_be.domain.social.guestbook.service;
 
+import com.example.cp_main_be.domain.notification.domain.NotificationType;
+import com.example.cp_main_be.domain.notification.service.NotificationService;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
@@ -20,6 +22,7 @@ public class GuestbookService {
 
   private final GuestbookRepository guestbookRepository;
   private final UserRepository userRepository;
+  private final NotificationService notificationService;
 
   public void createGuestbook(Long writerId, Long ownerId, GuestbookRequest request) {
     User writer =
@@ -44,5 +47,10 @@ public class GuestbookService {
     Guestbook guestbook =
         Guestbook.builder().writer(writer).owner(owner).content(request.getContent()).build();
     guestbookRepository.save(guestbook);
+
+    // 자기 자신에게는 알림을 보내지 않음
+    if (!writerId.equals(ownerId)) {
+      notificationService.send(owner, writer, NotificationType.GUESTBOOK, "/guestbooks/" + ownerId);
+    }
   }
 }

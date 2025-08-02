@@ -1,8 +1,12 @@
 package com.example.cp_main_be.domain.social.comment.service;
 
+import com.example.cp_main_be.domain.notification.domain.NotificationType;
+import com.example.cp_main_be.domain.notification.service.NotificationService;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
 import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
+import com.example.cp_main_be.domain.social.feed.domain.Feed;
+import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
@@ -17,6 +21,8 @@ public class CommentService {
 
   private final CommentRepository commentRepository;
   private final UserRepository userRepository;
+  private final FeedRepository feedRepository;
+  private final NotificationService notificationService;
 
   public Comment createComment(Long writerId, CommentRequest request) {
     User writer =
@@ -31,7 +37,22 @@ public class CommentService {
             .targetId(request.getTargetId())
             .targetType(request.getTargetType())
             .build();
-    return commentRepository.save(comment);
+    commentRepository.save(comment);
+
+    if ("feed".equalsIgnoreCase(request.getTargetType())) {
+      Feed feed =
+          feedRepository
+              .findById(request.getTargetId())
+              .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
+      User receiver = feed.getUser();
+
+      // 자기 자신에게는 알림을 보내지 않음
+      if (!receiver.getId().equals(writerId)) {
+        notificationService.send(
+            receiver, writer, NotificationType.FEED_COMMENT, "/feeds/" + request.getTargetId());
+      }
+    }
+    return comment;
   }
 
   public Comment updateComment(Long commentId, Long writerId, CommentRequest request) {
