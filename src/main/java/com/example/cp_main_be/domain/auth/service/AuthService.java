@@ -4,6 +4,8 @@ import com.example.cp_main_be.domain.auth.dto.response.TokenRefreshResponse;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +16,7 @@ public class AuthService {
 
   private final JwtTokenProvider jwtTokenProvider;
   private final UserRepository userRepository;
+  private final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
   public TokenRefreshResponse refreshAccessToken(String refreshToken) {
     // Refresh Token 유효성 검사
@@ -32,7 +35,7 @@ public class AuthService {
     String newAccessToken = jwtTokenProvider.generateAccessToken(uuid);
     String newRefreshToken = jwtTokenProvider.generateRefreshToken(uuid);
 
-    return new TokenRefreshResponse(newAccessToken, newRefreshToken);
+    return new TokenRefreshResponse(newAccessToken, newRefreshToken, false);
   }
 
   public TokenRefreshResponse createNewAnonymousAccount() {
@@ -52,8 +55,7 @@ public class AuthService {
     String accessToken = jwtTokenProvider.generateAccessToken(newUuid);
     String refreshToken = jwtTokenProvider.generateRefreshToken(newUuid);
 
-    // 데이터 유실 경고 로그: 이 시점에서 이전 UUID와 연결된 데이터는 고립됩니다.
-    log.warn("리프레시 토큰 만료로 인해 새로운 익명 계정을 생성했습니다. 이전 데이터는 더 이상 연결되지 않습니다. New UUID: {}", newUuid);
+    logger.warn("리프레시 토큰 만료로 인해 새로운 익명 계정을 생성했습니다. 이전 데이터는 더 이상 연결되지 않습니다. New UUID: {}", newUuid);
     return new TokenRefreshResponse(accessToken, refreshToken, true);
   }
 }

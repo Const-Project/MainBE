@@ -34,11 +34,13 @@ class AuthServiceTest {
     String userUuid = UUID.randomUUID().toString();
     User user = User.builder().uuid(UUID.fromString(userUuid)).build();
     String newAccessToken = "newAccessToken";
+    String newRefreshToken = "newRefreshToken"; // 새로운 refresh token 추가
 
     given(jwtTokenProvider.validateToken(refreshToken)).willReturn(true);
     given(jwtTokenProvider.getUuidFromToken(refreshToken)).willReturn(userUuid);
     given(userRepository.findByUuid(UUID.fromString(userUuid))).willReturn(Optional.of(user));
     given(jwtTokenProvider.generateAccessToken(userUuid)).willReturn(newAccessToken);
+    given(jwtTokenProvider.generateRefreshToken(userUuid)).willReturn(newRefreshToken); // 추가
 
     // when
     TokenRefreshResponse response = authService.refreshAccessToken(refreshToken);
@@ -46,11 +48,14 @@ class AuthServiceTest {
     // then
     Assertions.assertNotNull(response);
     Assertions.assertEquals(newAccessToken, response.getAccessToken());
-    Assertions.assertEquals(refreshToken, response.getRefreshToken());
+    Assertions.assertEquals(newRefreshToken, response.getRefreshToken()); // 새로운 토큰 검증
+    Assertions.assertFalse(response.isNewAccount());
+
     verify(jwtTokenProvider).validateToken(refreshToken);
     verify(jwtTokenProvider).getUuidFromToken(refreshToken);
     verify(userRepository).findByUuid(UUID.fromString(userUuid));
     verify(jwtTokenProvider).generateAccessToken(userUuid);
+    verify(jwtTokenProvider).generateRefreshToken(userUuid); // 추가 검증
   }
 
   @DisplayName("액세스 토큰 재발급 실패 - 유효하지 않은 Refresh Token")

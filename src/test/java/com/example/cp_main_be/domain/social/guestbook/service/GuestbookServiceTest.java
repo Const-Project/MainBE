@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
+import com.example.cp_main_be.domain.notification.service.NotificationService;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
@@ -27,6 +28,7 @@ class GuestbookServiceTest {
   @Mock private UserRepository userRepository;
 
   @InjectMocks private GuestbookService guestbookService;
+  @Mock private NotificationService notificationService;
 
   @DisplayName("방명록 작성 성공")
   @Test
