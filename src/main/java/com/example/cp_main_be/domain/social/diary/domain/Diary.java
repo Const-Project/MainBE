@@ -2,8 +2,7 @@ package com.example.cp_main_be.domain.social.diary.domain;
 
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -12,6 +11,9 @@ import java.util.Date;
 @Table(name = "diaries")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Diary {
 
     @Id

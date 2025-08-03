@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface DiaryRepository extends JpaRepository<Diary,Integer> {
 
-    List<Diary> findByUser_id(Long userId);
+    List<Diary> findAllByUser_id(Long userId);
 }
