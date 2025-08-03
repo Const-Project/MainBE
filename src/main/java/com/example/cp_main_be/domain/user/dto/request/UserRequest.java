@@ -1,14 +1,18 @@
 package com.example.cp_main_be.domain.user.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import java.util.UUID;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@RequiredArgsConstructor
+@Setter
 public class UserRequest {
 
-  private final UUID userUuid;
-  private final Long userId;
-  private final String username;
+  private UUID uuid;
+
+  @NotBlank(message = "유저 이름은 필수입니다.")
+  private String username;
+
+  private String avatarUrl;
 }
