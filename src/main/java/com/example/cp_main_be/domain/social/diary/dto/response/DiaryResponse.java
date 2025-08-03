@@ -1,0 +1,42 @@
+package com.example.cp_main_be.domain.social.diary.dto.response;
+
+import com.example.cp_main_be.domain.social.diary.domain.Diary;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.time.LocalDateTime;
+
+@Getter
+public class DiaryResponse {
+
+    private final Long id;
+    private final Long userId;
+    private final String title;
+    private final String content;
+    private final String keyword;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
+
+    @Builder
+    private DiaryResponse(Long id, Long userId, String title, String content, String keyword, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.userId = userId;
+        this.title = title;
+        this.content = content;
+        this.keyword = keyword;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    public static DiaryResponse from(Diary diary) {
+        return DiaryResponse.builder()
+                .id(diary.getId())
+                .userId(diary.getUser().getId())
+                .title(diary.getTitle())
+                .content(diary.getContent())
+                .keyword(diary.getKeyword())
+                .createdAt(diary.getCreatedAt())
+                .updatedAt(diary.getUpdatedAt())
+                .build();
+    }
+}
