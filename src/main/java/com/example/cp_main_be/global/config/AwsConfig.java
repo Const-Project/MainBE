@@ -1,4 +1,5 @@
-package com.example.cp_main_be.global.config;// AwsConfig.java
+package com.example.cp_main_be.global.config; // AwsConfig.java
+
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
@@ -10,22 +11,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AwsConfig {
 
-    @Value("${cloud.aws.credentials.access-key}")
-    private String accessKey;
+  @Value("${cloud.aws.credentials.access-key}")
+  private String accessKey;
 
-    @Value("${cloud.aws.credentials.secret-key}")
-    private String secretKey;
+  @Value("${cloud.aws.credentials.secret-key}")
+  private String secretKey;
 
-    @Value("${cloud.aws.region.static}")
-    private String region;
+  @Value("${cloud.aws.region.static}")
+  private String region;
 
-    @Bean
-    public AmazonS3 amazonS3() {
-        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
-        return AmazonS3ClientBuilder
-                .standard()
-                .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .build();
-    }
+  @Bean
+  public AmazonS3 amazonS3() {
+    BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+    return AmazonS3ClientBuilder.standard()
+        .withRegion(region)
+        .withCredentials(new AWSStaticCredentialsProvider(credentials))
+        .build();
+  }
 }
