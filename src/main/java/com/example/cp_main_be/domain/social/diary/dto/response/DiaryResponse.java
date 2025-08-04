@@ -21,13 +21,15 @@ public class DiaryResponse {
 
   @Builder
   private DiaryResponse(
-          Long id,
-          Long userId,
-          String title,
-          String content,
-          String keyword, Comment comment, Long likeCount,
-          LocalDateTime createdAt,
-          LocalDateTime updatedAt) {
+      Long id,
+      Long userId,
+      String title,
+      String content,
+      String keyword,
+      Comment comment,
+      Long likeCount,
+      LocalDateTime createdAt,
+      LocalDateTime updatedAt) {
     this.id = id;
     this.userId = userId;
     this.title = title;

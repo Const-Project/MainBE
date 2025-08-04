@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.social.diary.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
@@ -10,11 +11,16 @@ import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @DataJpaTest
 @Import(DiaryService.class) // 테스트할 서비스 클래스를 빈으로 등록
@@ -25,6 +31,33 @@ class DiaryServiceTest {
   @Autowired private DiaryRepository diaryRepository;
 
   @Autowired private UserRepository userRepository; // User 엔티티 저장을 위해 필요
+
+  private User ownerUser;
+  private User anotherUser;
+  private Diary testDiary;
+
+  @BeforeEach
+  void setUp() {
+    // 테스트용 사용자 2명 생성 및 저장
+    ownerUser =
+        userRepository.save(User.builder().username("owner").uuid(UUID.randomUUID()).build());
+    anotherUser =
+        userRepository.save(User.builder().username("another").uuid(UUID.randomUUID()).build());
+
+    // ownerUser가 작성한 다이어리 생성 및 저장
+    testDiary =
+        diaryRepository.save(
+            Diary.builder()
+                .title("Test Diary Title")
+                .content("Test Diary Content")
+                .user(ownerUser)
+                .build());
+
+    // SecurityContextHolder에 현재 로그인한 사용자 정보 설정
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(ownerUser.getUuid().toString(), null);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+  }
 
   @DisplayName("특정 유저의 다이어리 목록 조회 성공")
   @Test
@@ -141,5 +174,39 @@ class DiaryServiceTest {
     assertThat(diary.getTitle()).isEqualTo(title);
     assertThat(diary.getContent()).isEqualTo(content);
     assertThat(diary.getImageUrl()).isEqualTo(imageUrl);
+  }
+
+  @DisplayName("다이어리 삭제 성공: 일기 작성자 본인이 삭제하는 경우")
+  @Test
+  void deleteDiaryById_success() {
+    // given
+    Long diaryIdToDelete = testDiary.getId();
+
+    // when
+    diaryService.deleteDiaryById(diaryIdToDelete);
+
+    // then
+    Optional<Diary> deletedDiary = diaryRepository.findById(diaryIdToDelete);
+    assertThat(deletedDiary).isNotPresent();
+  }
+
+  @DisplayName("다이어리 삭제 실패: 다른 사용자가 삭제하려는 경우")
+  @Test
+  void deleteDiaryById_fail_whenUnauthorizedUser() {
+    // given
+    // SecurityContextHolder에 다른 사용자 정보로 변경
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(anotherUser.getUuid().toString(), null);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    Long diaryIdToDelete = testDiary.getId();
+
+    // when & then
+    assertThatThrownBy(() -> diaryService.deleteDiaryById(diaryIdToDelete))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("해당 다이어리를 삭제할 권한이 없습니다.");
+
+    // 다이어리가 실제로 삭제되지 않았는지 확인
+    assertThat(diaryRepository.findById(diaryIdToDelete)).isPresent();
   }
 }
