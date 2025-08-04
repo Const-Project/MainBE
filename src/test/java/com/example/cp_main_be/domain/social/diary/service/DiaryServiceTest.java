@@ -1,5 +1,11 @@
 package com.example.cp_main_be.domain.social.diary.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+
 import com.example.cp_main_be.domain.image.ImageUploader;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
@@ -7,6 +13,9 @@ import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,16 +28,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-
 @DataJpaTest
 @Import(DiaryService.class) // 테스트할 서비스 클래스를 빈으로 등록
 class DiaryServiceTest {
@@ -39,8 +38,7 @@ class DiaryServiceTest {
 
   @Autowired private UserRepository userRepository; // User 엔티티 저장을 위해 필요
 
-  @MockBean
-  private ImageUploader imageUploader;
+  @MockBean private ImageUploader imageUploader;
 
   private User ownerUser;
   private User anotherUser;
@@ -227,8 +225,8 @@ class DiaryServiceTest {
     // Given
     Long diaryId = testDiary.getId();
     MockMultipartFile mockFile =
-            new MockMultipartFile(
-                    "file", "test-image.jpg", "image/jpeg", "test image content".getBytes());
+        new MockMultipartFile(
+            "file", "test-image.jpg", "image/jpeg", "test image content".getBytes());
     String uploadedImageUrl = "https://s3-bucket/diary-images/test-image.jpg";
 
     // imageUploader의 Mocking 동작을 설정
@@ -253,13 +251,13 @@ class DiaryServiceTest {
     // Given
     // SecurityContextHolder에 다른 사용자 정보로 변경
     Authentication anotherAuth =
-            new UsernamePasswordAuthenticationToken(anotherUser.getUuid().toString(), null);
+        new UsernamePasswordAuthenticationToken(anotherUser.getUuid().toString(), null);
     SecurityContextHolder.getContext().setAuthentication(anotherAuth);
 
     Long diaryId = testDiary.getId();
     MockMultipartFile mockFile =
-            new MockMultipartFile(
-                    "file", "test-image.jpg", "image/jpeg", "test image content".getBytes());
+        new MockMultipartFile(
+            "file", "test-image.jpg", "image/jpeg", "test image content".getBytes());
     String uploadedImageUrl = "https://s3-bucket/diary-images/test-image.jpg";
 
     // Mocking 동작 설정 (업로드까지는 시도)
@@ -267,8 +265,8 @@ class DiaryServiceTest {
 
     // When & Then
     assertThatThrownBy(() -> diaryService.saveDiaryImage(diaryId, mockFile))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("해당 다이어리에 이미지를 추가할 권한이 없습니다.");
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("해당 다이어리에 이미지를 추가할 권한이 없습니다.");
 
     // 다이어리가 실제로 업데이트되지 않았는지 확인
     Optional<Diary> unchangedDiary = diaryRepository.findById(diaryId);
