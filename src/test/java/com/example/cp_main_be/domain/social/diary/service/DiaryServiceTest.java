@@ -147,33 +147,35 @@ class DiaryServiceTest {
   @Test
   void update_diary_success() throws Exception {
     // given
-    User user1 = userRepository.save(User.builder().username("testUser1").build());
-    Diary firstDiary = Diary.builder().title("first 1").content("first 1").user(user1).build();
-    diaryRepository.save(firstDiary);
-
-    String title = "Test Title";
-    String content = "Test Content";
-    String imageUrl = "http://test.com/image.png";
-    String keyword = "testKeyword";
-    Boolean isPublic = true;
-
+    Long diaryId = testDiary.getId();
     DiaryWriteRequest diaryWriteRequest =
-        DiaryWriteRequest.builder()
-            .title(title)
-            .content(content)
-            .imageUrl(imageUrl)
-            .keyword(keyword)
-            .isPublic(isPublic)
-            .build();
+        DiaryWriteRequest.builder().title("update Title").content("update Content").build();
 
     // when
-    Diary diary = diaryService.updateDiary(firstDiary.getId(), diaryWriteRequest);
+    Diary updatedDiary = diaryService.updateDiary(diaryId, diaryWriteRequest);
 
     // then
-    assertThat(diary.getId()).isEqualTo(firstDiary.getId());
-    assertThat(diary.getTitle()).isEqualTo(title);
-    assertThat(diary.getContent()).isEqualTo(content);
-    assertThat(diary.getImageUrl()).isEqualTo(imageUrl);
+    assertThat(updatedDiary.getTitle()).isEqualTo(diaryWriteRequest.getTitle());
+    assertThat(updatedDiary.getContent()).isEqualTo(diaryWriteRequest.getContent());
+  }
+
+  @DisplayName("다른 사람의 일기 수정 실패")
+  @Test
+  void update_others_diary_fail() throws Exception {
+    // given
+    // SecurityContextHolder에 다른 사용자 정보로 변경
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(anotherUser.getUuid().toString(), null);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    Long diaryId = testDiary.getId();
+    DiaryWriteRequest diaryWriteRequest =
+        DiaryWriteRequest.builder().title("update Title").content("update Content").build();
+
+    // when & then
+    assertThatThrownBy(() -> diaryService.updateDiary(diaryId, diaryWriteRequest))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("해당 다이어리를 수정할 권한이 없습니다.");
   }
 
   @DisplayName("다이어리 삭제 성공: 일기 작성자 본인이 삭제하는 경우")
