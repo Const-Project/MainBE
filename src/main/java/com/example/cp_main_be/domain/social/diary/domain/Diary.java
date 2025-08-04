@@ -10,8 +10,8 @@ import lombok.*;
 @Table(name = "diaries")
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Diary {
 
   @Id
@@ -62,5 +62,12 @@ public class Diary {
   @PreUpdate
   protected void onUpdate() {
     this.updatedAt = LocalDateTime.now();
+  }
+
+  public void updateDiary(String title, String content, String imageUrl, boolean isPublic) {
+    this.title = title;
+    this.content = content;
+    this.imageUrl = imageUrl;
+    this.isPublic = isPublic;
   }
 }
