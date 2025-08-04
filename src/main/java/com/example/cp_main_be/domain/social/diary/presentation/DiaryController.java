@@ -70,4 +70,11 @@ public class DiaryController {
     DiaryResponse diaryResponse = DiaryResponse.from(diary);
     return ResponseEntity.ok(ApiResponse.success(diaryResponse));
   }
+
+  @DeleteMapping("/{diaryId}")
+  public ResponseEntity<ApiResponse<Void>> deleteDiaryById(@PathVariable Long diaryId) {
+    // 작성한 사람만 삭제 가능
+    diaryService.deleteDiaryById(diaryId);
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
 }
