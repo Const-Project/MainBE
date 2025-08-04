@@ -46,7 +46,6 @@ public class DiaryController {
         diaryService.registerDiary(
             request.getTitle(),
             request.getContent(),
-            request.getImageUrl(),
             request.getKeyword(),
             user,
             request.isPublic());

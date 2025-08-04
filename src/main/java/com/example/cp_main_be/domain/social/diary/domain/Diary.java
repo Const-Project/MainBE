@@ -64,10 +64,10 @@ public class Diary {
     this.updatedAt = LocalDateTime.now();
   }
 
-  public void updateDiary(String title, String content, String imageUrl, boolean isPublic) {
+  // 사진은 업데이트 포함 안함
+  public void updateDiary(String title, String content, boolean isPublic) {
     this.title = title;
     this.content = content;
-    this.imageUrl = imageUrl;
     this.isPublic = isPublic;
   }
 }

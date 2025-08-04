@@ -34,12 +34,11 @@ public class DiaryService {
   }
 
   public Long registerDiary(
-      String title, String content, String imageUrl, String keyword, User user, Boolean isPublic) {
+      String title, String content, String keyword, User user, Boolean isPublic) {
     Diary diary =
         Diary.builder()
             .title(title)
             .content(content)
-            .imageUrl(imageUrl)
             .keyword(keyword)
             .user(user)
             .isPublic(isPublic)
@@ -81,8 +80,7 @@ public class DiaryService {
     }
 
     // 4. 비즈니스 메서드를 사용해 다이어리 업데이트
-    diary.updateDiary(
-        request.getTitle(), request.getContent(), request.getImageUrl(), request.isPublic());
+    diary.updateDiary(request.getTitle(), request.getContent(), request.isPublic());
 
     return diary;
   }

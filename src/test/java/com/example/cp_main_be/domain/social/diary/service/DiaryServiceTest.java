@@ -95,12 +95,11 @@ class DiaryServiceTest {
 
     String title = "Test Title";
     String content = "Test Content";
-    String imageUrl = "http://test.com/image.png";
     String keyword = "testKeyword";
     Boolean isPublic = true;
 
     // when
-    Long newDiaryId = diaryService.registerDiary(title, content, imageUrl, keyword, user, isPublic);
+    Long newDiaryId = diaryService.registerDiary(title, content, keyword, user, isPublic);
 
     // then
     // 반환된 ID를 사용해 데이터베이스에서 다이어리 객체를 조회
