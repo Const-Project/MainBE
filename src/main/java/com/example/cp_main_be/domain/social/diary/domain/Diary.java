@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.social.diary.domain;
 
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
+import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -28,7 +29,9 @@ public class Diary {
 
   private String keyword;
 
-  private String imageUrl;
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @JoinColumn(name = "diary_image_id")
+  private DiaryImage diaryImage;
 
   @Column(name = "is_public")
   private boolean isPublic = true; // 기본값 true
@@ -71,7 +74,7 @@ public class Diary {
     this.isPublic = isPublic;
   }
 
-  public void updateImageUrl(String imageUrl) {
-    this.imageUrl = imageUrl;
+  public void updateImage(DiaryImage diaryImage) {
+    this.diaryImage = diaryImage;
   }
 }

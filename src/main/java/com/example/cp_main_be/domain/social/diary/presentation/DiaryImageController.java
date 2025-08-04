@@ -24,4 +24,11 @@ public class DiaryImageController {
     // 2. 성공 응답 반환
     return ResponseEntity.ok(ApiResponse.success(null));
   }
+
+  @DeleteMapping("{diaryId}/images/{imageId}")
+  public ResponseEntity<ApiResponse<Void>> deleteDiaryImage(
+      @PathVariable Long diaryId, @PathVariable Long imageId) {
+    diaryService.deleteDiaryImage(diaryId, imageId);
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
 }

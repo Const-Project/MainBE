@@ -45,17 +45,31 @@ public class DiaryResponse {
   }
 
   public static DiaryResponse from(Diary diary) {
-    return DiaryResponse.builder()
-        .id(diary.getId())
-        .userId(diary.getUser().getId())
-        .title(diary.getTitle())
-        .content(diary.getContent())
-        .keyword(diary.getKeyword())
-        .imageUrl(diary.getImageUrl())
-        .comment(diary.getComment())
-        .likeCount(diary.getLikeCount())
-        .createdAt(diary.getCreatedAt())
-        .updatedAt(diary.getUpdatedAt())
-        .build();
+    if (diary.getDiaryImage() == null) {
+      return DiaryResponse.builder()
+          .id(diary.getId())
+          .userId(diary.getUser().getId())
+          .title(diary.getTitle())
+          .content(diary.getContent())
+          .keyword(diary.getKeyword())
+          .comment(diary.getComment())
+          .likeCount(diary.getLikeCount())
+          .createdAt(diary.getCreatedAt())
+          .updatedAt(diary.getUpdatedAt())
+          .build();
+    } else {
+      return DiaryResponse.builder()
+          .id(diary.getId())
+          .userId(diary.getUser().getId())
+          .title(diary.getTitle())
+          .content(diary.getContent())
+          .keyword(diary.getKeyword())
+          .imageUrl(diary.getDiaryImage().getImageUrl())
+          .comment(diary.getComment())
+          .likeCount(diary.getLikeCount())
+          .createdAt(diary.getCreatedAt())
+          .updatedAt(diary.getUpdatedAt())
+          .build();
+    }
   }
 }

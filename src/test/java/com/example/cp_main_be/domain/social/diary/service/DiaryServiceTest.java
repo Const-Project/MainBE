@@ -4,13 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import com.example.cp_main_be.domain.image.ImageUploader;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
+import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
+import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import java.util.List;
@@ -33,16 +35,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 class DiaryServiceTest {
 
   @Autowired private DiaryService diaryService;
-
   @Autowired private DiaryRepository diaryRepository;
-
   @Autowired private UserRepository userRepository; // User 엔티티 저장을 위해 필요
-
+  @Autowired private DiaryImageRepository diaryImageRepository;
   @MockBean private ImageUploader imageUploader;
 
   private User ownerUser;
   private User anotherUser;
   private Diary testDiary;
+  private DiaryImage testDiaryImage;
 
   @BeforeEach
   void setUp() {
@@ -240,7 +241,8 @@ class DiaryServiceTest {
 
     Optional<Diary> updatedDiaryOptional = diaryRepository.findById(diaryId);
     assertThat(updatedDiaryOptional).isPresent();
-    assertThat(updatedDiaryOptional.get().getImageUrl()).isEqualTo(uploadedImageUrl);
+    assertThat(updatedDiaryOptional.get().getDiaryImage().getImageUrl())
+        .isEqualTo(uploadedImageUrl);
 
     verify(imageUploader).upload(any(), any());
   }
@@ -271,6 +273,59 @@ class DiaryServiceTest {
     // 다이어리가 실제로 업데이트되지 않았는지 확인
     Optional<Diary> unchangedDiary = diaryRepository.findById(diaryId);
     assertThat(unchangedDiary).isPresent();
-    assertThat(unchangedDiary.get().getImageUrl()).isNull();
+    assertThat(unchangedDiary.get().getDiaryImage()).isNull();
+  }
+
+  @DisplayName("이미지 삭제 성공: 일기 작성자 본인이 삭제하는 경우")
+  @Test
+  void deleteDiaryImage_success() {
+    // 다이어리에 속한 이미지 생성 및 저장
+    testDiaryImage =
+        diaryImageRepository.save(
+            DiaryImage.builder().imageUrl("http://test.com/image.jpg").diary(testDiary).build());
+    // given
+    Long diaryId = testDiary.getId();
+    Long imageId = testDiaryImage.getId();
+
+    // imageUploader.delete() 호출 시 아무것도 하지 않도록 설정 (void 메서드 Mocking)
+    doNothing().when(imageUploader).delete(any(String.class));
+
+    // when
+    diaryService.deleteDiaryImage(diaryId, imageId);
+
+    // then
+    // 1. 데이터베이스에서 DiaryImage 엔티티가 삭제되었는지 확인
+    Optional<DiaryImage> deletedImage = diaryImageRepository.findById(imageId);
+    assertThat(deletedImage).isNotPresent();
+
+    // 2. imageUploader.delete()가 올바른 URL로 호출되었는지 확인
+    verify(imageUploader).delete(testDiaryImage.getImageUrl());
+  }
+
+  @DisplayName("이미지 삭제 실패: 다른 사용자가 삭제하려는 경우")
+  @Test
+  void deleteDiaryImage_fail_unauthorizedUser() {
+    // given
+    // 다이어리에 속한 이미지 생성 및 저장
+    testDiaryImage =
+        diaryImageRepository.save(
+            DiaryImage.builder().imageUrl("http://test.com/image.jpg").diary(testDiary).build());
+    // SecurityContextHolder에 다른 사용자 정보로 변경
+    Authentication authentication =
+        new UsernamePasswordAuthenticationToken(anotherUser.getUuid().toString(), null);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    Long diaryId = testDiary.getId();
+    Long imageId = testDiaryImage.getId();
+
+    // when & then
+    assertThatThrownBy(() -> diaryService.deleteDiaryImage(diaryId, imageId))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("해당 다이어리에 이미지를 삭제할 권한이 없습니다.");
+
+    // 1. imageUploader.delete()가 호출되지 않았는지 확인
+    verify(imageUploader, never()).delete(any(String.class));
+    // 2. 데이터베이스에 엔티티가 여전히 존재하는지 확인
+    assertThat(diaryImageRepository.findById(imageId)).isPresent();
   }
 }
