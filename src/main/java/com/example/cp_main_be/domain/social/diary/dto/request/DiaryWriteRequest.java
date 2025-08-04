@@ -9,7 +9,6 @@ public class DiaryWriteRequest {
 
   private String title;
   private String content;
-  private String imageUrl;
   private String keyword;
   private boolean isPublic;
 }
