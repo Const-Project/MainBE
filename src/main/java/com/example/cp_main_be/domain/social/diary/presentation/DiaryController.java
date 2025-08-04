@@ -49,7 +49,16 @@ public class DiaryController {
             request.getKeyword(),
             user);
 
-    DiaryIdResponse diaryIdResponse = diaryService.findDiaryById(diaryId);
+    DiaryIdResponse diaryIdResponse = diaryService.findDiaryIdById(diaryId);
     return ResponseEntity.ok(ApiResponse.success(diaryIdResponse));
+  }
+
+  @GetMapping("/{diaryId}")
+  public ResponseEntity<ApiResponse<DiaryResponse>> getDiaryById(
+          @PathVariable Long diaryId) {
+
+    // id로 일기 조회할거임, 남이 적은 일기도 접근 가능한 상황
+    DiaryResponse diaryById = diaryService.findDiaryById(diaryId);
+    return ResponseEntity.ok(ApiResponse.success(diaryById));
   }
 }

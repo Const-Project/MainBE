@@ -37,8 +37,14 @@ public class DiaryService {
     return diary.getId();
   }
 
-  public DiaryIdResponse findDiaryById(Long diaryId) {
+  public DiaryIdResponse findDiaryIdById(Long diaryId) {
     Diary diary = diaryRepository.findDiaryById(diaryId);
     return DiaryIdResponse.builder().id(diary.getId()).build();
+  }
+
+  public DiaryResponse findDiaryById(Long diaryId) {
+    // 아마 diaryId 로만 조회하면 남이 쓴 일기도 조회 가능할듯
+    Diary diary = diaryRepository.findDiaryById(diaryId);
+    return DiaryResponse.from(diary);
   }
 }

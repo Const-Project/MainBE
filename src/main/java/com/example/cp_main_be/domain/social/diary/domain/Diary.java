@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.social.diary.domain;
 
+import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -40,6 +41,10 @@ public class Diary {
 
   @Column(name = "like_count")
   private Long likeCount = 0L;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "comment_id")
+  private Comment comment;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
