@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
@@ -63,9 +64,10 @@ class DiaryServiceTest {
     String content = "Test Content";
     String imageUrl = "http://test.com/image.png";
     String keyword = "testKeyword";
+    Boolean isPublic = true;
 
     // when
-    Long newDiaryId = diaryService.registerDiary(title, content, imageUrl, keyword, user);
+    Long newDiaryId = diaryService.registerDiary(title, content, imageUrl, keyword, user, isPublic);
 
     // then
     // 반환된 ID를 사용해 데이터베이스에서 다이어리 객체를 조회
@@ -81,18 +83,22 @@ class DiaryServiceTest {
   @DisplayName("특정 다이어리 조회 성공 by id")
   @Test
   void getDiaryById_success() throws Exception {
-    //given
+    // given
     User user1 = userRepository.save(User.builder().username("testUser1").build());
     User user2 = userRepository.save(User.builder().username("testUser2").build());
 
-    Diary diary1 = diaryRepository.save(Diary.builder().title("Diary 1").content("Content 1").user(user1).build());
-    Diary diary2 = diaryRepository.save(Diary.builder().title("Diary 2").content("Content 2").user(user2).build());
+    Diary diary1 =
+        diaryRepository.save(
+            Diary.builder().title("Diary 1").content("Content 1").user(user1).build());
+    Diary diary2 =
+        diaryRepository.save(
+            Diary.builder().title("Diary 2").content("Content 2").user(user2).build());
 
-    //when
-    DiaryResponse diary1ById = diaryService.findDiaryById(diary1.getId());
-    DiaryResponse diary2ById = diaryService.findDiaryById(diary2.getId());
+    // when
+    DiaryResponse diary1ById = diaryService.getDiaryResponseById(diary1.getId());
+    DiaryResponse diary2ById = diaryService.getDiaryResponseById(diary2.getId());
 
-    //then
+    // then
     assertThat(diary1ById).isNotNull();
     assertThat(diary1ById.getId()).isEqualTo(diary1.getId());
     assertThat(diary1ById.getTitle()).isEqualTo(diary1.getTitle());
@@ -102,5 +108,38 @@ class DiaryServiceTest {
     assertThat(diary2ById.getId()).isEqualTo(diary2.getId());
     assertThat(diary2ById.getTitle()).isEqualTo(diary2.getTitle());
     assertThat(diary2ById.getContent()).isEqualTo(diary2.getContent());
+  }
+
+  @DisplayName("다이어리 수정 성공")
+  @Test
+  void update_diary_success() throws Exception {
+    // given
+    User user1 = userRepository.save(User.builder().username("testUser1").build());
+    Diary firstDiary = Diary.builder().title("first 1").content("first 1").user(user1).build();
+    diaryRepository.save(firstDiary);
+
+    String title = "Test Title";
+    String content = "Test Content";
+    String imageUrl = "http://test.com/image.png";
+    String keyword = "testKeyword";
+    Boolean isPublic = true;
+
+    DiaryWriteRequest diaryWriteRequest =
+        DiaryWriteRequest.builder()
+            .title(title)
+            .content(content)
+            .imageUrl(imageUrl)
+            .keyword(keyword)
+            .isPublic(isPublic)
+            .build();
+
+    // when
+    Diary diary = diaryService.updateDiary(firstDiary.getId(), diaryWriteRequest);
+
+    // then
+    assertThat(diary.getId()).isEqualTo(firstDiary.getId());
+    assertThat(diary.getTitle()).isEqualTo(title);
+    assertThat(diary.getContent()).isEqualTo(content);
+    assertThat(diary.getImageUrl()).isEqualTo(imageUrl);
   }
 }

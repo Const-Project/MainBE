@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.social.diary.presentation;
 
+import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryIdResponse;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
@@ -47,18 +48,26 @@ public class DiaryController {
             request.getContent(),
             request.getImageUrl(),
             request.getKeyword(),
-            user);
+            user,
+            request.isPublic());
 
-    DiaryIdResponse diaryIdResponse = diaryService.findDiaryIdById(diaryId);
+    DiaryIdResponse diaryIdResponse = diaryService.getDiaryIdResponseById(diaryId);
     return ResponseEntity.ok(ApiResponse.success(diaryIdResponse));
   }
 
   @GetMapping("/{diaryId}")
-  public ResponseEntity<ApiResponse<DiaryResponse>> getDiaryById(
-          @PathVariable Long diaryId) {
+  public ResponseEntity<ApiResponse<DiaryResponse>> getDiaryById(@PathVariable Long diaryId) {
 
     // id로 일기 조회할거임, 남이 적은 일기도 접근 가능한 상황
-    DiaryResponse diaryById = diaryService.findDiaryById(diaryId);
+    DiaryResponse diaryById = diaryService.getDiaryResponseById(diaryId);
     return ResponseEntity.ok(ApiResponse.success(diaryById));
+  }
+
+  @PutMapping("/{diaryId}")
+  public ResponseEntity<ApiResponse<DiaryResponse>> updateDiaryById(
+      @PathVariable Long diaryId, @Valid @RequestBody DiaryWriteRequest request) {
+    Diary diary = diaryService.updateDiary(diaryId, request);
+    DiaryResponse diaryResponse = DiaryResponse.from(diary);
+    return ResponseEntity.ok(ApiResponse.success(diaryResponse));
   }
 }
