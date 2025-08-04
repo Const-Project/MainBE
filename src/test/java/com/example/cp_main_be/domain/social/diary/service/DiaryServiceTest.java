@@ -77,4 +77,30 @@ class DiaryServiceTest {
     assertThat(foundDiary.get().getContent()).isEqualTo(content);
     assertThat(foundDiary.get().getUser().getId()).isEqualTo(user.getId());
   }
+
+  @DisplayName("특정 다이어리 조회 성공 by id")
+  @Test
+  void getDiaryById_success() throws Exception {
+    //given
+    User user1 = userRepository.save(User.builder().username("testUser1").build());
+    User user2 = userRepository.save(User.builder().username("testUser2").build());
+
+    Diary diary1 = diaryRepository.save(Diary.builder().title("Diary 1").content("Content 1").user(user1).build());
+    Diary diary2 = diaryRepository.save(Diary.builder().title("Diary 2").content("Content 2").user(user2).build());
+
+    //when
+    DiaryResponse diary1ById = diaryService.findDiaryById(diary1.getId());
+    DiaryResponse diary2ById = diaryService.findDiaryById(diary2.getId());
+
+    //then
+    assertThat(diary1ById).isNotNull();
+    assertThat(diary1ById.getId()).isEqualTo(diary1.getId());
+    assertThat(diary1ById.getTitle()).isEqualTo(diary1.getTitle());
+    assertThat(diary1ById.getContent()).isEqualTo(diary1.getContent());
+
+    assertThat(diary2ById).isNotNull();
+    assertThat(diary2ById.getId()).isEqualTo(diary2.getId());
+    assertThat(diary2ById.getTitle()).isEqualTo(diary2.getTitle());
+    assertThat(diary2ById.getContent()).isEqualTo(diary2.getContent());
+  }
 }
