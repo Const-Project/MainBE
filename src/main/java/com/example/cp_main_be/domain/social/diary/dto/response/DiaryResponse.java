@@ -14,6 +14,7 @@ public class DiaryResponse {
   private final String title;
   private final String content;
   private final String keyword;
+  private final String imageUrl;
   private final Comment comment;
   private final Long likeCount;
   private final LocalDateTime createdAt;
@@ -21,20 +22,22 @@ public class DiaryResponse {
 
   @Builder
   private DiaryResponse(
-      Long id,
-      Long userId,
-      String title,
-      String content,
-      String keyword,
-      Comment comment,
-      Long likeCount,
-      LocalDateTime createdAt,
-      LocalDateTime updatedAt) {
+          Long id,
+          Long userId,
+          String title,
+          String content,
+          String keyword,
+          String imageUrl,
+          Comment comment,
+          Long likeCount,
+          LocalDateTime createdAt,
+          LocalDateTime updatedAt) {
     this.id = id;
     this.userId = userId;
     this.title = title;
     this.content = content;
     this.keyword = keyword;
+    this.imageUrl = imageUrl;
     this.comment = comment;
     this.likeCount = likeCount;
     this.createdAt = createdAt;
@@ -48,6 +51,7 @@ public class DiaryResponse {
         .title(diary.getTitle())
         .content(diary.getContent())
         .keyword(diary.getKeyword())
+        .imageUrl(diary.getImageUrl())
         .comment(diary.getComment())
         .likeCount(diary.getLikeCount())
         .createdAt(diary.getCreatedAt())

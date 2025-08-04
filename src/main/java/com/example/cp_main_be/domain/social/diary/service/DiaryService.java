@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.social.diary.service;
 
+import com.example.cp_main_be.domain.image.ImageUploader;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +25,7 @@ public class DiaryService {
 
   private final DiaryRepository diaryRepository;
   private final UserRepository userRepository;
+  private final ImageUploader imageUploader; // 의존성 주입은 인터페이스로
 
   public Diary getDiaryById(Long diaryId) {
     return diaryRepository.findById(diaryId).orElseThrow();
@@ -107,5 +110,30 @@ public class DiaryService {
     }
 
     diaryRepository.delete(diary);
+  }
+
+  public DiaryResponse saveDiaryImage(Long diaryId, MultipartFile file) {
+    // 1. 현재 로그인한 사용자 정보 가져오기
+    String uuidString = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UUID userUuid = UUID.fromString(uuidString);
+    User user = userRepository.findByUuid(userUuid)
+            .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+
+    // 2. 다이어리 조회
+    Diary diary = diaryRepository.findById(diaryId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
+
+    // 3. 권한 검증: 일기 작성자와 현재 사용자가 동일한지 확인
+    if (!diary.getUser().getId().equals(user.getId())) {
+      throw new IllegalStateException("해당 다이어리에 이미지를 추가할 권한이 없습니다.");
+    }
+
+    // 4. 이미지 파일을 업로더에 전달하고 URL 받기
+    String imageUrl = imageUploader.upload(file, "diary-images");
+
+    // 5. 다이어리 엔티티의 imageUrl 필드 업데이트
+    diary.updateImageUrl(imageUrl);
+
+    return DiaryResponse.from(diary);
   }
 }

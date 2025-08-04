@@ -70,4 +70,8 @@ public class Diary {
     this.content = content;
     this.isPublic = isPublic;
   }
+
+  public void updateImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
+  }
 }
