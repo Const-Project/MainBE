@@ -114,13 +114,18 @@ public class DiaryService {
 
   public DiaryResponse saveDiaryImage(Long diaryId, MultipartFile file) {
     // 1. 현재 로그인한 사용자 정보 가져오기
-    String uuidString = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    String uuidString =
+        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     UUID userUuid = UUID.fromString(uuidString);
-    User user = userRepository.findByUuid(userUuid)
+    User user =
+        userRepository
+            .findByUuid(userUuid)
             .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
 
     // 2. 다이어리 조회
-    Diary diary = diaryRepository.findById(diaryId)
+    Diary diary =
+        diaryRepository
+            .findById(diaryId)
             .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
 
     // 3. 권한 검증: 일기 작성자와 현재 사용자가 동일한지 확인
