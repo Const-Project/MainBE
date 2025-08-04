@@ -66,6 +66,7 @@ public class DiaryController {
   @PutMapping("/{diaryId}")
   public ResponseEntity<ApiResponse<DiaryResponse>> updateDiaryById(
       @PathVariable Long diaryId, @Valid @RequestBody DiaryWriteRequest request) {
+    // 작성한 사람만 수정 가능
     Diary diary = diaryService.updateDiary(diaryId, request);
     DiaryResponse diaryResponse = DiaryResponse.from(diary);
     return ResponseEntity.ok(ApiResponse.success(diaryResponse));

@@ -10,7 +10,6 @@ import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -61,16 +60,31 @@ public class DiaryService {
   }
 
   public Diary updateDiary(Long diaryId, @Valid DiaryWriteRequest request) {
-    Optional<Diary> optionalDiary = diaryRepository.findById(diaryId);
-    if (optionalDiary.isEmpty()) {
-      return null;
+    // 1. 현재 인증된 사용자의 UUID를 SecurityContext에서 가져옴
+    String uuidString =
+        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UUID userUuid = UUID.fromString(uuidString);
+
+    // 2. 다이어리와 사용자 조회 (없으면 예외 발생)
+    Diary diary =
+        diaryRepository
+            .findById(diaryId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 다이어리가 존재하지 않습니다."));
+    User user =
+        userRepository
+            .findByUuid(userUuid)
+            .orElseThrow(() -> new IllegalArgumentException("해당 사용자가 존재하지 않습니다."));
+
+    // 3. 권한 검증: 현재 사용자가 다이어리 소유자인지 확인
+    if (!diary.getUser().getId().equals(user.getId())) {
+      throw new IllegalStateException("해당 다이어리를 수정할 권한이 없습니다.");
     }
-    Diary diary = optionalDiary.get();
+
+    // 4. 비즈니스 메서드를 사용해 다이어리 업데이트
     diary.updateDiary(
         request.getTitle(), request.getContent(), request.getImageUrl(), request.isPublic());
 
-    // 수정된 다이어리 반환
-    return diaryRepository.save(diary);
+    return diary;
   }
 
   public void deleteDiaryById(Long diaryId) {
