@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.user.domain;
 
 import com.example.cp_main_be.domain.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.garden.domain.Garden;
+import com.example.cp_main_be.domain.social.bookmark.domain.Bookmark;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -63,9 +64,13 @@ public class User {
   @Builder.Default
   private List<Garden> gardens = new ArrayList<>();
 
-  @OneToMany(mappedBy = "user")
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
   private List<Diary> diaries = new ArrayList<>();
+
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  @Builder.Default
+  private List<Bookmark> bookMarks = new ArrayList<>();
 
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
   protected void onCreate() {
