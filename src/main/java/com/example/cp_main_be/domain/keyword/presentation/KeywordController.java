@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.keyword.presentation;
 
-import com.example.cp_main_be.domain.keyword.dto.response.KeywordListResponse;
+import com.example.cp_main_be.domain.keyword.dto.response.KeywordResponse;
 import com.example.cp_main_be.domain.keyword.dto.response.TodayKeywordResponse;
 import com.example.cp_main_be.domain.keyword.service.KeywordService;
 import com.example.cp_main_be.global.util.ApiResponse;
@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,8 +26,8 @@ public class KeywordController {
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<KeywordListResponse>> getAllKeywords() {
-    KeywordListResponse response = keywordService.getAllKeywords();
+  public ResponseEntity<ApiResponse<List<KeywordResponse>>> getAllKeywords() {
+    List<KeywordResponse> response = keywordService.getAllKeywords();
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 }
