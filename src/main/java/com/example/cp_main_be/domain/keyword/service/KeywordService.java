@@ -1,14 +1,14 @@
 package com.example.cp_main_be.domain.keyword.service;
 
-import com.example.cp_main_be.domain.keyword.domain.Keyword;
 import com.example.cp_main_be.domain.keyword.domain.repository.KeywordRepository;
-import com.example.cp_main_be.domain.keyword.dto.response.KeywordListResponse;
+import com.example.cp_main_be.domain.keyword.dto.response.KeywordResponse;
 import com.example.cp_main_be.domain.keyword.dto.response.TodayKeywordResponse;
 import jakarta.transaction.Transactional;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +22,12 @@ public class KeywordService {
     return new TodayKeywordResponse("today_keyword");
   }
 
-  public KeywordListResponse getAllKeywords() {
-    List<String> allKeywords =
-        keywordRepository.findAll().stream().map(Keyword::getKeyword).collect(Collectors.toList());
-    return new KeywordListResponse(allKeywords);
+  public List<KeywordResponse> getAllKeywords() {
+    List<KeywordResponse> allKeywords =
+        keywordRepository.findAll().stream()
+            .map(keyword -> new KeywordResponse(keyword.getCreatedAt(), keyword.getKeyword()))
+            .collect(Collectors.toList());
+
+    return allKeywords;
   }
 }
