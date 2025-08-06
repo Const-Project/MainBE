@@ -8,6 +8,7 @@ import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,5 +77,15 @@ public class UserService {
     return this.userRepository
         .findByUuid(uuid)
         .orElseThrow(() -> new UserNotFoundException("해당 UUID의 사용자를 찾을 수 없습니다 : " + uuid));
+  }
+
+  // 현재 로그인한 유저 가져옴
+  public User getCurrentUser() {
+    String uuidString =
+        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UUID userUuid = UUID.fromString(uuidString);
+    return userRepository
+        .findByUuid(userUuid)
+        .orElseThrow(() -> new IllegalArgumentException("현재 로그인한 사용자를 찾을 수 없습니다."));
   }
 }
