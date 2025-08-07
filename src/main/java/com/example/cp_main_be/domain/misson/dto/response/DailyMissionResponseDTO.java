@@ -16,10 +16,11 @@ public class DailyMissionResponseDTO {
 
     @Getter
     @Builder
-    public class MissionSummaryDTO {
+    public static class MissionSummaryDTO {
         Long missionId;
         String missionTitle;
         String missionDescription;
+        Boolean isCompleted;
         public static DailyMissionResponseDTO.MissionSummaryDTO from(DailyMissionMasters dailyMissionMasters)
         {
             return MissionSummaryDTO.builder()
