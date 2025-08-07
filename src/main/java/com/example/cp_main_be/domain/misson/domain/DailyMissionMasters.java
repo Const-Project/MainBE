@@ -1,7 +1,7 @@
-package com.example.cp_main_be.domain.daily_mission_masters.domain;
+package com.example.cp_main_be.domain.misson.domain;
 
 
-import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
+import com.example.cp_main_be.domain.misson.MissionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
