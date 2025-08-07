@@ -7,5 +7,4 @@ import java.util.List;
 
 public interface DailyMissionMastersRepository extends JpaRepository<DailyMissionMasters, Long> {
 
-    List<DailyMissionMasters> findAllById(Long id);
 }
