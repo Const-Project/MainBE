@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.misson.MissionType;
 import com.example.cp_main_be.domain.misson.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.misson.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.misson.dto.response.DailyMissionResponseDTO;
+import com.example.cp_main_be.domain.user_daily_missions.domain.service.UserDailyMissionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +26,7 @@ import static org.mockito.Mockito.verify;
 class DailyMissionServiceTest {
 
     @InjectMocks
-    private DailyMissionService dailyMissionService;
+    private UserDailyMissionService dailyMissionService;
 
     @Mock
     private DailyMissionMastersRepository dailyMissionMastersRepository;
