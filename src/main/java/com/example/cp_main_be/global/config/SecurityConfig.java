@@ -25,7 +25,12 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers("/api/v1/register", "/api/v1/auth/refresh")
+                    .requestMatchers(
+                        "/api/v1/register",
+                        "/api/v1/auth/refresh",
+                        "/swagger-ui/**", // Swagger UI 페이지
+                        "/v3/api-docs/**", // OpenAPI 명세서
+                        "/swagger-resources/**")
                     .permitAll() // 회원가입 및 토큰 재발급은 인증 없이 허용
                     .anyRequest()
                     .authenticated() // 그 외 모든 요청은 인증 필요
