@@ -1,17 +1,16 @@
 package com.example.cp_main_be.domain.user_daily_missions.domain.service;
 
-import com.example.cp_main_be.domain.misson.domain.DailyMissionMasters;
-import com.example.cp_main_be.domain.misson.domain.repository.DailyMissionMastersRepository;
-import com.example.cp_main_be.domain.misson.dto.response.DailyMissionResponseDTO;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
+import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
 import com.example.cp_main_be.domain.user_daily_missions.domain.UserDailyMissions;
 import com.example.cp_main_be.domain.user_daily_missions.domain.repository.UserDailyMissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -22,6 +21,11 @@ public class UserDailyMissionService {
 
     public DailyMissionResponseDTO getDailyMissions(Long userId) {
         List<UserDailyMissions> dailyMissions = userDailyMissionRepository.findAllByUserId(userId);
+
+//        if(dailyMissions.isEmpty()) 미션이 할당 되지 않았다면 할당하기
+//        {
+//        }
+//
         List<DailyMissionMasters> dailyMissionMasters = dailyMissions.stream()
                 .map(mission -> dailyMissionMastersRepository.findById(mission
                         .getDailyMissionMasters()

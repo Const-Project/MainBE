@@ -1,12 +1,10 @@
-package com.example.cp_main_be.domain.misson.dto.response;
+package com.example.cp_main_be.domain.daily_mission_masters.dto.response;
 
-import com.example.cp_main_be.domain.misson.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Builder
