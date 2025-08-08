@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.user_daily_missions.domain.repository;
+package com.example.cp_main_be.domain.user_daily_missions.repository;
 
 
 import com.example.cp_main_be.domain.user_daily_missions.domain.UserDailyMissions;

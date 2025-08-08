@@ -46,7 +46,7 @@ public class DailyMissionMasters {
     private LocalDateTime createdAt;
 
 
-    public void update(AdminRequestDTO.UpdateRequestDTO requestDTO) {
+    public void update(AdminRequestDTO.UpdateMissionRequestDTO requestDTO) {
         if (requestDTO.getTitle() != null) {
             this.title = requestDTO.getTitle();
         }

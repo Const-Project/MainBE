@@ -4,7 +4,7 @@ import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
-import com.example.cp_main_be.domain.user_daily_missions.domain.service.UserDailyMissionService;
+import com.example.cp_main_be.domain.user_daily_missions.service.UserDailyMissionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

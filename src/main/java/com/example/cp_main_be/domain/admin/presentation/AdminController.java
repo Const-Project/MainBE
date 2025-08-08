@@ -14,6 +14,7 @@ package com.example.cp_main_be.domain.admin.presentation;
 //POST /admin/plants (새 식물 등록)
 //PUT /admin/plants/{id} (식물 정보 수정)
 
+import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
@@ -24,6 +25,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
@@ -33,16 +36,29 @@ public class AdminController {
 
     @PostMapping("/missions/daily")
     @Operation(summary = "일일 미션(미션마스터) 생성 API")
-    public ResponseEntity<ApiResponse<DailyMissionMasters>> createDailyMission(@RequestBody AdminRequestDTO.CreateRequestDTO requestDTO) {
+    public ResponseEntity<ApiResponse<DailyMissionMasters>> createDailyMission(@RequestBody AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
         DailyMissionMasters response = adminService.createDailyMissionMasters(requestDTO);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PutMapping("missions/daily/{id}")
     @Operation(summary = "일일 미션(미션마스터) 수정 API")
-    public ResponseEntity<ApiResponse<DailyMissionMasters>> updateDailyMission(@RequestBody AdminRequestDTO.UpdateRequestDTO requestDTO, Long id) {
+    public ResponseEntity<ApiResponse<DailyMissionMasters>> updateDailyMission(@RequestBody AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
         DailyMissionMasters response = adminService.updateDailyMissionMasters(requestDTO, id);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @PostMapping("/keywords")
+    @Operation(summary = "일일 키워드 등록 API")
+    public ResponseEntity<ApiResponse<DailyKeywords>> createKeyword(@RequestBody AdminRequestDTO.CreateKeywordRequestDTO requestDTO) {
+        DailyKeywords dailyKeywords = adminService.createDailyKeywords(requestDTO);
+        return ResponseEntity.ok(ApiResponse.success(dailyKeywords));
+    }
+
+    @GetMapping("/users")
+    @Operation(summary = "사용자 목록 조회 API")
+    public ResponseEntity<ApiResponse<List<User>>> getUsers() {
+        List<User> users = adminService.getUsers();
+        return ResponseEntity.ok(ApiResponse.success(users));
+    }
 }
