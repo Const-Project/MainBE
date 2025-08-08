@@ -27,13 +27,13 @@ public class DailyMissionMasters {
     private MissionType missionType;
 
     @Column(name = "title")
-    private String title;
+    private String title;  // 미션 타이틀
 
     @Column(name = "description")
-    private String description;
+    private String description; // 미션 내용
 
     @Column(name = "content")
-    private String content;
+    private String content;   //퀴즈 내용
 
     @Column(name = "reward_points")
     private Long rewardPoints;

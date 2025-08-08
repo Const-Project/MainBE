@@ -5,6 +5,7 @@ import com.example.cp_main_be.daily_keywords.domain.repository.DailyKeywordsRepo
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
+import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.user.service.UserService;
@@ -20,7 +21,6 @@ import java.util.List;
 @Transactional
 public class AdminService {
 
-    //wired repository를 service로 바꿔야할까?
     private final DailyMissionMastersRepository dailyMissionMastersRepository;
     private final DailyKeywordsRepository dailyKeywordsRepository;
 
@@ -59,5 +59,23 @@ public class AdminService {
     public List<User> getUsers()
     {
         return userService.findAllUsers();
+    }
+
+    public User chageUserStatus(Long userId, AdminRequestDTO.ChangeUserStatusRequestDTO requestDTO) {
+        User user = userService.findUserById(userId);
+        user.setStatus(requestDTO.getUserStatus());
+        return user;
+    }
+
+    public QuizOptions createQuizOption(AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
+        DailyMissionMasters dailyMissionMaster = dailyMissionMastersRepository.findById(requestDTO.getMissionMasterId())
+                .orElseThrow(() -> new IllegalStateException("미션 ID에 해당하는 미션이 존재하지 않습니다."));
+
+        return QuizOptions.builder()        // QuizOptions 퀴즈의 선지
+                .optionText(requestDTO.getOptionText())
+                .optionOrder(requestDTO.getOptionOrder())
+                .isCorrect(requestDTO.isCorrect())
+                .dailyMissionMasters(dailyMissionMaster)
+                .build();
     }
 }
