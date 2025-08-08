@@ -86,4 +86,12 @@ public class AdminController {
         PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
         return ResponseEntity.ok(ApiResponse.success(plantMaster));
     }
+
+    @PutMapping("/plants/{id}")
+    @Operation(summary = "식물 정보 수정 API")
+    public ResponseEntity<ApiResponse<PlantMasters>> updatePlantMasters(@PathVariable(name = "id") Long plantId, AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO)
+    {
+        PlantMasters plantMaster = adminService.updatePlantMasters(plantId,requestDTO);
+        return ResponseEntity.ok(ApiResponse.success(plantMaster));
+    }
 }
