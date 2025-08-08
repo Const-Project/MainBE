@@ -72,7 +72,7 @@ public class AdminService {
 
     public QuizOptions createQuizOption(AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
         DailyMissionMasters dailyMissionMaster = dailyMissionMastersRepository.findById(requestDTO.getMissionMasterId())
-                .orElseThrow(() -> new IllegalStateException("미션 ID에 해당하는 미션이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 미션이 존재하지 않습니다."));
 
         return QuizOptions.builder()        // QuizOptions 퀴즈의 선지
                 .optionText(requestDTO.getOptionText())
@@ -91,5 +91,12 @@ public class AdminService {
                 .build();
 
         return plantMasterRepository.save(plantMasters);
+    }
+
+    public PlantMasters updatePlantMasters(Long plantId, AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
+        PlantMasters plantMasters = plantMasterRepository.findById(plantId)
+                .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 식물이 존재하지 않습니다."));
+        plantMasters.update(requestDTO);
+        return plantMasters;
     }
 }

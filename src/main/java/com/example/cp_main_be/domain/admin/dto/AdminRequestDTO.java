@@ -88,6 +88,15 @@ public class AdminRequestDTO {
         private String description;
         @NotNull
         private String imageUrl;
+    }
 
+    @Getter
+    @Builder
+    public static class UpdatePlantMasterRequestDTO
+    {
+        private String plantName;
+        private String plantType;
+        private String description;
+        private String imageUrl;
     }
 }
