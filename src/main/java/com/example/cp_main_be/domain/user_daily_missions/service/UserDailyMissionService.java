@@ -1,10 +1,10 @@
-package com.example.cp_main_be.domain.user_daily_missions.domain.service;
+package com.example.cp_main_be.domain.user_daily_missions.service;
 
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
 import com.example.cp_main_be.domain.user_daily_missions.domain.UserDailyMissions;
-import com.example.cp_main_be.domain.user_daily_missions.domain.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.user_daily_missions.repository.UserDailyMissionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

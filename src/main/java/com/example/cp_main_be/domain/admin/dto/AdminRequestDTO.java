@@ -14,7 +14,7 @@ public class AdminRequestDTO {
 
     @Getter
     @Builder
-    public static class CreateRequestDTO {
+    public static class CreateMissionRequestDTO {
         @NotNull
         private MissionType missionType;
 
@@ -35,12 +35,19 @@ public class AdminRequestDTO {
 
     @Getter
     @Builder
-    public static class UpdateRequestDTO {
+    public static class UpdateMissionRequestDTO {
         private MissionType missionType;
         private String title;
         private String description;
         private String content;
         private Long rewardPoints;
         private Boolean isActive;
+    }
+
+    @Getter
+    @Builder
+    public static class CreateKeywordRequestDTO {
+        private String keyword;
+        private LocalDateTime keywordDate;
     }
 }
