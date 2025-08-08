@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.user_daily_missions.domain;
 
-import com.example.cp_main_be.domain.misson.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,7 +31,7 @@ public class UserDailyMissions {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "mission_master_id")
     DailyMissionMasters dailyMissionMasters;
 

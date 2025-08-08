@@ -14,24 +14,35 @@ package com.example.cp_main_be.domain.admin.presentation;
 //POST /admin/plants (새 식물 등록)
 //PUT /admin/plants/{id} (식물 정보 수정)
 
+import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
+import com.example.cp_main_be.domain.admin.service.AdminService;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
-    @PostMapping("/missions/daily")
-    @Operation(summary = "일일 미션 생성 API")
-    public ResponseEntity<ApiResponse<Void>> createDailyMission(@RequestBody ) {
+    private final AdminService adminService;
 
+    @PostMapping("/missions/daily")
+    @Operation(summary = "일일 미션(미션마스터) 생성 API")
+    public ResponseEntity<ApiResponse<DailyMissionMasters>> createDailyMission(@RequestBody AdminRequestDTO.CreateRequestDTO requestDTO) {
+        DailyMissionMasters response = adminService.createDailyMissionMasters(requestDTO);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    @PutMapping("missions/daily/{id}")
+    @Operation(summary = "일일 미션(미션마스터) 수정 API")
+    public ResponseEntity<ApiResponse<DailyMissionMasters>> updateDailyMission(@RequestBody AdminRequestDTO.UpdateRequestDTO requestDTO, Long id) {
+        DailyMissionMasters response = adminService.updateDailyMissionMasters(requestDTO, id);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
 }

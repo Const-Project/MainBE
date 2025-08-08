@@ -1,9 +1,9 @@
-package com.example.cp_main_be.domain.misson.service;
+package com.example.cp_main_be.domain.daily_mission_masters.service;
 
-import com.example.cp_main_be.domain.misson.MissionType;
-import com.example.cp_main_be.domain.misson.domain.DailyMissionMasters;
-import com.example.cp_main_be.domain.misson.domain.repository.DailyMissionMastersRepository;
-import com.example.cp_main_be.domain.misson.dto.response.DailyMissionResponseDTO;
+import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
+import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
 import com.example.cp_main_be.domain.user_daily_missions.domain.service.UserDailyMissionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.quiz.domain;
 
 
-import com.example.cp_main_be.domain.misson.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import jakarta.persistence.*;
 import lombok.*;
 

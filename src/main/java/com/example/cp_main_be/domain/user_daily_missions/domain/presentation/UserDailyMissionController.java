@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.user_daily_missions.domain.presentation;
 
-import com.example.cp_main_be.domain.misson.dto.response.DailyMissionResponseDTO;
+import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user_daily_missions.domain.service.UserDailyMissionService;
 import com.example.cp_main_be.global.util.ApiResponse;
@@ -18,7 +18,7 @@ public class UserDailyMissionController {
     private final UserDailyMissionService userDailyMissionService;
 
     @GetMapping("/daily")
-    @Operation(summary = "유저 일일 미션 목록 조회 API")
+    @Operation(summary = "유저 일일 미션 목록 조회 or 할당된 미션이 없다면 할당 API ")
     public ResponseEntity<ApiResponse<DailyMissionResponseDTO>> getDailyMissions(@AuthenticationPrincipal User user) {
         DailyMissionResponseDTO response = userDailyMissionService.getDailyMissions(user.getId());
         return ResponseEntity.ok(ApiResponse.success(response));
@@ -30,5 +30,6 @@ public class UserDailyMissionController {
         userDailyMissionService.completeDailyMission(userDailyMissionId);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
+
 
 }
