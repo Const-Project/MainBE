@@ -1,6 +1,8 @@
 package com.example.cp_main_be.domain.admin.dto;
 
 import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.user.domain.UserStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -49,5 +51,29 @@ public class AdminRequestDTO {
     public static class CreateKeywordRequestDTO {
         private String keyword;
         private LocalDateTime keywordDate;
+    }
+
+    @Getter
+    @Builder
+    public static class ChangeUserStatusRequestDTO {
+        @NotNull
+        private UserStatus userStatus;
+    }
+
+    @Getter
+    @Builder
+    public static class CreateQuizRequestDTO {
+
+        @NotNull
+        private String optionText;
+
+        @NotNull
+        private boolean isCorrect;
+
+        @NotNull
+        private int optionOrder;
+
+        @NotNull
+        private Long missionMasterId;
     }
 }

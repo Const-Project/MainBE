@@ -18,6 +18,7 @@ import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,5 +61,20 @@ public class AdminController {
     public ResponseEntity<ApiResponse<List<User>>> getUsers() {
         List<User> users = adminService.getUsers();
         return ResponseEntity.ok(ApiResponse.success(users));
+    }
+
+    @PutMapping("/users/{userId}/status")
+    @Operation(summary = "사용자 상태 변경(ban 등) API")
+    public ResponseEntity<ApiResponse<User>> changeUserStatus(@PathVariable(name = "userId") Long userId, AdminRequestDTO.ChangeUserStatusRequestDTO request)
+    {
+        User user = adminService.chageUserStatus(userId, request);
+        return ResponseEntity.ok(ApiResponse.success(user));
+    }
+
+    @PostMapping("/quiz")
+    @Operation(summary = "퀴즈 질문 등록 API")
+    public ResponseEntity<ApiResponse<QuizOptions>> createQuizOption(AdminRequestDTO.CreateQuizRequestDTO requestDTO){
+        QuizOptions quizOptions = adminService.createQuizOption(requestDTO);
+        return ResponseEntity.ok(ApiResponse.success(quizOptions));
     }
 }
