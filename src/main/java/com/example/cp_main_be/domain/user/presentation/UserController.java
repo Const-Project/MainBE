@@ -7,10 +7,12 @@ import com.example.cp_main_be.domain.user.dto.request.UserRequest;
 import com.example.cp_main_be.domain.user.dto.response.UserResponse;
 import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,5 +77,12 @@ public class UserController {
         new UserResponse(
             user.getId(), user.getUsername(), user.getUuid(), null, null); // 토큰은 응답에 포함하지 않음
     return ResponseEntity.ok(ApiResponse.success(userResponse));
+  }
+  @GetMapping("/level")
+  @Operation(summary = "점수 및 레벨 조회")
+  public ResponseEntity<ApiResponse<UserResponse.LevelStatusResponseDTO>> getLevel(@AuthenticationPrincipal User user)
+  {
+    UserResponse.LevelStatusResponseDTO levelStatusResponseDTO = userService.getLevel(user);
+    return ResponseEntity.ok(ApiResponse.success(levelStatusResponseDTO));
   }
 }

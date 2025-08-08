@@ -76,4 +76,18 @@ public class AdminRequestDTO {
         @NotNull
         private Long missionMasterId;
     }
+    @Getter
+    @Builder
+    public static class CreatePlantMasterRequestDTO
+    {
+        @NotNull
+        private String plantName;
+        @NotNull
+        private String plantType;
+        @NotNull
+        private String description;
+        @NotNull
+        private String imageUrl;
+
+    }
 }

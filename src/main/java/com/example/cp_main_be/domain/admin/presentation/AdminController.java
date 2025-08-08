@@ -18,6 +18,7 @@ import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.plant_masters.domain.PlantMasters;
 import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.global.util.ApiResponse;
@@ -72,9 +73,17 @@ public class AdminController {
     }
 
     @PostMapping("/quiz")
-    @Operation(summary = "퀴즈 질문 등록 API")
+    @Operation(summary = "퀴즈 선지 등록 API")
     public ResponseEntity<ApiResponse<QuizOptions>> createQuizOption(AdminRequestDTO.CreateQuizRequestDTO requestDTO){
         QuizOptions quizOptions = adminService.createQuizOption(requestDTO);
         return ResponseEntity.ok(ApiResponse.success(quizOptions));
+    }
+
+    @PostMapping("/plants")
+    @Operation(summary = "새 식물 등록 API")
+    public ResponseEntity<ApiResponse<PlantMasters>> createNewPlant(AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO)
+    {
+        PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
+        return ResponseEntity.ok(ApiResponse.success(plantMaster));
     }
 }

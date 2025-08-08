@@ -5,6 +5,8 @@ import com.example.cp_main_be.daily_keywords.domain.repository.DailyKeywordsRepo
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
+import com.example.cp_main_be.domain.plant_masters.domain.PlantMasters;
+import com.example.cp_main_be.domain.plant_masters.domain.repository.PlantMasterRepository;
 import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
@@ -23,6 +25,7 @@ public class AdminService {
 
     private final DailyMissionMastersRepository dailyMissionMastersRepository;
     private final DailyKeywordsRepository dailyKeywordsRepository;
+    private final PlantMasterRepository plantMasterRepository;
 
     private final UserService userService;
 
@@ -77,5 +80,16 @@ public class AdminService {
                 .isCorrect(requestDTO.isCorrect())
                 .dailyMissionMasters(dailyMissionMaster)
                 .build();
+    }
+
+    public PlantMasters createNewPlant(AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
+        PlantMasters plantMasters = PlantMasters.builder()
+                .plantName(requestDTO.getPlantName())
+                .plantType(requestDTO.getPlantType())
+                .imageUrl(requestDTO.getImageUrl())
+                .description(requestDTO.getDescription())
+                .build();
+
+        return plantMasterRepository.save(plantMasters);
     }
 }

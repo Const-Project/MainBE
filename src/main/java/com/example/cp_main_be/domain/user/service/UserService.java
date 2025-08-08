@@ -84,4 +84,13 @@ public class UserService {
   {
     return userRepository.findAll();
   }
+
+  public UserResponse.LevelStatusResponseDTO getLevel(User user) {
+
+    return UserResponse.LevelStatusResponseDTO.builder()
+            .level(user.getLevel())
+            .temperatureScore(user.getTemperatureScore())
+            .build();
+  }
+
 }
