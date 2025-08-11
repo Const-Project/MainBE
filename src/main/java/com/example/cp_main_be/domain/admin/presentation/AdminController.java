@@ -115,7 +115,7 @@ public class AdminController {
 
     @PutMapping("/reports/{reportId}")
     @Operation(summary = "신고 상태 변경 API")
-    public ResponseEntity<ApiResponse<Reports>> updateReportStatus(@PathVariable(name = "reportId") Long reportId, ReportStatus reportStatus){
+    public ResponseEntity<ApiResponse<Reports>> updateReportStatus(@PathVariable(name = "reportId") Long reportId, @RequestParam(name = "status") ReportStatus reportStatus){
         Reports result = adminService.updateReportStatus(reportId, reportStatus);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
