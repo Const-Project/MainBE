@@ -10,6 +10,7 @@ import com.example.cp_main_be.domain.plant_masters.domain.repository.PlantMaster
 import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
+import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.user.service.UserService;
@@ -106,5 +107,11 @@ public class AdminService {
     public List<Reports> getAllReports() {
         List<Reports> reports = reportRepository.findAll();
         return reports;
+    }
+
+    public Reports updateReportStatus(Long reportId, ReportStatus reportStatus) {
+        Reports report = reportRepository.findById(reportId).orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다."));
+        report.setStatus(reportStatus);
+        return report;
     }
 }

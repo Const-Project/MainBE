@@ -22,6 +22,7 @@ import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMa
 import com.example.cp_main_be.domain.plant_masters.domain.PlantMasters;
 import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
+import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.global.dto.ListResponse;
 import com.example.cp_main_be.global.util.ApiResponse;
@@ -110,5 +111,12 @@ public class AdminController {
         List<Reports> reports = adminService.getAllReports();
         ListResponse<Reports> listResponse = new ListResponse<>(reports);
         return ResponseEntity.ok(ApiResponse.success(listResponse));
+    }
+
+    @PutMapping("/reports/{reportId}")
+    @Operation(summary = "신고 상태 변경 API")
+    public ResponseEntity<ApiResponse<Reports>> updateReportStatus(@PathVariable(name = "reportId") Long reportId, ReportStatus reportStatus){
+        Reports result = adminService.updateReportStatus(reportId, reportStatus);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
