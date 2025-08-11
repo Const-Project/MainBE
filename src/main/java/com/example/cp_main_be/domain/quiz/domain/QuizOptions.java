@@ -28,7 +28,7 @@ public class QuizOptions {
     private int optionOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mission_master_id")
-    private DailyMissionMasters dailyMissionMasters;
+    @JoinColumn(name = "quiz_id")
+    private Quiz quiz;
 
 }

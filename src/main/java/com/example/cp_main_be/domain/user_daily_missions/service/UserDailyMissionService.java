@@ -22,10 +22,6 @@ public class UserDailyMissionService {
     public DailyMissionResponseDTO getDailyMissions(Long userId) {
         List<UserDailyMissions> dailyMissions = userDailyMissionRepository.findAllByUserId(userId);
 
-//        if(dailyMissions.isEmpty()) 미션이 할당 되지 않았다면 할당하기
-//        {
-//        }
-//
         List<DailyMissionMasters> dailyMissionMasters = dailyMissions.stream()
                 .map(mission -> dailyMissionMastersRepository.findById(mission
                         .getDailyMissionMasters()
