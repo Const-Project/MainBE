@@ -16,12 +16,16 @@ package com.example.cp_main_be.domain.admin.presentation;
 
 import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
+import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.plant_masters.domain.PlantMasters;
 import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
+import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.global.dto.ListResponse;
 import com.example.cp_main_be.global.util.ApiResponse;
+import com.google.protobuf.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -38,16 +42,18 @@ public class AdminController {
 
     @PostMapping("/missions/daily")
     @Operation(summary = "일일 미션(미션마스터) 생성 API")
-    public ResponseEntity<ApiResponse<DailyMissionMasters>> createDailyMission(@RequestBody AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
+    public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>> createDailyMission(@RequestBody AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
         DailyMissionMasters response = adminService.createDailyMissionMasters(requestDTO);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        AdminResponseDTO.DailyMissionMastersResDTO result = DailyMissionMasters.toDailyMissionMastersResDTO(response);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PutMapping("missions/daily/{id}")
     @Operation(summary = "일일 미션(미션마스터) 수정 API")
-    public ResponseEntity<ApiResponse<DailyMissionMasters>> updateDailyMission(@RequestBody AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
+    public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>> updateDailyMission(@RequestBody AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
         DailyMissionMasters response = adminService.updateDailyMissionMasters(requestDTO, id);
-        return ResponseEntity.ok(ApiResponse.success(response));
+        AdminResponseDTO.DailyMissionMastersResDTO result = DailyMissionMasters.toDailyMissionMastersResDTO(response);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PostMapping("/keywords")
@@ -59,9 +65,10 @@ public class AdminController {
 
     @GetMapping("/users")
     @Operation(summary = "사용자 목록 조회 API")
-    public ResponseEntity<ApiResponse<List<User>>> getUsers() {
+    public ResponseEntity<ApiResponse<ListResponse<User>>> getUsers() {
         List<User> users = adminService.getUsers();
-        return ResponseEntity.ok(ApiResponse.success(users));
+        ListResponse<User> listResponse = new ListResponse<>(users);
+        return ResponseEntity.ok(ApiResponse.success(listResponse));
     }
 
     @PutMapping("/users/{userId}/status")
@@ -81,17 +88,27 @@ public class AdminController {
 
     @PostMapping("/plants")
     @Operation(summary = "새 식물 등록 API")
-    public ResponseEntity<ApiResponse<PlantMasters>> createNewPlant(AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO)
+    public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> createNewPlant(AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO)
     {
         PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
-        return ResponseEntity.ok(ApiResponse.success(plantMaster));
+        AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PutMapping("/plants/{id}")
     @Operation(summary = "식물 정보 수정 API")
-    public ResponseEntity<ApiResponse<PlantMasters>> updatePlantMasters(@PathVariable(name = "id") Long plantId, AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO)
+    public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> updatePlantMasters(@PathVariable(name = "id") Long plantId, AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO)
     {
         PlantMasters plantMaster = adminService.updatePlantMasters(plantId,requestDTO);
-        return ResponseEntity.ok(ApiResponse.success(plantMaster));
+        AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @GetMapping("/reports")
+    @Operation(summary = "신고 목록 조회 API")
+    public ResponseEntity<ApiResponse<ListResponse<Reports>>> getAllReports() {
+        List<Reports> reports = adminService.getAllReports();
+        ListResponse<Reports> listResponse = new ListResponse<>(reports);
+        return ResponseEntity.ok(ApiResponse.success(listResponse));
     }
 }

@@ -8,6 +8,8 @@ import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.Dai
 import com.example.cp_main_be.domain.plant_masters.domain.PlantMasters;
 import com.example.cp_main_be.domain.plant_masters.domain.repository.PlantMasterRepository;
 import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
+import com.example.cp_main_be.domain.reports.domain.Reports;
+import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.user.service.UserService;
@@ -28,6 +30,7 @@ public class AdminService {
     private final PlantMasterRepository plantMasterRepository;
 
     private final UserService userService;
+    private final ReportRepository reportRepository;
 
     public DailyMissionMasters createDailyMissionMasters(AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
         DailyMissionMasters dailyMissionMasters = DailyMissionMasters.builder()
@@ -98,5 +101,10 @@ public class AdminService {
                 .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 식물이 존재하지 않습니다."));
         plantMasters.update(requestDTO);
         return plantMasters;
+    }
+
+    public List<Reports> getAllReports() {
+        List<Reports> reports = reportRepository.findAll();
+        return reports;
     }
 }

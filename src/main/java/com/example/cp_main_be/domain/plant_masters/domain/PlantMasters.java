@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.plant_masters.domain;
 
 
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
+import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -58,4 +59,16 @@ public class PlantMasters {
         }
     }
 
+    public static AdminResponseDTO.PlantMasterResDTO toPlantMasterResDTO(PlantMasters plantMasters) {
+        return AdminResponseDTO.PlantMasterResDTO.builder()
+                .id(plantMasters.getId())
+                .plantName(plantMasters.getPlantName())
+                .plantType(plantMasters.getPlantType())
+                .description(plantMasters.getDescription())
+                .imageUrl(plantMasters.getImageUrl())
+                .growthStages(plantMasters.getGrowthStages())
+                .unlockLevel(plantMasters.getUnlockLevel())
+                .createdAt(plantMasters.getCreatedAt())
+                .build();
+    }
 }

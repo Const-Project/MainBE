@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.daily_mission_masters.domain;
 
 
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
+import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -65,5 +66,17 @@ public class DailyMissionMasters {
         if(this.isActive != null) {
             this.isActive = requestDTO.getIsActive();
         }
+    }
+
+    public static AdminResponseDTO.DailyMissionMastersResDTO toDailyMissionMastersResDTO(DailyMissionMasters dailyMissionMasters) {
+        return AdminResponseDTO.DailyMissionMastersResDTO.builder()
+                .id(dailyMissionMasters.getId())
+                .missionType(dailyMissionMasters.getMissionType())
+                .title(dailyMissionMasters.getTitle())
+                .description(dailyMissionMasters.getDescription())
+                .content(dailyMissionMasters.getContent())
+                .rewardPoints(dailyMissionMasters.getRewardPoints())
+                .createdAt(dailyMissionMasters.getCreatedAt())
+                .build();
     }
 }
