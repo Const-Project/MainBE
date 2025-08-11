@@ -1,0 +1,46 @@
+package com.example.cp_main_be.domain.admin.dto;
+
+import com.example.cp_main_be.domain.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.user.domain.UserStatus;
+import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+public class AdminResponseDTO {
+    @Getter
+    @Builder
+    public static class DailyMissionMastersResDTO {
+        private Long id;
+        private MissionType missionType;
+        private String title;  // 미션 타이틀
+        private String description; // 미션 내용
+        private String content;   //퀴즈 내용
+        private Long rewardPoints;
+        private LocalDateTime createdAt;
+    }
+
+
+    @Getter
+    @Builder
+    public static class PlantMasterResDTO {
+        private Long id;
+        private String plantType;
+        private String plantName;
+        private String description;
+        private String imageUrl;
+        private int growthStages;
+        private int unlockLevel;
+        private LocalDateTime createdAt;
+    }
+
+}
