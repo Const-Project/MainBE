@@ -1,6 +1,8 @@
 package com.example.cp_main_be.domain.user_daily_missions.presentation;
 
 import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
+import com.example.cp_main_be.domain.quiz.dto.QuizResponseDTO;
+import com.example.cp_main_be.domain.quiz.service.QuizService;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.dto.response.UserResponse;
 import com.example.cp_main_be.domain.user_daily_missions.service.UserDailyMissionService;
@@ -18,13 +20,16 @@ import org.springframework.web.bind.annotation.*;
 public class UserDailyMissionController {
 
     private final UserDailyMissionService userDailyMissionService;
+    private final QuizService quizService;
 
     @GetMapping("/daily")
-    @Operation(summary = "유저 일일 미션 목록 조회 or 할당된 미션이 없다면 할당 API ")
+    @Operation(summary = "유저 일일 미션 목록 조회")
     public ResponseEntity<ApiResponse<DailyMissionResponseDTO>> getDailyMissions(@AuthenticationPrincipal User user) {
         DailyMissionResponseDTO response = userDailyMissionService.getDailyMissions(user.getId());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
+
+    //미션 할당 API도 필요하다 .
 
     @PostMapping("/daily/{userDailyMissionId}/complete")
     @Operation(summary = "미션 완료 처리 API")
@@ -33,5 +38,11 @@ public class UserDailyMissionController {
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @GetMapping("/quiz/{userDailyMissionId}")
+    @Operation(summary = "퀴즈 문제 조회 API")
+    public ResponseEntity<ApiResponse<QuizResponseDTO>> getQuiz(@PathVariable(name = "userDailyMissionId") Long userDailyMissionId){
 
+        QuizResponseDTO result = quizService.getQuiz(userDailyMissionId);
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
 }

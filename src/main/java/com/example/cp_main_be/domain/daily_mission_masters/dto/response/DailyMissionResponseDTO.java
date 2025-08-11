@@ -38,4 +38,5 @@ public class DailyMissionResponseDTO {
                 .todayMissions(dailyMissionResponseDTOS)
                 .build();
     }
+
 }
