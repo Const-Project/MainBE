@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.cp_main_be.domain.image.service.ImageProcessingService;
 import com.example.cp_main_be.global.config.WebClientConfig;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
-import com.example.cp_main_be.global.util.ApiResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,8 +48,7 @@ class ImageControllerTest {
     MockMultipartFile mockImageFile =
         new MockMultipartFile("image", "test-image.png", MediaType.IMAGE_PNG_VALUE, fakeImageData);
 
-    given(imageProcessingService.processImageWithAi(any()))
-        .willReturn(ApiResponse.success(fakeImageData));
+    given(imageProcessingService.processImageWithAi(any())).willReturn(fakeImageData);
 
     // when & then (Authorization 헤더 불필요)
     mockMvc
@@ -68,8 +66,7 @@ class ImageControllerTest {
     // given
     MockMultipartFile mockImageFile = new MockMultipartFile("image", new byte[0]);
 
-    given(imageProcessingService.processImageWithAi(any()))
-        .willReturn(ApiResponse.failure("AI_ERROR", "AI 서버 처리 중 오류 발생"));
+    given(imageProcessingService.processImageWithAi(any())).willReturn(new byte[] {});
 
     // when & then
     mockMvc
