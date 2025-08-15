@@ -75,4 +75,20 @@ class GardenServiceTest {
     // then
     assertThat(garden.getWaterCount()).isEqualTo(1);
   }
+
+  @DisplayName("텃밭 햇빛 주기 성공")
+  @Test
+  void sunlightGarden_Success() {
+    // given
+    Long gardenId = 1L;
+    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
+    Garden garden = Garden.builder().user(user).slotNumber(1).build();
+    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
+
+    // when
+    gardenService.sunlightGarden(gardenId);
+
+    // then
+    assertThat(garden.getSunlightCount()).isEqualTo(1);
+  }
 }

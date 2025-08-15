@@ -1,9 +1,8 @@
 package com.example.cp_main_be.domain.keyword.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Getter

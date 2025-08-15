@@ -4,13 +4,12 @@ import com.example.cp_main_be.domain.keyword.dto.response.KeywordResponse;
 import com.example.cp_main_be.domain.keyword.dto.response.TodayKeywordResponse;
 import com.example.cp_main_be.domain.keyword.service.KeywordService;
 import com.example.cp_main_be.global.util.ApiResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

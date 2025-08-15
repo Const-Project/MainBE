@@ -4,11 +4,10 @@ import com.example.cp_main_be.domain.keyword.domain.repository.KeywordRepository
 import com.example.cp_main_be.domain.keyword.dto.response.KeywordResponse;
 import com.example.cp_main_be.domain.keyword.dto.response.TodayKeywordResponse;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
