@@ -32,4 +32,14 @@ public class GardenService {
 
     garden.increaseWaterCount();
   }
+
+  @Transactional
+  public void sunlightGarden(Long gardenId) {
+    Garden garden =
+        gardenRepository
+            .findById(gardenId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
+
+    garden.increaseSunlightCount();
+  }
 }

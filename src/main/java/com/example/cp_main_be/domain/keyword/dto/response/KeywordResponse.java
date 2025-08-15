@@ -1,9 +1,8 @@
 package com.example.cp_main_be.domain.keyword.dto.response;
 
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Getter
 @RequiredArgsConstructor

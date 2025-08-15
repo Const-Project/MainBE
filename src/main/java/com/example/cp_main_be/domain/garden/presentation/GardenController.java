@@ -34,4 +34,10 @@ public class GardenController {
     gardenService.waterGarden(gardenId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
+
+  @PutMapping({"/{gardenId}/sunlight"})
+  public ResponseEntity<ApiResponse<Void>> sunlightGarden(@PathVariable Long gardenId) {
+    gardenService.sunlightGarden(gardenId);
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
 }
