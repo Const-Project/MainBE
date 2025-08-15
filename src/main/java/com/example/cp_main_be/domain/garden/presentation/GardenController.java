@@ -5,10 +5,7 @@ import com.example.cp_main_be.domain.garden.service.GardenService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,5 +18,20 @@ public class GardenController {
   public ResponseEntity<ApiResponse<GardenResponse>> getGarden(@PathVariable Long gardenId) {
     GardenResponse gardenResponse = gardenService.findGardenById(gardenId);
     return ResponseEntity.ok(ApiResponse.success(gardenResponse));
+  }
+
+  //  @GetMapping("/background/{backgroundId}")
+  //  public ResponseEntity<ApiResponse<BackgroundResponse>> getBackground(
+  //          @PathVariable Long backgroundId) {
+  //
+  //    BackgroundResponse backgroundResponse = gardenService.getBackgroundById(backgroundId);
+  //
+  //    return ResponseEntity.ok(ApiResponse.success(backgroundResponse));
+  //  }
+
+  @PutMapping("/{gardenId}/water")
+  public ResponseEntity<ApiResponse<Void>> waterGarden(@PathVariable Long gardenId) {
+    gardenService.waterGarden(gardenId);
+    return ResponseEntity.ok(ApiResponse.success(null));
   }
 }

@@ -1,21 +1,22 @@
 package com.example.cp_main_be.domain.garden.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.given;
-
 import com.example.cp_main_be.domain.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.garden.dto.GardenResponse;
 import com.example.cp_main_be.domain.user.domain.User;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class GardenServiceTest {
@@ -56,5 +57,22 @@ class GardenServiceTest {
         () -> {
           gardenService.findGardenById(gardenId);
         });
+  }
+
+  @DisplayName("텃밭 물주기 성공")
+  @Test
+  void waterGarden_Success() {
+    // given
+    Long gardenId = 1L;
+    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
+    Garden garden = Garden.builder().user(user).slotNumber(1).build();
+
+    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
+
+    // when
+    gardenService.waterGarden(gardenId);
+
+    // then
+    assertThat(garden.getWaterCount()).isEqualTo(1);
   }
 }

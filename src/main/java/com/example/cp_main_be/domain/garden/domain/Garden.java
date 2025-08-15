@@ -48,4 +48,12 @@ public class Garden {
     this.waterCount = 0;
     this.sunlightCount = 0;
   }
+
+  public void increaseWaterCount() {
+    this.waterCount++;
+  }
+
+  public void increaseSunlightCount() {
+    this.sunlightCount++;
+  }
 }
