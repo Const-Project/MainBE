@@ -22,4 +22,14 @@ public class GardenService {
 
     return GardenResponse.from(garden);
   }
+
+  @Transactional
+  public void waterGarden(Long gardenId) {
+    Garden garden =
+        gardenRepository
+            .findById(gardenId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
+
+    garden.increaseWaterCount();
+  }
 }
