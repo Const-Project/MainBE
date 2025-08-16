@@ -34,7 +34,7 @@ public class AvatarPostService {
     // 아직 이미지는 구현 x
     return PostInfoResponse.builder()
         .imageUrl(null)
-        .likes(postById.getLikes().size())
+        .likes(postById.getLikeCount())
         .comments(postById.getComments())
         .isBookmarked(isBookmarked)
         .build();

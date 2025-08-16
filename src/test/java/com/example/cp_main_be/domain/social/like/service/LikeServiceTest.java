@@ -167,10 +167,11 @@ class LikeServiceTest {
     given(diaryRepository.findById(targetId)).willReturn(Optional.of(diary));
 
     // when
-    likeService.addLike(userId, targetId, targetType);
+    int likeCount = likeService.addLike(userId, targetId, targetType);
 
     // then
-    assertThat(diary.getLikes()).hasSize(1);
+    assertThat(likeCount).isEqualTo(1);
+    then(diaryRepository).should().findById(targetId);
     then(likeRepository).should().save(any(Like.class));
     then(notificationService)
         .should()
@@ -196,10 +197,11 @@ class LikeServiceTest {
     given(avatarPostRepository.findById(targetId)).willReturn(Optional.of(avatarPost));
 
     // when
-    likeService.addLike(userId, targetId, targetType);
+    int likeCount = likeService.addLike(userId, targetId, targetType);
 
     // then
-    assertThat(avatarPost.getLikes()).hasSize(1);
+    assertThat(likeCount).isEqualTo(1);
+    then(avatarPostRepository).should().findById(targetId);
     then(likeRepository).should().save(any(Like.class));
     then(notificationService)
         .should()
@@ -219,8 +221,7 @@ class LikeServiceTest {
     String targetType = "diary"; // 현재 구현은 소문자를 사용
     Like like =
         Like.builder().id(100L).user(user).targetId(targetId).targetType(targetType).build();
-    Diary diary = Diary.builder().id(targetId).user(receiver).build();
-    diary.increaseLike(like); // 테스트를 위해 미리 '좋아요'가 있는 상태로 만듦
+    Diary diary = Diary.builder().id(targetId).user(receiver).likeCount(1).build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     given(likeRepository.findByUserAndTargetIdAndTargetType(user, targetId, targetType))
@@ -228,10 +229,10 @@ class LikeServiceTest {
     given(diaryRepository.findById(targetId)).willReturn(Optional.of(diary));
 
     // when
-    likeService.removeLike(userId, targetId, targetType);
+    int likeCount = likeService.removeLike(userId, targetId, targetType);
 
     // then
-    assertThat(diary.getLikes()).isEmpty();
+    assertThat(likeCount).isZero();
     then(likeRepository).should().delete(like);
   }
 
@@ -248,8 +249,7 @@ class LikeServiceTest {
     String targetType = "avatar_post"; // 현재 구현은 소문자를 사용
     Like like =
         Like.builder().id(100L).user(user).targetId(targetId).targetType(targetType).build();
-    AvatarPost avatarPost = AvatarPost.builder().id(targetId).user(receiver).build();
-    avatarPost.increaseLike(like); // 테스트를 위해 미리 '좋아요'가 있는 상태로 만듦
+    AvatarPost avatarPost = AvatarPost.builder().id(targetId).user(receiver).likeCount(1).build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     given(likeRepository.findByUserAndTargetIdAndTargetType(user, targetId, targetType))
@@ -257,10 +257,10 @@ class LikeServiceTest {
     given(avatarPostRepository.findById(targetId)).willReturn(Optional.of(avatarPost));
 
     // when
-    likeService.removeLike(userId, targetId, targetType);
+    int likeCount = likeService.removeLike(userId, targetId, targetType);
 
     // then
-    assertThat(avatarPost.getLikes()).isEmpty();
+    assertThat(likeCount).isZero();
     then(likeRepository).should().delete(like);
   }
 }

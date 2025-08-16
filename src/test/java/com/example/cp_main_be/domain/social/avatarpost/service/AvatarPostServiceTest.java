@@ -2,7 +2,7 @@ package com.example.cp_main_be.domain.social.avatarpost.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
@@ -42,7 +42,7 @@ class AvatarPostServiceTest {
         AvatarPost.builder()
             .id(postId)
             .caption("포스트 내용")
-            .likes(Collections.emptyList()) // 좋아요 목록 (size() 호출 대비)
+            .likeCount(0) // 좋아요 목록 (size() 호출 대비)
             .comments(Collections.emptyList()) // 댓글 목록 (comments 호출 대비)
             .build();
 
@@ -79,7 +79,7 @@ class AvatarPostServiceTest {
         AvatarPost.builder()
             .id(postId)
             .caption("다른 내용")
-            .likes(Collections.emptyList())
+            .likeCount(0)
             .comments(Collections.emptyList())
             .build();
 
