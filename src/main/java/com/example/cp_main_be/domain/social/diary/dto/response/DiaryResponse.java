@@ -53,7 +53,7 @@ public class DiaryResponse {
           .content(diary.getContent())
           .keyword(diary.getKeyword())
           .comment(diary.getComment())
-          .likeCount((long) diary.getLikes().size())
+          .likeCount((long) diary.getLikeCount())
           .createdAt(diary.getCreatedAt())
           .updatedAt(diary.getUpdatedAt())
           .build();
@@ -66,7 +66,7 @@ public class DiaryResponse {
           .keyword(diary.getKeyword())
           .imageUrl(diary.getDiaryImage().getImageUrl())
           .comment(diary.getComment())
-          .likeCount((long) diary.getLikes().size())
+          .likeCount((long) diary.getLikeCount())
           .createdAt(diary.getCreatedAt())
           .updatedAt(diary.getUpdatedAt())
           .build();

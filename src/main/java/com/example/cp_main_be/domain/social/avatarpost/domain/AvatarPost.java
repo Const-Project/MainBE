@@ -1,11 +1,9 @@
 package com.example.cp_main_be.domain.social.avatarpost.domain;
 
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
-import com.example.cp_main_be.domain.social.like.domain.Like;
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
 
@@ -29,9 +27,8 @@ public class AvatarPost {
   @Column(name = "caption")
   private String caption;
 
-  @OneToMany(mappedBy = "avatarPost", cascade = CascadeType.ALL)
-  @Builder.Default
-  private List<Like> likes = new ArrayList<>();
+  @Column(name = "like_count")
+  private int likeCount = 0;
 
   @OneToMany(mappedBy = "avatarPost", cascade = CascadeType.ALL)
   private List<Comment> comments;
@@ -44,11 +41,11 @@ public class AvatarPost {
     this.createdAt = LocalDateTime.now();
   }
 
-  public void increaseLike(Like like) {
-    this.likes.add(like);
+  public void increaseLikeCount() {
+    this.likeCount++;
   }
 
-  public void decreaseLike(Like like) {
-    this.likes.remove(like);
+  public void decreaseLikeCount() {
+    this.likeCount = Math.max(0, this.likeCount - 1);
   }
 }

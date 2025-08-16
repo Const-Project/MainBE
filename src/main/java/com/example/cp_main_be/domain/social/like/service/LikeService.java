@@ -62,27 +62,27 @@ public class LikeService {
           diaryRepository
               .findById(targetId)
               .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
-      diary.increaseLike(like);
+      diary.increaseLikeCount();
 
       User receiver = diary.getUser();
       if (!receiver.getId().equals(userId)) {
         notificationService.send(
             receiver, user, NotificationType.DIARY_LIKE, "/diaries/" + targetId);
       }
-      return diary.getLikes().size();
+      return diary.getLikeCount();
     } else if ("AVATAR_POST".equalsIgnoreCase(targetType)) {
       AvatarPost avatarPost =
           avatarPostRepository
               .findById(targetId)
               .orElseThrow(() -> new IllegalArgumentException("포스트를 찾을 수 없습니다."));
-      avatarPost.increaseLike(like);
+      avatarPost.increaseLikeCount();
 
       User receiver = avatarPost.getUser();
       if (!receiver.getId().equals(userId)) {
         notificationService.send(
             receiver, user, NotificationType.AVATAR_POST_LIKE, "/avatar-posts/" + targetId);
       }
-      return avatarPost.getLikes().size();
+      return avatarPost.getLikeCount();
     }
     return 0;
   }
@@ -105,16 +105,16 @@ public class LikeService {
               .findById(targetId)
               .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
 
-      diary.decreaseLike(like);
-      return diary.getLikes().size();
+      diary.decreaseLikeCount();
+      return diary.getLikeCount();
     } else if ("avatar_post".equalsIgnoreCase(targetType)) {
       AvatarPost avatarPost =
           avatarPostRepository
               .findById(targetId)
               .orElseThrow(() -> new IllegalArgumentException("포스트를 찾을 수 없습니다."));
 
-      avatarPost.decreaseLike(like);
-      return avatarPost.getLikes().size();
+      avatarPost.decreaseLikeCount();
+      return avatarPost.getLikeCount();
     }
     return 0;
   }
