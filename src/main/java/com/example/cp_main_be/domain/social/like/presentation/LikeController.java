@@ -39,7 +39,8 @@ public class LikeController {
   }
 
   @DeleteMapping("/avatar-posts/{postId}/likes")
-  public ResponseEntity<ApiResponse<LikeCountResponse>> unlikeAvatarPost(@PathVariable Long postId) {
+  public ResponseEntity<ApiResponse<LikeCountResponse>> unlikeAvatarPost(
+      @PathVariable Long postId) {
     User user = userService.getCurrentUser();
     int likeCount = likeService.removeLike(user.getId(), postId, "AVATAR_POST");
     return ResponseEntity.ok(ApiResponse.success(new LikeCountResponse(likeCount)));

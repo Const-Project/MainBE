@@ -10,7 +10,7 @@ import lombok.Getter;
 public class PostInfoResponse {
 
   private String imageUrl;
-  private int likes;
+  private int likeCount;
   private List<Comment> comments;
   private boolean isBookmarked;
 }

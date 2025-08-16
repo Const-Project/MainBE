@@ -60,7 +60,7 @@ class AvatarPostServiceTest {
     // Then
     assertThat(result).isNotNull();
     assertThat(result.isBookmarked()).isTrue(); // 북마크됨을 검증
-    assertThat(result.getLikes()).isEqualTo(0); // 좋아요 수 검증 (Collections.emptyList().size())
+    assertThat(result.getLikeCount()).isEqualTo(0); // 좋아요 수 검증 (Collections.emptyList().size())
     assertThat(result.getComments()).isEmpty(); // 댓글 목록 검증
 
     // verify: 각 리포지토리 메서드가 올바른 인자로 호출되었는지 확인
@@ -95,7 +95,7 @@ class AvatarPostServiceTest {
     // Then
     assertThat(result).isNotNull();
     assertThat(result.isBookmarked()).isFalse(); // 북마크되지 않음을 검증
-    assertThat(result.getLikes()).isEqualTo(0);
+    assertThat(result.getLikeCount()).isEqualTo(0);
     assertThat(result.getComments()).isEmpty();
 
     // verify: 각 리포지토리 메서드가 올바른 인자로 호출되었는지 확인
