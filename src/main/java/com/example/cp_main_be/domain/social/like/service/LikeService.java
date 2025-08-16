@@ -29,7 +29,7 @@ public class LikeService {
   private final AvatarPostRepository avatarPostRepository;
   private final NotificationService notificationService;
 
-  public void addLike(Long userId, Long targetId, String targetType) {
+  public int addLike(Long userId, Long targetId, String targetType) {
     User user =
         userRepository
             .findById(userId)
@@ -54,6 +54,9 @@ public class LikeService {
       if (!receiver.getId().equals(userId)) {
         notificationService.send(receiver, user, NotificationType.FEED_LIKE, "/feeds/" + targetId);
       }
+
+      // 일단 보류
+      return 0;
     } else if ("DIARY".equalsIgnoreCase(targetType)) {
       Diary diary =
           diaryRepository
@@ -66,6 +69,7 @@ public class LikeService {
         notificationService.send(
             receiver, user, NotificationType.DIARY_LIKE, "/diaries/" + targetId);
       }
+      return diary.getLikes().size();
     } else if ("AVATAR_POST".equalsIgnoreCase(targetType)) {
       AvatarPost avatarPost =
           avatarPostRepository
@@ -78,10 +82,12 @@ public class LikeService {
         notificationService.send(
             receiver, user, NotificationType.AVATAR_POST_LIKE, "/avatar-posts/" + targetId);
       }
+      return avatarPost.getLikes().size();
     }
+    return 0;
   }
 
-  public void removeLike(Long userId, Long targetId, String targetType) {
+  public int removeLike(Long userId, Long targetId, String targetType) {
     User user =
         userRepository
             .findById(userId)
@@ -100,6 +106,7 @@ public class LikeService {
               .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
 
       diary.decreaseLike(like);
+      return diary.getLikes().size();
     } else if ("avatar_post".equalsIgnoreCase(targetType)) {
       AvatarPost avatarPost =
           avatarPostRepository
@@ -107,6 +114,8 @@ public class LikeService {
               .orElseThrow(() -> new IllegalArgumentException("포스트를 찾을 수 없습니다."));
 
       avatarPost.decreaseLike(like);
+      return avatarPost.getLikes().size();
     }
+    return 0;
   }
 }
