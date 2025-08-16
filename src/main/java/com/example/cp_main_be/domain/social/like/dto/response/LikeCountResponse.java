@@ -7,5 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class LikeCountResponse {
 
-    private int likeCount;
+  private int likeCount;
 }
