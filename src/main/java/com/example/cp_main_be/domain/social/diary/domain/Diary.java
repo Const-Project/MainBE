@@ -2,9 +2,12 @@ package com.example.cp_main_be.domain.social.diary.domain;
 
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
+import com.example.cp_main_be.domain.social.like.domain.Like;
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
 
 @Entity
@@ -42,8 +45,13 @@ public class Diary {
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
 
-  @Column(name = "like_count")
-  private Long likeCount = 0L;
+  //  @Column(name = "like_count")
+  //  private Long likeCount = 0L;
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @JoinColumn(name = "diary_id")
+  @Builder.Default
+  private List<Like> likes = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "comment_id")
@@ -57,9 +65,6 @@ public class Diary {
   protected void onCreate() {
     this.createdAt = LocalDateTime.now();
     this.updatedAt = LocalDateTime.now();
-    if (this.likeCount == null) {
-      this.likeCount = 0L;
-    }
   }
 
   @PreUpdate
@@ -76,5 +81,13 @@ public class Diary {
 
   public void updateImage(DiaryImage diaryImage) {
     this.diaryImage = diaryImage;
+  }
+
+  public void increaseLike(Like like) {
+    this.likes.add(like);
+  }
+
+  public void decreaseLike(Like like) {
+    this.likes.remove(like);
   }
 }
