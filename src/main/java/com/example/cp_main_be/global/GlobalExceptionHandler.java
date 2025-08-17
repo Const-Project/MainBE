@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<ApiResponse<Object>> handleUserNotFoundException(UserNotFoundException e) {
@@ -31,7 +32,6 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(CustomApiException.class)
   public ResponseEntity<ErrorResponse> handleCustomApiException(CustomApiException e) {
-    Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
     logger.warn("CustomApiException: {}", e.getMessage());
     ErrorCode errorCode = e.getErrorCode();
     return ResponseEntity.status(errorCode.getStatus())

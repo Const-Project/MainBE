@@ -19,7 +19,7 @@ public class AvatarController {
 
   private final AvatarService avatarService;
 
-  @Operation(summary = "아바타 등록", description = "아바타를 등록합니다")
+  @Operation(summary = "아바타 선택 목록 조회", description = "선택 가능한 아바타 목록을 반환합니다")
   @GetMapping("/register/avatars")
   public ResponseEntity<AvatarResponse> selectableAvatars() {
     AvatarResponse avatarResponse = new AvatarResponse(avatarService.getAllAvatar());

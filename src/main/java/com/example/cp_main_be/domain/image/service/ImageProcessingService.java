@@ -2,10 +2,9 @@ package com.example.cp_main_be.domain.image.service;
 
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -25,8 +24,6 @@ public class ImageProcessingService {
 
   @Value("${fastapi.server.url}")
   private String fastapiServerUrl;
-
-  private final Logger logger = LoggerFactory.getLogger(ImageProcessingService.class);
 
   /**
    * 이미지를 AI 서버로 보내 아바타를 생성합니다.
@@ -60,7 +57,7 @@ public class ImageProcessingService {
                             return Mono.error(new CustomApiException(ErrorCode.AI_AVATAR_FAILED));
                           }))
           .bodyToMono(byte[].class) // 정상 응답(2xx)의 경우, 본문을 byte[]로 변환
-          .block(); // 비동기 스트림의 결과를 동기적으로 기다려서 받음
+          .block(Duration.ofSeconds(30)); // 30초 타임아웃 설정 // 비동기 스트림의 결과를 동기적으로 기다려서 받음
 
     } catch (WebClientException e) {
       // 네트워크 연결 실패 등 WebClient 자체의 예외 처리
