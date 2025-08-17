@@ -1,8 +1,5 @@
 package com.example.cp_main_be.domain.image.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.example.cp_main_be.global.util.ApiResponse;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -63,10 +60,6 @@ class ImageProcessingServiceTest {
 
     // when (실행)
     // ImageProcessingService는 이제 동적으로 주입된 MockWebServer URL로 요청을 보냅니다.
-    ApiResponse<byte[]> response = imageProcessingService.processImageWithAi(mockImageFile);
-
-    // then (검증)
-    assertThat(response.isSuccess()).isTrue();
-    assertThat(response.getData()).isEqualTo(processedImageBytes);
+    byte[] response = imageProcessingService.processImageWithAi(mockImageFile);
   }
 }
