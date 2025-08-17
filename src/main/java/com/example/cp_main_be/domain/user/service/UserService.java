@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.user.service;
 
+import com.example.cp_main_be.domain.garden.domain.Garden;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.user.dto.request.UserRequest;
@@ -10,6 +11,7 @@ import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,9 @@ public class UserService {
             .username(userRequest.getUsername())
             .profileImageUrl(userRequest.getAvatarUrl())
             .build();
+    // 최초 텃밭 생성 및 할당
+    Garden firstGarden = Garden.builder().user(user).slotNumber(1).build();
+    user.addGarden(firstGarden);
 
     userRepository.save(user);
 
@@ -43,8 +48,7 @@ public class UserService {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-    user.setProfileImageUrl(newAvatarUrl);
-    userRepository.save(user);
+    user.updateProfile(null, newAvatarUrl);
   }
 
   public void updateNickname(Long userId, String newNickname) {
@@ -52,8 +56,7 @@ public class UserService {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-    user.setUsername(newNickname);
-    userRepository.save(user);
+    user.updateProfile(newNickname, null);
   }
 
   public void saveUser(User user) {
@@ -89,8 +92,18 @@ public class UserService {
 
     return UserResponse.LevelStatusResponseDTO.builder()
             .level(user.getLevel())
-            .temperatureScore(user.getTemperatureScore())
+            .experience(user.getExperience())
             .build();
+  }
+
+  // 현재 로그인한 유저 가져옴
+  public User getCurrentUser() {
+    String uuidString =
+            (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    UUID userUuid = UUID.fromString(uuidString);
+    return userRepository
+            .findByUuid(userUuid)
+            .orElseThrow(() -> new IllegalArgumentException("현재 로그인한 사용자를 찾을 수 없습니다."));
   }
 
 }

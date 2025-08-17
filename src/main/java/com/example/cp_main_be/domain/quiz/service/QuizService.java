@@ -28,11 +28,12 @@ public class QuizService {
     private final QuizOptionsRepository quizOptionsRepository;
 
     public QuizResponseDTO getQuiz(Long userDailyMissionId) {
+
+
         UserDailyMissions userDailyMissions = userDailyMissionRepository.findById(userDailyMissionId)
                 .orElseThrow(() -> new RuntimeException("해당 ID를 갖는 미션이 존재하지 않습니다."));
-        Long missionMasterID = userDailyMissions.getDailyMissionMasters().getId();
-        DailyMissionMasters dailyMissionMasters = dailyMissionMastersRepository.findById(missionMasterID)
-                .orElseThrow(() -> new RuntimeException("해당 ID를 갖는 미션이 존재하지 않습니다."));
+
+        DailyMissionMasters dailyMissionMasters = userDailyMissions.getDailyMissionMasters();
 
         Quiz quiz = quizRepository.findByDailyMissionMasters_Id(dailyMissionMasters.getId())
                 .orElseThrow(() -> new RuntimeException("퀴즈가 존재하지 않습니다."));
