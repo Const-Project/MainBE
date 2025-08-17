@@ -20,7 +20,7 @@ public class UserResponse {
   @Builder
   public static class LevelStatusResponseDTO {
     // GET /level 의 Response
-    private Long level ; // 레벨
-    private Integer temperatureScore; // 온도 점수
+    private Integer level ; // 레벨
+    private Integer experience; // 경험
   }
 }

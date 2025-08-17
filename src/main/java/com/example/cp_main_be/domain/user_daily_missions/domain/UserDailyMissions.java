@@ -1,10 +1,12 @@
 package com.example.cp_main_be.domain.user_daily_missions.domain;
 
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.image.DailyMissionImage;
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,4 +40,8 @@ public class UserDailyMissions {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
+
+    @OneToOne
+    @JoinColumn(name = "image_id")
+    private DailyMissionImage dailyMissionImage;
 }

@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/mission")
@@ -44,5 +45,12 @@ public class UserDailyMissionController {
 
         QuizResponseDTO result = quizService.getQuiz(userDailyMissionId);
         return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @PostMapping("/photo/{userDailyMissionId}/upload")
+    @Operation(summary = "사진 미션 업로드")
+    public ResponseEntity<ApiResponse<String>> uploadPictureForMission(@RequestParam MultipartFile file, @PathVariable(name = "userDailyMissionId") Long userDailyMissionId){
+        String imageUrl = userDailyMissionService.uploadPictureForDailyMission(userDailyMissionId, file);
+        return ResponseEntity.ok(ApiResponse.success(imageUrl));
     }
 }
