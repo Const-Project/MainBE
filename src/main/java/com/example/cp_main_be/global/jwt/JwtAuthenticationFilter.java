@@ -2,9 +2,11 @@ package com.example.cp_main_be.global.jwt;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     String bearerToken = request.getHeader("Authorization");
     if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
       return bearerToken.substring(7);
+    }
+    // 쿠키에서 토큰 찾기
+    if (request.getCookies() != null) {
+      return Arrays.stream(request.getCookies())
+          .filter(cookie -> "accessToken".equals(cookie.getName()))
+          .map(Cookie::getValue)
+          .findFirst()
+          .orElse(null);
     }
     return null;
   }
