@@ -82,7 +82,6 @@ public class AdminService {
                 .optionText(requestDTO.getOptionText())
                 .optionOrder(requestDTO.getOptionOrder())
                 .isCorrect(requestDTO.isCorrect())
-                .dailyMissionMasters(dailyMissionMaster)
                 .build();
     }
 
