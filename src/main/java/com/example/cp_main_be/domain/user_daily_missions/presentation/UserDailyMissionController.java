@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.user_daily_missions.presentation;
 
 import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
+import com.example.cp_main_be.domain.quiz.dto.QuizRequestDTO;
 import com.example.cp_main_be.domain.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.quiz.service.QuizService;
 import com.example.cp_main_be.domain.user.domain.User;
@@ -48,9 +49,16 @@ public class UserDailyMissionController {
     }
 
     @PostMapping("/photo/{userDailyMissionId}/upload")
-    @Operation(summary = "사진 미션 업로드")
+    @Operation(summary = "미션 사진 업로드 API")
     public ResponseEntity<ApiResponse<String>> uploadPictureForMission(@RequestParam MultipartFile file, @PathVariable(name = "userDailyMissionId") Long userDailyMissionId){
         String imageUrl = userDailyMissionService.uploadPictureForDailyMission(userDailyMissionId, file);
         return ResponseEntity.ok(ApiResponse.success(imageUrl));
+    }
+
+    @PostMapping("/quiz/{userDailyMissionId}/answer")
+    @Operation(summary = "퀴즈 답변 제출 API")
+    public ResponseEntity<ApiResponse<Boolean>> answerQuiz(@PathVariable(name = "userDailyMissionId") Long userDailyMissionId, @RequestBody QuizRequestDTO request){
+        Boolean result = userDailyMissionService.summitAnswer(request, userDailyMissionId);
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
