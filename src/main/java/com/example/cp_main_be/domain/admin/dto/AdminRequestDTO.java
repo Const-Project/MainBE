@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 public class AdminRequestDTO {
 
     @Getter
+    @Setter
     @Builder
     public static class CreateMissionRequestDTO {
         @NotNull
@@ -36,6 +38,7 @@ public class AdminRequestDTO {
     }
 
     @Getter
+    @Setter
     @Builder
     public static class UpdateMissionRequestDTO {
         private MissionType missionType;
@@ -45,8 +48,8 @@ public class AdminRequestDTO {
         private Long rewardPoints;
         private Boolean isActive;
     }
-
     @Getter
+    @Setter
     @Builder
     public static class CreateKeywordRequestDTO {
         private String keyword;
@@ -54,6 +57,7 @@ public class AdminRequestDTO {
     }
 
     @Getter
+    @Setter
     @Builder
     public static class ChangeUserStatusRequestDTO {
         @NotNull
@@ -61,6 +65,7 @@ public class AdminRequestDTO {
     }
 
     @Getter
+    @Setter
     @Builder
     public static class CreateQuizRequestDTO {
 
@@ -77,6 +82,7 @@ public class AdminRequestDTO {
         private Long missionMasterId;
     }
     @Getter
+    @Setter
     @Builder
     public static class CreatePlantMasterRequestDTO
     {
@@ -91,6 +97,7 @@ public class AdminRequestDTO {
     }
 
     @Getter
+    @Setter
     @Builder
     public static class UpdatePlantMasterRequestDTO
     {
