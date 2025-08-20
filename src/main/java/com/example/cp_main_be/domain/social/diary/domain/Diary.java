@@ -4,9 +4,8 @@ import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "diaries")

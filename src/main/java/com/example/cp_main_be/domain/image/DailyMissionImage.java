@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.image;
 
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,11 +10,10 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class DailyMissionImage {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "image_url")
-    private String imageUrl;
-
+  @Column(name = "image_url")
+  private String imageUrl;
 }
