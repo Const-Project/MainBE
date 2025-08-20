@@ -4,10 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
 
-import com.example.cp_main_be.domain.garden.domain.Garden;
-import com.example.cp_main_be.domain.garden.domain.repository.GardenRepository;
-import com.example.cp_main_be.domain.garden.dto.GardenResponse;
-import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
+import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
+import com.example.cp_main_be.domain.garden.garden.dto.GardenResponse;
+import com.example.cp_main_be.domain.garden.garden.service.GardenService;
+import com.example.cp_main_be.domain.member.user.domain.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

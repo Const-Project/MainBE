@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.image.service;
 
+import com.example.cp_main_be.domain.garden.image.service.ImageProcessingService;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;

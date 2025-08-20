@@ -1,8 +1,8 @@
 package com.example.cp_main_be.domain.reports.domain;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import com.example.cp_main_be.domain.reports.enums.TargetType;
-import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;

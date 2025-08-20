@@ -6,11 +6,12 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.UserStatus;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.user.dto.request.UserRequest;
-import com.example.cp_main_be.domain.user.dto.response.UserResponse;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.UserStatus;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.user.dto.request.UserRequest;
+import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
+import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.util.Optional;

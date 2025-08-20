@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.social.like.domain;
 
-import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "likes")
+@Table(
+    name = "likes",
+    uniqueConstraints =
+        @UniqueConstraint(
+            name = "uk_likes_user_target",
+            columnNames = {"user_id", "target_id", "target_type"}))
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,13 +29,13 @@ public class Like {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @Column(nullable = false)
+  @Column(name = "target_id", nullable = false)
   private Long targetId;
 
-  @Column(nullable = false)
+  @Column(name = "target_type", nullable = false)
   private String targetType; // 예: "DIARY", "AVATAR_POST"
 
-  @Column(nullable = false)
+  @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 
   @PrePersist

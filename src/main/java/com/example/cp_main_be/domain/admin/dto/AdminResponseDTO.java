@@ -1,7 +1,6 @@
 package com.example.cp_main_be.domain.admin.dto;
 
-import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
-import jakarta.persistence.*;
+import com.example.cp_main_be.domain.mission.daily_mission_masters.MissionType;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;

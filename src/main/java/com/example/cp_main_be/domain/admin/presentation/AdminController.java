@@ -13,16 +13,16 @@ package com.example.cp_main_be.domain.admin.presentation;
 // POST /admin/plants (새 식물 등록)
 // PUT /admin/plants/{id} (식물 정보 수정)
 
-import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
-import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
-import com.example.cp_main_be.domain.plant_masters.domain.PlantMasters;
-import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
+import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
+import com.example.cp_main_be.domain.mission.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
-import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.global.dto.ListResponse;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
