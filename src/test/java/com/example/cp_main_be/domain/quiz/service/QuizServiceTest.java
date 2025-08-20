@@ -3,8 +3,7 @@ package com.example.cp_main_be.domain.quiz.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.quiz.domain.Quiz;
@@ -111,8 +110,7 @@ class QuizServiceTest {
     assertThat(exception.getMessage()).isEqualTo("해당 ID를 갖는 미션이 존재하지 않습니다.");
     verify(userDailyMissionRepository, times(1)).findById(userDailyMissionId);
     // 미션을 찾지 못했으므로 다른 repository는 호출되지 않아야 함
-    verify(quizRepository, times(0)).findByDailyMissionMaster_Id(null);
-    verify(quizOptionsRepository, times(0)).findAllByQuizId(null);
+    verifyNoInteractions(quizRepository, quizOptionsRepository);
   }
 
   @Test
@@ -147,6 +145,6 @@ class QuizServiceTest {
     verify(userDailyMissionRepository, times(1)).findById(userDailyMissionId);
     verify(quizRepository, times(1)).findByDailyMissionMaster_Id(dailyMissionMasterId);
     // 퀴즈를 찾지 못했으므로 옵션 repository는 호출되지 않아야 함
-    verify(quizOptionsRepository, times(0)).findAllByQuizId(null);
+    verifyNoInteractions(quizOptionsRepository);
   }
 }
