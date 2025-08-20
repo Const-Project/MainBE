@@ -64,4 +64,12 @@ public class Garden {
   public void updateBackgroundImage(GardenBackground gardenBackground) {
     this.gardenBackground = gardenBackground;
   }
+
+  public void increaseWaterCount() {
+    this.waterCount++;
+  }
+
+  public void increaseSunlightCount() {
+    this.sunlightCount++;
+  }
 }

@@ -7,6 +7,7 @@ import com.example.cp_main_be.domain.user.dto.request.UserRequest;
 import com.example.cp_main_be.domain.user.dto.response.UserResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -79,6 +80,18 @@ public class UserService {
     return this.userRepository
         .findByUuid(uuid)
         .orElseThrow(() -> new UserNotFoundException("해당 UUID의 사용자를 찾을 수 없습니다 : " + uuid));
+  }
+
+  public List<User> findAllUsers() {
+    return userRepository.findAll();
+  }
+
+  public UserResponse.LevelStatusResponseDTO getLevel(User user) {
+
+    return UserResponse.LevelStatusResponseDTO.builder()
+        .level(user.getLevel())
+        .experience(user.getExperience())
+        .build();
   }
 
   // 현재 로그인한 유저 가져옴

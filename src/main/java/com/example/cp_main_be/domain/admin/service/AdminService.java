@@ -1,0 +1,125 @@
+package com.example.cp_main_be.domain.admin.service;
+
+import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
+import com.example.cp_main_be.daily_keywords.domain.repository.DailyKeywordsRepository;
+import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
+import com.example.cp_main_be.domain.plant_masters.domain.PlantMasters;
+import com.example.cp_main_be.domain.plant_masters.domain.repository.PlantMasterRepository;
+import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
+import com.example.cp_main_be.domain.reports.domain.Reports;
+import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
+import com.example.cp_main_be.domain.reports.enums.ReportStatus;
+import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.user.service.UserService;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class AdminService {
+
+  private final DailyMissionMastersRepository dailyMissionMastersRepository;
+  private final DailyKeywordsRepository dailyKeywordsRepository;
+  private final PlantMasterRepository plantMasterRepository;
+
+  private final UserService userService;
+  private final ReportRepository reportRepository;
+
+  public DailyMissionMasters createDailyMissionMasters(
+      AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
+    DailyMissionMasters dailyMissionMasters =
+        DailyMissionMasters.builder()
+            .title(requestDTO.getTitle())
+            .description(requestDTO.getDescription())
+            .content(requestDTO.getContent())
+            .missionType(requestDTO.getMissionType())
+            .rewardPoints(requestDTO.getRewardPoints())
+            .build();
+
+    return dailyMissionMastersRepository.save(dailyMissionMasters);
+  }
+
+  public DailyMissionMasters updateDailyMissionMasters(
+      AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
+
+    DailyMissionMasters dailyMissionMasters =
+        dailyMissionMastersRepository
+            .findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("해당 ID의 미션을 찾을 수 없습니다."));
+
+    // null 인 컬럼들은 수정 안한다.
+    dailyMissionMasters.update(requestDTO);
+    return dailyMissionMasters;
+  }
+
+  public DailyKeywords createDailyKeywords(AdminRequestDTO.CreateKeywordRequestDTO requestDTO) {
+
+    DailyKeywords dailyKeyword = new DailyKeywords();
+    dailyKeyword.from(requestDTO);
+    return dailyKeywordsRepository.save(dailyKeyword);
+  }
+
+  public List<User> getUsers() {
+    return userService.findAllUsers();
+  }
+
+  public User chageUserStatus(Long userId, AdminRequestDTO.ChangeUserStatusRequestDTO requestDTO) {
+    User user = userService.findUserById(userId);
+    user.setStatus(requestDTO.getUserStatus());
+    return user;
+  }
+
+  public QuizOptions createQuizOption(AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
+    DailyMissionMasters dailyMissionMaster =
+        dailyMissionMastersRepository
+            .findById(requestDTO.getMissionMasterId())
+            .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 미션이 존재하지 않습니다."));
+
+    return QuizOptions.builder() // QuizOptions 퀴즈의 선지
+        .optionText(requestDTO.getOptionText())
+        .optionOrder(requestDTO.getOptionOrder())
+        .isCorrect(requestDTO.isCorrect())
+        .build();
+  }
+
+  public PlantMasters createNewPlant(AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
+    PlantMasters plantMasters =
+        PlantMasters.builder()
+            .plantName(requestDTO.getPlantName())
+            .plantType(requestDTO.getPlantType())
+            .imageUrl(requestDTO.getImageUrl())
+            .description(requestDTO.getDescription())
+            .build();
+
+    return plantMasterRepository.save(plantMasters);
+  }
+
+  public PlantMasters updatePlantMasters(
+      Long plantId, AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
+    PlantMasters plantMasters =
+        plantMasterRepository
+            .findById(plantId)
+            .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 식물이 존재하지 않습니다."));
+    plantMasters.update(requestDTO);
+    return plantMasters;
+  }
+
+  public List<Reports> getAllReports() {
+    List<Reports> reports = reportRepository.findAll();
+    return reports;
+  }
+
+  public Reports updateReportStatus(Long reportId, ReportStatus reportStatus) {
+    Reports report =
+        reportRepository
+            .findById(reportId)
+            .orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다."));
+    report.setStatus(reportStatus);
+    return report;
+  }
+}

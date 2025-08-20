@@ -2,6 +2,8 @@ package com.example.cp_main_be.domain.social.feed.presentation;
 
 import com.example.cp_main_be.domain.social.feed.service.FeedService;
 import com.example.cp_main_be.global.util.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/feed")
+@Tag(name = "인증 API", description = "인증 관련 기능을 제공합니다.")
 public class FeedController {
 
   private final FeedService feedService;
 
+  @Operation(summary = "피드 조회", description = "통합 피드를 불러옵니다")
   @GetMapping
   public ResponseEntity<ApiResponse<List<Object>>> getFeed(
       @RequestParam(required = false) String filter) {
