@@ -7,7 +7,6 @@ import com.example.cp_main_be.domain.user.dto.request.UserRequest;
 import com.example.cp_main_be.domain.user.dto.response.UserResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
-
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -83,27 +82,25 @@ public class UserService {
         .orElseThrow(() -> new UserNotFoundException("해당 UUID의 사용자를 찾을 수 없습니다 : " + uuid));
   }
 
-  public List<User> findAllUsers()
-  {
+  public List<User> findAllUsers() {
     return userRepository.findAll();
   }
 
   public UserResponse.LevelStatusResponseDTO getLevel(User user) {
 
     return UserResponse.LevelStatusResponseDTO.builder()
-            .level(user.getLevel())
-            .experience(user.getExperience())
-            .build();
+        .level(user.getLevel())
+        .experience(user.getExperience())
+        .build();
   }
 
   // 현재 로그인한 유저 가져옴
   public User getCurrentUser() {
     String uuidString =
-            (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     UUID userUuid = UUID.fromString(uuidString);
     return userRepository
-            .findByUuid(userUuid)
-            .orElseThrow(() -> new IllegalArgumentException("현재 로그인한 사용자를 찾을 수 없습니다."));
+        .findByUuid(userUuid)
+        .orElseThrow(() -> new IllegalArgumentException("현재 로그인한 사용자를 찾을 수 없습니다."));
   }
-
 }

@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.quiz.service;
 
-
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.quiz.domain.Quiz;
@@ -10,41 +9,42 @@ import com.example.cp_main_be.domain.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.user_daily_missions.domain.UserDailyMissions;
 import com.example.cp_main_be.domain.user_daily_missions.repository.UserDailyMissionRepository;
-import com.example.cp_main_be.domain.user_daily_missions.service.UserDailyMissionService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class QuizService {
 
-    private final UserDailyMissionRepository userDailyMissionRepository;
-    private final DailyMissionMastersRepository dailyMissionMastersRepository;
-    private final QuizRepository quizRepository;
-    private final QuizOptionsRepository quizOptionsRepository;
+  private final UserDailyMissionRepository userDailyMissionRepository;
+  private final DailyMissionMastersRepository dailyMissionMastersRepository;
+  private final QuizRepository quizRepository;
+  private final QuizOptionsRepository quizOptionsRepository;
 
-    public QuizResponseDTO getQuiz(Long userDailyMissionId) {
+  public QuizResponseDTO getQuiz(Long userDailyMissionId) {
 
+    UserDailyMissions userDailyMissions =
+        userDailyMissionRepository
+            .findById(userDailyMissionId)
+            .orElseThrow(() -> new RuntimeException("해당 ID를 갖는 미션이 존재하지 않습니다."));
 
-        UserDailyMissions userDailyMissions = userDailyMissionRepository.findById(userDailyMissionId)
-                .orElseThrow(() -> new RuntimeException("해당 ID를 갖는 미션이 존재하지 않습니다."));
+    DailyMissionMasters dailyMissionMasters = userDailyMissions.getDailyMissionMasters();
 
-        DailyMissionMasters dailyMissionMasters = userDailyMissions.getDailyMissionMasters();
+    Quiz quiz =
+        quizRepository
+            .findByDailyMissionMasters_Id(dailyMissionMasters.getId())
+            .orElseThrow(() -> new RuntimeException("퀴즈가 존재하지 않습니다."));
 
-        Quiz quiz = quizRepository.findByDailyMissionMasters_Id(dailyMissionMasters.getId())
-                .orElseThrow(() -> new RuntimeException("퀴즈가 존재하지 않습니다."));
+    List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
 
-        List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
-
-        return QuizResponseDTO.builder()
-                .quizType(quiz.getQuizType())
-                .quizQuestion(quiz.getQuizQuestion())
-                .quizOptions(quizOptions)
-                .missionId(dailyMissionMasters.getId())
-                .build();
-    }
+    return QuizResponseDTO.builder()
+        .quizType(quiz.getQuizType())
+        .quizQuestion(quiz.getQuizQuestion())
+        .quizOptions(quizOptions)
+        .missionId(dailyMissionMasters.getId())
+        .build();
+  }
 }
