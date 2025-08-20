@@ -4,9 +4,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.domain.auth.dto.response.TokenRefreshResponse;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.auth.dto.response.TokenRefreshResponse;
+import com.example.cp_main_be.domain.member.auth.service.AuthService;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.util.Optional;
 import java.util.UUID;

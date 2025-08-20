@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.social.follow.domain.repository;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
-import com.example.cp_main_be.domain.user.domain.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
