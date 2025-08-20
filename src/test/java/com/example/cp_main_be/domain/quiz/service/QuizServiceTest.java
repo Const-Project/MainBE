@@ -3,18 +3,18 @@ package com.example.cp_main_be.domain.quiz.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
-import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
-import com.example.cp_main_be.domain.quiz.domain.Quiz;
-import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
-import com.example.cp_main_be.domain.quiz.domain.repository.QuizOptionsRepository;
-import com.example.cp_main_be.domain.quiz.domain.repository.QuizRepository;
-import com.example.cp_main_be.domain.quiz.dto.QuizResponseDTO;
-import com.example.cp_main_be.domain.quiz.enums.QuizType;
-import com.example.cp_main_be.domain.user_daily_missions.domain.UserDailyMissions;
-import com.example.cp_main_be.domain.user_daily_missions.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
+import com.example.cp_main_be.domain.mission.quiz.domain.Quiz;
+import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
+import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsRepository;
+import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
+import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
+import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
+import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
+import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -46,19 +46,19 @@ class QuizServiceTest {
     Long quizId = 201L;
 
     // 연관 데이터 설정
-    DailyMissionMasters dailyMissionMasters =
-        DailyMissionMasters.builder().id(dailyMissionMasterId).title("오늘의 퀴즈 미션").build();
+    DailyMissionMaster dailyMissionMaster =
+        DailyMissionMaster.builder().id(dailyMissionMasterId).title("오늘의 퀴즈 미션").build();
 
-    UserDailyMissions userDailyMissions =
-        UserDailyMissions.builder()
+    UserDailyMission userDailyMission =
+        UserDailyMission.builder()
             .id(userDailyMissionId)
-            .dailyMissionMasters(dailyMissionMasters)
+            .dailyMissionMaster(dailyMissionMaster)
             .build();
 
     Quiz quiz =
         Quiz.builder()
             .id(quizId)
-            .dailyMissionMasters(dailyMissionMasters)
+            .dailyMissionMaster(dailyMissionMaster)
             .quizType(QuizType.MULTI_CHOICE)
             .quizQuestion("다음 중 가장 큰 동물은?")
             .build();
@@ -70,8 +70,8 @@ class QuizServiceTest {
 
     // Mock 객체 동작 정의
     given(userDailyMissionRepository.findById(userDailyMissionId))
-        .willReturn(Optional.of(userDailyMissions));
-    given(quizRepository.findByDailyMissionMasters_Id(dailyMissionMasterId))
+        .willReturn(Optional.of(userDailyMission));
+    given(quizRepository.findByDailyMissionMaster_Id(dailyMissionMasterId))
         .willReturn(Optional.of(quiz));
     given(quizOptionsRepository.findAllByQuizId(quizId)).willReturn(quizOptions);
 
@@ -84,11 +84,11 @@ class QuizServiceTest {
     assertThat(result.getQuizType()).isEqualTo(QuizType.MULTI_CHOICE);
     assertThat(result.getMissionId()).isEqualTo(dailyMissionMasterId);
     assertThat(result.getQuizOptions()).hasSize(2);
-    assertThat(result.getQuizOptions().get(0).getOptionText()).isEqualTo("코끼리");
+    assertThat(result.getQuizOptions().get(0).getText()).isEqualTo("코끼리");
 
     // 메소드 호출 횟수 검증
     verify(userDailyMissionRepository, times(1)).findById(userDailyMissionId);
-    verify(quizRepository, times(1)).findByDailyMissionMasters_Id(dailyMissionMasterId);
+    verify(quizRepository, times(1)).findByDailyMissionMaster_Id(dailyMissionMasterId);
     verify(quizOptionsRepository, times(1)).findAllByQuizId(quizId);
   }
 
@@ -110,8 +110,7 @@ class QuizServiceTest {
     assertThat(exception.getMessage()).isEqualTo("해당 ID를 갖는 미션이 존재하지 않습니다.");
     verify(userDailyMissionRepository, times(1)).findById(userDailyMissionId);
     // 미션을 찾지 못했으므로 다른 repository는 호출되지 않아야 함
-    verify(quizRepository, times(0)).findByDailyMissionMasters_Id(null);
-    verify(quizOptionsRepository, times(0)).findAllByQuizId(null);
+    verifyNoInteractions(quizRepository, quizOptionsRepository);
   }
 
   @Test
@@ -121,17 +120,17 @@ class QuizServiceTest {
     Long userDailyMissionId = 1L;
     Long dailyMissionMasterId = 101L;
 
-    DailyMissionMasters dailyMissionMasters =
-        DailyMissionMasters.builder().id(dailyMissionMasterId).build();
-    UserDailyMissions userDailyMissions =
-        UserDailyMissions.builder()
+    DailyMissionMaster dailyMissionMaster =
+        DailyMissionMaster.builder().id(dailyMissionMasterId).build();
+    UserDailyMission userDailyMission =
+        UserDailyMission.builder()
             .id(userDailyMissionId)
-            .dailyMissionMasters(dailyMissionMasters)
+            .dailyMissionMaster(dailyMissionMaster)
             .build();
 
     given(userDailyMissionRepository.findById(userDailyMissionId))
-        .willReturn(Optional.of(userDailyMissions));
-    given(quizRepository.findByDailyMissionMasters_Id(dailyMissionMasterId))
+        .willReturn(Optional.of(userDailyMission));
+    given(quizRepository.findByDailyMissionMaster_Id(dailyMissionMasterId))
         .willReturn(Optional.empty()); // 퀴즈가 없음
 
     // When & Then
@@ -144,8 +143,8 @@ class QuizServiceTest {
 
     assertThat(exception.getMessage()).isEqualTo("퀴즈가 존재하지 않습니다.");
     verify(userDailyMissionRepository, times(1)).findById(userDailyMissionId);
-    verify(quizRepository, times(1)).findByDailyMissionMasters_Id(dailyMissionMasterId);
+    verify(quizRepository, times(1)).findByDailyMissionMaster_Id(dailyMissionMasterId);
     // 퀴즈를 찾지 못했으므로 옵션 repository는 호출되지 않아야 함
-    verify(quizOptionsRepository, times(0)).findAllByQuizId(null);
+    verifyNoInteractions(quizOptionsRepository);
   }
 }

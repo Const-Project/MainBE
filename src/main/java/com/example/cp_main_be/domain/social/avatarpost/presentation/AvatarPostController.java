@@ -1,11 +1,11 @@
 package com.example.cp_main_be.domain.social.avatarpost.presentation;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.avatarpost.dto.response.PostInfoResponse;
 import com.example.cp_main_be.domain.social.avatarpost.service.AvatarPostService;
 import com.example.cp_main_be.domain.social.bookmark.domain.repository.BookmarkRepository;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
