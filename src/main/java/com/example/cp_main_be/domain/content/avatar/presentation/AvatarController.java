@@ -1,7 +1,7 @@
-package com.example.cp_main_be.domain.avatar.presentation;
+package com.example.cp_main_be.domain.content.avatar.presentation;
 
-import com.example.cp_main_be.domain.avatar.dto.response.AvatarResponse;
-import com.example.cp_main_be.domain.avatar.service.AvatarService;
+import com.example.cp_main_be.domain.content.avatar.dto.response.AvatarResponse;
+import com.example.cp_main_be.domain.content.avatar.service.AvatarService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

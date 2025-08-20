@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.member.user.domain;
 
-import com.example.cp_main_be.domain.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.content.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.social.bookmark.domain.Bookmark;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;

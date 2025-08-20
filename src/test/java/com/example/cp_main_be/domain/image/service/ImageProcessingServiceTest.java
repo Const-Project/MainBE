@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.image.service;
 
-import com.example.cp_main_be.domain.garden.image.service.ImageProcessingService;
+import com.example.cp_main_be.domain.content.image.service.ImageProcessingService;
 import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -39,6 +39,7 @@ class ImageProcessingServiceTest {
   static void registerDynamicProperties(DynamicPropertyRegistry registry) {
     registry.add("fastapi.server.url", () -> mockWebServer.url("/").toString());
     registry.add("jwt.secret", () -> "this-is-a-dummy-secret-key-for-testing-purpose");
+    registry.add("r");
   }
 
   @Test

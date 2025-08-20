@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.garden.image.service;
+package com.example.cp_main_be.domain.content.image.service;
 
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;

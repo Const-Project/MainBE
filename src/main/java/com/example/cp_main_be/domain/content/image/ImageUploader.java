@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.garden.image;
+package com.example.cp_main_be.domain.content.image;
 
 import org.springframework.web.multipart.MultipartFile;
 

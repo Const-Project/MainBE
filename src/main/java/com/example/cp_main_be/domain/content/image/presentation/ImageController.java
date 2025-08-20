@@ -1,6 +1,6 @@
-package com.example.cp_main_be.domain.garden.image.presentation;
+package com.example.cp_main_be.domain.content.image.presentation;
 
-import com.example.cp_main_be.domain.garden.image.service.ImageProcessingService;
+import com.example.cp_main_be.domain.content.image.service.ImageProcessingService;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import io.swagger.v3.oas.annotations.Operation;

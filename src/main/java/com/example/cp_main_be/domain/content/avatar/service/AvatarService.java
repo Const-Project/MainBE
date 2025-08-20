@@ -1,7 +1,7 @@
-package com.example.cp_main_be.domain.avatar.service;
+package com.example.cp_main_be.domain.content.avatar.service;
 
-import com.example.cp_main_be.domain.avatar.domain.Avatar;
-import com.example.cp_main_be.domain.avatar.domain.repository.AvatarRepository;
+import com.example.cp_main_be.domain.content.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.content.avatar.domain.repository.AvatarRepository;
 import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;

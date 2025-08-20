@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.avatar.domain;
+package com.example.cp_main_be.domain.content.avatar.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import jakarta.persistence.*;

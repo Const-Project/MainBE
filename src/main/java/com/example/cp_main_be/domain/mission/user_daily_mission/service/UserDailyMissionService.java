@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.service;
 
-import com.example.cp_main_be.domain.garden.image.DailyMissionImage;
+import com.example.cp_main_be.domain.content.image.DailyMissionImage;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMasterRepository;
 import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
