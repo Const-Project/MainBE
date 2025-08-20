@@ -49,7 +49,7 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
-    @PutMapping("missions/daily/{id}")
+    @PutMapping("/missions/daily/{id}")
     @Operation(summary = "일일 미션(미션마스터) 수정 API")
     public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>> updateDailyMission(@RequestBody AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
         DailyMissionMasters response = adminService.updateDailyMissionMasters(requestDTO, id);
