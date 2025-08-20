@@ -108,7 +108,7 @@ jobs:
           # DB_URL: ${{ secrets.DB_URL_TEST }}
           # DB_USERNAME: ${{ secrets.DB_USERNAME_TEST }}
           # DB_PASSWORD: ${{ secrets.DB_PASSWORD_TEST }}
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace --info
 
       # 8. 테스트 결과 업로드
       - name: Publish Test Results
