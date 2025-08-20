@@ -80,8 +80,10 @@ public class UserController {
   }
   @GetMapping("/level")
   @Operation(summary = "점수 및 레벨 조회")
-  public ResponseEntity<ApiResponse<UserResponse.LevelStatusResponseDTO>> getLevel(@AuthenticationPrincipal User user)
+  public ResponseEntity<ApiResponse<UserResponse.LevelStatusResponseDTO>> getLevel()
   {
+    String uuid = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    User user = userService.findUserByUuid(UUID.fromString(uuid));
     UserResponse.LevelStatusResponseDTO levelStatusResponseDTO = userService.getLevel(user);
     return ResponseEntity.ok(ApiResponse.success(levelStatusResponseDTO));
   }
