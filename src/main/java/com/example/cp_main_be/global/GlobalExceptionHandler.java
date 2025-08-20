@@ -37,4 +37,10 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(errorCode.getStatus())
         .body(new ErrorResponse(errorCode.getCode(), errorCode.getMessage()));
   }
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ApiResponse<Object>> handleIllegalArgument(IllegalArgumentException e) {
+    ApiResponse<Object> resp = ApiResponse.failure("NOT_FOUND", e.getMessage());
+    return new ResponseEntity<>(resp, HttpStatus.NOT_FOUND);
+  }
 }
