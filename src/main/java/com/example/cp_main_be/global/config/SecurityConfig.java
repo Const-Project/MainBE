@@ -1,6 +1,7 @@
 package com.example.cp_main_be.global.config;
 
 import com.example.cp_main_be.global.jwt.JwtAuthenticationFilter;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,6 +10,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -20,6 +24,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
         .authorizeHttpRequests(
@@ -38,5 +43,36 @@ public class SecurityConfig {
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
+  }
+
+  @Bean
+  public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+
+    // 모든 출처 허용 (개발 환경)
+    configuration.addAllowedOriginPattern("*");
+
+    // 모든 HTTP 메서드 허용
+    configuration.setAllowedMethods(
+        Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
+    // 모든 헤더 허용
+    configuration.addAllowedHeader("*");
+
+    // 인증 정보 포함 허용 (쿠키, Authorization 헤더 등)
+    configuration.setAllowCredentials(true);
+
+    // preflight 요청 캐시 시간 (초)
+    configuration.setMaxAge(3600L);
+
+    // 응답에서 클라이언트가 접근할 수 있는 헤더 설정
+    configuration.addExposedHeader("Authorization");
+    configuration.addExposedHeader("Content-Type");
+    configuration.addExposedHeader("Accept");
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
+
+    return source;
   }
 }
