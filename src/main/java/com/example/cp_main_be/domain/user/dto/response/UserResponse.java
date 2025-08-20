@@ -1,10 +1,8 @@
 package com.example.cp_main_be.domain.user.dto.response;
 
 import java.util.UUID;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.*;
 
 @Getter
 @Setter
@@ -17,4 +15,12 @@ public class UserResponse {
   private UUID uuid;
   private String accessToken;
   private String refreshToken;
+
+  @Getter
+  @Builder
+  public static class LevelStatusResponseDTO {
+    // GET /level 의 Response
+    private Integer level ; // 레벨
+    private Integer experience; // 경험
+  }
 }
