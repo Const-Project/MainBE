@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.quiz.dto;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class QuizRequestDTO {
 
-    private Integer answerNumber;
+  private Integer answerNumber;
 }
