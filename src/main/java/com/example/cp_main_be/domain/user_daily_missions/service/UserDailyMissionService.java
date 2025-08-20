@@ -47,9 +47,10 @@ public class UserDailyMissionService {
     }
 
     public String uploadPictureForDailyMission(Long userDailyMissionId, MultipartFile file) {
-        String imageUrl = s3Uploader.upload(file,"mission-images");
         UserDailyMissions userDailyMissions = userDailyMissionRepository.findById(userDailyMissionId)
                 .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
+
+        String imageUrl = s3Uploader.upload(file,"mission-images");
 
         userDailyMissions.setDailyMissionImage(DailyMissionImage.builder()
                 .imageUrl(imageUrl)
