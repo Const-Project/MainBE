@@ -103,7 +103,7 @@ jobs:
         env:
           # Spring Boot는 이 환경 변수(API_TOKEN)를 인식하여
           # application.properties의 ${API_TOKEN} 플레이스홀더를 치환합니다.
-          API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          API_TOKEN: ${{ secrets.API_TOKEN }}
           # 만약 테스트 DB 등 다른 환경 변수가 필요하다면 아래와 같이 추가할 수 있습니다.
           # DB_URL: ${{ secrets.DB_URL_TEST }}
           # DB_USERNAME: ${{ secrets.DB_USERNAME_TEST }}

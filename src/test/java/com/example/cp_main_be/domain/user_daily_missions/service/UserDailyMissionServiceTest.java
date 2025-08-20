@@ -61,7 +61,7 @@ class UserDailyMissionServiceTest {
 
     List<UserDailyMission> missions = List.of(userMission1, userMission2);
 
-    given(userDailyMissionRepository.findAllByUserId(userId)).willReturn(missions);
+    given(userDailyMissionRepository.findAllByUser_Id(userId)).willReturn(missions);
 
     // When (실행)
     DailyMissionResponseDTO result = userDailyMissionService.getDailyMissions(userId);
@@ -72,7 +72,7 @@ class UserDailyMissionServiceTest {
     assertThat(result.getTodayMissions().get(0).getMissionTitle()).isEqualTo("미션 1");
     assertThat(result.getTodayMissions().get(1).getMissionTitle()).isEqualTo("미션 2");
 
-    verify(userDailyMissionRepository, times(1)).findAllByUserId(userId);
+    verify(userDailyMissionRepository, times(1)).findAllByUser_Id(userId);
   }
 
   @Test

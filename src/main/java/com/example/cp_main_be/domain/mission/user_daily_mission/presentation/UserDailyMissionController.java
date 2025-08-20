@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.mission.user_daily_mission.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
+import com.example.cp_main_be.domain.mission.quiz.dto.CompletedQuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
@@ -46,6 +47,15 @@ public class UserDailyMissionController {
       @PathVariable(name = "userDailyMissionId") Long userDailyMissionId) {
 
     QuizResponseDTO result = quizService.getQuiz(userDailyMissionId);
+    return ResponseEntity.ok(ApiResponse.success(result));
+  }
+
+  // 새로운 엔드포인트 - 완료된 퀴즈 결과 조회
+  @GetMapping("/quiz/{userDailyMissionId}/result")
+  @Operation(summary = "완료된 퀴즈 결과 조회 API (정답 정보 포함)")
+  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> getQuizResult(
+      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId) {
+    CompletedQuizResponseDTO result = quizService.getCompletedQuizResult(userDailyMissionId);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 

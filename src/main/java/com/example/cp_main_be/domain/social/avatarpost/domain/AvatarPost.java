@@ -28,6 +28,7 @@ public class AvatarPost {
   private String caption;
 
   @Column(name = "like_count")
+  @Builder.Default
   private int likeCount = 0;
 
   @OneToMany(mappedBy = "avatarPost", cascade = CascadeType.ALL)

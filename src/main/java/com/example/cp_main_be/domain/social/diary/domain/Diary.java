@@ -34,6 +34,7 @@ public class Diary {
   private DiaryImage diaryImage;
 
   @Column(name = "is_public")
+  @Builder.Default
   private boolean isPublic = true; // 기본값 true
 
   @Column(name = "created_at")
@@ -43,6 +44,7 @@ public class Diary {
   private LocalDateTime updatedAt;
 
   @Column(name = "like_count")
+  @Builder.Default
   private int likeCount = 0;
 
   @ManyToOne(fetch = FetchType.LAZY)

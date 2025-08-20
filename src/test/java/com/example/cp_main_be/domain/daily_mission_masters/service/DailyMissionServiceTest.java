@@ -63,7 +63,7 @@ class DailyMissionServiceTest {
                 .build());
 
     // dailyMissionMastersRepository.findAllById(userId) 호출 시 mockMissions를 반환하도록 설정
-    given(userDailyMissionRepository.findAllByUserId(userId)).willReturn(mockMissions);
+    given(userDailyMissionRepository.findAllByUser_Id(userId)).willReturn(mockMissions);
 
     // when: 테스트 실행
     // 실제 DTO인 DailyMissionResponseDTO를 사용합니다.
@@ -85,7 +85,7 @@ class DailyMissionServiceTest {
     assertThat(secondMission.getMissionTitle()).isEqualTo("물 2L 마시기");
 
     // repository의 findAllById 메서드가 정확히 1번 호출되었는지 검증
-    verify(userDailyMissionRepository).findAllByUserId(userId);
+    verify(userDailyMissionRepository).findAllByUser_Id(userId);
   }
 
   @DisplayName("사용자의 일일 미션이 없는 경우 빈 목록을 반환한다.")
@@ -94,7 +94,7 @@ class DailyMissionServiceTest {
     // given
     final Long userId = 2L;
 
-    given(userDailyMissionRepository.findAllByUserId(userId)).willReturn(Collections.emptyList());
+    given(userDailyMissionRepository.findAllByUser_Id(userId)).willReturn(Collections.emptyList());
     // when
     DailyMissionResponseDTO responseDTO = dailyMissionService.getDailyMissions(userId);
 
@@ -103,6 +103,6 @@ class DailyMissionServiceTest {
     assertThat(responseDTO.getTodayMissions()).isNotNull();
     assertThat(responseDTO.getTodayMissions()).isEmpty();
 
-    verify(userDailyMissionRepository).findAllByUserId(userId);
+    verify(userDailyMissionRepository).findAllByUser_Id(userId);
   }
 }

@@ -19,6 +19,5 @@ public class QuizResponseDTO {
   public static class QuizOptionResponseDTO {
     private final Long id;
     private final String text;
-    private final Boolean isAnswer;
   }
 }
