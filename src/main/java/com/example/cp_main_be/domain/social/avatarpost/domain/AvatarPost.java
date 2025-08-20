@@ -23,6 +23,9 @@ public class AvatarPost {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  @Column(name = "image_url")
+  private String imageUrl;
+
   @Lob
   @Column(name = "caption")
   private String caption;

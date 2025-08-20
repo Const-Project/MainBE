@@ -6,13 +6,13 @@ import com.example.cp_main_be.domain.social.avatarpost.dto.response.PostInfoResp
 import com.example.cp_main_be.domain.social.bookmark.domain.repository.BookmarkRepository;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AvatarPostService {
 
   private final AvatarPostRepository avatarPostRepository;
@@ -23,17 +23,18 @@ public class AvatarPostService {
     // 1. 포스트 정보 조회
     AvatarPost postById =
         avatarPostRepository
-            .findById(postId)
+            .findByIdWithComments(postId) // 댓글을 함께 조회하는 메서드 사용 (N+1 문제 방지)
             .orElseThrow(() -> new IllegalArgumentException("해당 포스트를 찾을 수 없습니다."));
 
     // 2. 현재 유저가 포스트를 북마크했는지 확인
     boolean isBookmarked =
-        bookmarkRepository.findByUserAndAvatarPost(currentUser, postById).isPresent();
+        bookmarkRepository.existsByUserAndAvatarPost(
+            currentUser, postById); // exists... 쿼리가 더 효율적입니다.
 
     // 3. PostInfoResponse DTO 생성 및 반환
-    // 아직 이미지는 구현 x
+    // 이미지 저장은 미구현
     return PostInfoResponse.builder()
-        .imageUrl(null)
+        .imageUrl(postById.getImageUrl())
         .likeCount(postById.getLikeCount())
         .comments(postById.getComments())
         .isBookmarked(isBookmarked)

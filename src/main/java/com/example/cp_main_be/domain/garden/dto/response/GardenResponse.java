@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.garden.dto;
+package com.example.cp_main_be.domain.garden.dto.response;
 
 import com.example.cp_main_be.domain.garden.domain.Garden;
 import java.time.LocalDateTime;

@@ -1,9 +1,15 @@
 package com.example.cp_main_be.domain.garden.service;
 
 import com.example.cp_main_be.domain.garden.domain.Garden;
+import com.example.cp_main_be.domain.garden.domain.GardenBackground;
+import com.example.cp_main_be.domain.garden.domain.repository.GardenBackgroundRepository;
 import com.example.cp_main_be.domain.garden.domain.repository.GardenRepository;
-import com.example.cp_main_be.domain.garden.dto.GardenResponse;
+import com.example.cp_main_be.domain.garden.dto.response.GardenBackgroundCandidateResponse;
+import com.example.cp_main_be.domain.garden.dto.response.GardenBackgroundResponse;
+import com.example.cp_main_be.domain.garden.dto.response.GardenResponse;
 import com.example.cp_main_be.domain.user.domain.User;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +22,7 @@ public class GardenService {
   private static final int MAX_GARDEN_COUNT = 3;
 
   private final GardenRepository gardenRepository;
+  private final GardenBackgroundRepository gardenBackgroundRepository;
 
   public GardenResponse findGardenById(Long gardenId) {
     Garden garden =
@@ -68,5 +75,40 @@ public class GardenService {
 
     // User 엔티티의 gardens 리스트에도 추가하여 영속성 컨텍스트와 객체 상태의 일관성을 맞춤
     user.addGarden(newGarden);
+  }
+
+  public GardenBackgroundResponse getGardenBackgroundImage(Long gardenId) {
+    Garden garden =
+        gardenRepository
+            .findById(gardenId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
+
+    GardenBackground background = garden.getGardenBackground();
+    if (background == null) {
+      throw new IllegalStateException("해당 텃밭에 배경화면이 설정되어 있지 않습니다.");
+    }
+
+    return new GardenBackgroundResponse(background.getImageUrl());
+  }
+
+  @Transactional
+  public void updateGardenBackgroundImage(Long gardenId, Long backgroundId) {
+    Garden garden =
+        gardenRepository
+            .findById(gardenId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
+
+    GardenBackground newBackground =
+        gardenBackgroundRepository
+            .findById(backgroundId)
+            .orElseThrow(() -> new IllegalArgumentException("해당 배경화면을 찾을 수 없습니다."));
+
+    garden.updateBackgroundImage(newBackground);
+  }
+
+  public List<GardenBackgroundCandidateResponse> getAllBackgrounds() {
+    return gardenBackgroundRepository.findAll().stream()
+        .map(GardenBackgroundCandidateResponse::from)
+        .collect(Collectors.toList());
   }
 }

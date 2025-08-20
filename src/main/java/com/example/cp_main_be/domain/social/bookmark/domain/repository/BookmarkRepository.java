@@ -9,4 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
   Optional<Bookmark> findByUserAndAvatarPost(User user, AvatarPost avatarPost);
+
+  boolean existsByUserAndAvatarPost(User user, AvatarPost avatarPost);
 }
