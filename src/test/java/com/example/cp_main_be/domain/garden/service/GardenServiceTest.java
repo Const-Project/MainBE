@@ -103,7 +103,7 @@ class GardenServiceTest {
     User user =
         User.builder()
             .id(1L)
-            .level(2)
+            .level(2L)
             .gardens(new ArrayList<>(List.of(Garden.builder().slotNumber(1).build())))
             .build();
 
@@ -132,7 +132,7 @@ class GardenServiceTest {
     User user =
         User.builder()
             .id(1L)
-            .level(1)
+            .level(1L)
             .gardens(new ArrayList<>(List.of(Garden.builder().slotNumber(1).build())))
             .build();
 
@@ -152,7 +152,7 @@ class GardenServiceTest {
     User user =
         User.builder()
             .id(1L)
-            .level(4)
+            .level(4L)
             .gardens(
                 new ArrayList<>(
                     List.of(

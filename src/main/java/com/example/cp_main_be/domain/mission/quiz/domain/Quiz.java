@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.mission.quiz.domain;
 
-import com.example.cp_main_be.domain.mission.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,5 +24,5 @@ public class Quiz {
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mission_master_id")
-  private DailyMissionMasters dailyMissionMasters;
+  private DailyMissionMaster dailyMissionMaster;
 }

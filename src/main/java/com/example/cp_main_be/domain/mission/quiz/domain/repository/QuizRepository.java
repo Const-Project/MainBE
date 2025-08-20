@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
-  Optional<Quiz> findByDailyMissionMasters_Id(Long missionMasterId);
+  Optional<Quiz> findByDailyMissionMaster_Id(Long missionMasterId);
 }

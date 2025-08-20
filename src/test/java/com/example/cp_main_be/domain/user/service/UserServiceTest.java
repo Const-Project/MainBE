@@ -66,7 +66,6 @@ class UserServiceTest {
             .email("test@example.com")
             .passwordHash("hashedpassword")
             .level(1L)
-            .temperatureScore(0)
             .status(UserStatus.ACTIVE)
             .build();
     doThrow(DataIntegrityViolationException.class).when(userRepository).save(any(User.class));

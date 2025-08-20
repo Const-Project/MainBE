@@ -7,8 +7,8 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.repository.DailyKeywordsRepository;
-import com.example.cp_main_be.domain.mission.daily_mission_masters.domain.DailyMissionMasters;
-import com.example.cp_main_be.domain.mission.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMasterRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
@@ -23,17 +23,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AdminService {
 
-  private final DailyMissionMastersRepository dailyMissionMastersRepository;
+  private final DailyMissionMasterRepository dailyMissionMasterRepository;
   private final DailyKeywordsRepository dailyKeywordsRepository;
   private final PlantMasterRepository plantMasterRepository;
 
   private final UserService userService;
   private final ReportRepository reportRepository;
 
-  public DailyMissionMasters createDailyMissionMasters(
+  public DailyMissionMaster createDailyMissionMasters(
       AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
-    DailyMissionMasters dailyMissionMasters =
-        DailyMissionMasters.builder()
+    DailyMissionMaster dailyMissionMaster =
+        DailyMissionMaster.builder()
             .title(requestDTO.getTitle())
             .description(requestDTO.getDescription())
             .content(requestDTO.getContent())
@@ -41,20 +41,20 @@ public class AdminService {
             .rewardPoints(requestDTO.getRewardPoints())
             .build();
 
-    return dailyMissionMastersRepository.save(dailyMissionMasters);
+    return dailyMissionMasterRepository.save(dailyMissionMaster);
   }
 
-  public DailyMissionMasters updateDailyMissionMasters(
+  public DailyMissionMaster updateDailyMissionMasters(
       AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
 
-    DailyMissionMasters dailyMissionMasters =
-        dailyMissionMastersRepository
+    DailyMissionMaster dailyMissionMaster =
+        dailyMissionMasterRepository
             .findById(id)
             .orElseThrow(() -> new IllegalArgumentException("해당 ID의 미션을 찾을 수 없습니다."));
 
     // null 인 컬럼들은 수정 안한다.
-    dailyMissionMasters.update(requestDTO);
-    return dailyMissionMasters;
+    dailyMissionMaster.update(requestDTO);
+    return dailyMissionMaster;
   }
 
   public DailyKeywords createDailyKeywords(AdminRequestDTO.CreateKeywordRequestDTO requestDTO) {
@@ -75,8 +75,8 @@ public class AdminService {
   }
 
   public QuizOptions createQuizOption(AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
-    DailyMissionMasters dailyMissionMaster =
-        dailyMissionMastersRepository
+    DailyMissionMaster dailyMissionMaster =
+        dailyMissionMasterRepository
             .findById(requestDTO.getMissionMasterId())
             .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 미션이 존재하지 않습니다."));
 

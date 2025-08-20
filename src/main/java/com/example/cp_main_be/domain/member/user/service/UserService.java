@@ -48,6 +48,7 @@ public class UserService {
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
     user.updateProfile(null, newAvatarUrl);
+    userRepository.save(user);
   }
 
   public void updateNickname(Long userId, String newNickname) {
@@ -56,6 +57,7 @@ public class UserService {
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
     user.updateProfile(newNickname, null);
+    userRepository.save(user);
   }
 
   public void saveUser(User user) {

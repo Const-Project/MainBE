@@ -4,12 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
-import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
-import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
-import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
-import com.example.cp_main_be.domain.user_daily_missions.service.UserDailyMissionService;
-import java.time.LocalDateTime;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMasterRepository;
+import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
+import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +27,9 @@ class DailyMissionServiceTest {
 
   @InjectMocks private UserDailyMissionService dailyMissionService;
 
-  @Mock private DailyMissionMastersRepository dailyMissionMastersRepository;
+  @Mock private DailyMissionMasterRepository dailyMissionMasterRepository;
+
+  @Mock private UserDailyMissionRepository userDailyMissionRepository;
 
   @DisplayName("특정 사용자의 일일 미션 목록을 성공적으로 조회한다.")
   @Test
@@ -34,32 +37,33 @@ class DailyMissionServiceTest {
     // given: 테스트 준비
     final Long userId = 1L;
     // Repository가 반환할 모의 데이터 생성 (DTO 구조에 맞게 completed 필드 제거)
-    final List<DailyMissionMasters> mockMissions =
+    DailyMissionMaster mission1 =
+        DailyMissionMaster.builder().id(1L).title("걷기 30분").description("공원에서 30분 이상 걷기").build();
+
+    DailyMissionMaster mission2 =
+        DailyMissionMaster.builder()
+            .id(2L)
+            .title("물 2L 마시기")
+            .description("하루 동안 총 2L의 물 마시기")
+            .build();
+
+    final List<UserDailyMission> mockMissions =
         Arrays.asList(
-            DailyMissionMasters.builder()
+            UserDailyMission.builder()
                 .id(1L)
-                .missionType(MissionType.DIARY) // Enum 타입 필드 추가
-                .title("걷기 30분")
-                .description("공원에서 30분 이상 걷기")
-                .content("오늘 날씨도 좋으니 가볍게 산책해보세요!")
-                .rewardPoints(10L)
-                .isActive(true)
-                .createdAt(LocalDateTime.now())
+                .user(User.builder().id(userId).build())
+                .dailyMissionMaster(mission1)
+                .isCompleted(false)
                 .build(),
-            DailyMissionMasters.builder()
+            UserDailyMission.builder()
                 .id(2L)
-                .missionType(MissionType.DIARY)
-                .title("물 2L 마시기")
-                .description("하루 동안 총 2L의 물 마시기")
-                .content("건강을 위한 작은 습관!")
-                .rewardPoints(15L)
-                .isActive(true)
-                .createdAt(LocalDateTime.now())
+                .user(User.builder().id(userId).build())
+                .dailyMissionMaster(mission2)
+                .isCompleted(true)
                 .build());
 
     // dailyMissionMastersRepository.findAllById(userId) 호출 시 mockMissions를 반환하도록 설정
-    given(dailyMissionMastersRepository.findAllById(Collections.singleton(userId)))
-        .willReturn(mockMissions);
+    given(userDailyMissionRepository.findAllByUserId(userId)).willReturn(mockMissions);
 
     // when: 테스트 실행
     // 실제 DTO인 DailyMissionResponseDTO를 사용합니다.
@@ -81,7 +85,7 @@ class DailyMissionServiceTest {
     assertThat(secondMission.getMissionTitle()).isEqualTo("물 2L 마시기");
 
     // repository의 findAllById 메서드가 정확히 1번 호출되었는지 검증
-    verify(dailyMissionMastersRepository).findAllById(Collections.singleton(userId));
+    verify(userDailyMissionRepository).findAllByUserId(userId);
   }
 
   @DisplayName("사용자의 일일 미션이 없는 경우 빈 목록을 반환한다.")
@@ -90,9 +94,7 @@ class DailyMissionServiceTest {
     // given
     final Long userId = 2L;
 
-    given(dailyMissionMastersRepository.findAllById(Collections.singleton(userId)))
-        .willReturn(Collections.emptyList());
-
+    given(userDailyMissionRepository.findAllByUserId(userId)).willReturn(Collections.emptyList());
     // when
     DailyMissionResponseDTO responseDTO = dailyMissionService.getDailyMissions(userId);
 
@@ -101,6 +103,6 @@ class DailyMissionServiceTest {
     assertThat(responseDTO.getTodayMissions()).isNotNull();
     assertThat(responseDTO.getTodayMissions()).isEmpty();
 
-    verify(dailyMissionMastersRepository).findAllById(Collections.singleton(userId));
+    verify(userDailyMissionRepository).findAllByUserId(userId);
   }
 }

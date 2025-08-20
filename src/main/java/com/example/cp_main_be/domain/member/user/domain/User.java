@@ -46,9 +46,9 @@ public class User {
   @Builder.Default
   private List<Avatar> avatarList = new ArrayList<>();
 
-  @Builder.Default private Integer level = 1; // 기본 레벨 설정
+  @Builder.Default private Long level = 1L; // 기본 레벨 설정
 
-  @Builder.Default private Integer experience = 0; // 기본 경험치 설정
+  @Builder.Default private Long experience = 0L; // 기본 경험치 설정
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
