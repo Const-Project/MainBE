@@ -85,7 +85,7 @@ class QuizServiceTest {
     assertThat(result.getQuizType()).isEqualTo(QuizType.MULTI_CHOICE);
     assertThat(result.getMissionId()).isEqualTo(dailyMissionMasterId);
     assertThat(result.getQuizOptions()).hasSize(2);
-    assertThat(result.getQuizOptions().get(0).getOptionText()).isEqualTo("코끼리");
+    assertThat(result.getQuizOptions().get(0).getText()).isEqualTo("코끼리");
 
     // 메소드 호출 횟수 검증
     verify(userDailyMissionRepository, times(1)).findById(userDailyMissionId);

@@ -88,7 +88,7 @@ class UserDailyMissionServiceTest {
 
     // Then
     verify(userDailyMissionRepository, times(1)).findById(dailyMissionId);
-    verify(userDailyMissionRepository, times(1)).delete(mission);
+    verify(userDailyMissionRepository, times(1)).save(mission);
   }
 
   @Test
@@ -106,7 +106,7 @@ class UserDailyMissionServiceTest {
               userDailyMissionService.completeDailyMission(dailyMissionId);
             });
 
-    assertThat(exception.getMessage()).isEqualTo("미션을 찾을 수 없습니다.");
+    assertThat(exception.getMessage()).isEqualTo("해당 ID를 갖는 미션이 존재하지 않습니다.");
     verify(userDailyMissionRepository, times(1)).findById(dailyMissionId);
     verify(userDailyMissionRepository, times(0)).delete(any());
   }
