@@ -2,11 +2,12 @@ package com.example.cp_main_be.domain.garden.domain;
 
 import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -63,13 +64,5 @@ public class Garden {
 
   public void updateBackgroundImage(GardenBackground gardenBackground) {
     this.gardenBackground = gardenBackground;
-  }
-
-  public void increaseWaterCount() {
-    this.waterCount++;
-  }
-
-  public void increaseSunlightCount() {
-    this.sunlightCount++;
   }
 }

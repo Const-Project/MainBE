@@ -2,9 +2,10 @@ package com.example.cp_main_be.domain.social.diary.dto.response;
 
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Getter
 public class DiaryResponse {

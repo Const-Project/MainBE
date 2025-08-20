@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.social.diary.presentation;
 
 import com.example.cp_main_be.domain.social.diary.service.DiaryService;
 import com.example.cp_main_be.global.util.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ public class DiaryImageController {
 
   private final DiaryService diaryService;
 
+  @Operation(summary = "일기 이미지 등록", description = "일기 이미지를 등록합니다")
   @PostMapping("{diaryId}/images")
   public ResponseEntity<ApiResponse<Void>> saveDiaryImage(
       @PathVariable Long diaryId, @RequestParam("file") MultipartFile file) {
@@ -25,6 +27,7 @@ public class DiaryImageController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
+  @Operation(summary = "일기 이미지 삭제", description = "일기 이미지를 삭제합니다")
   @DeleteMapping("{diaryId}/images/{imageId}")
   public ResponseEntity<ApiResponse<Void>> deleteDiaryImage(
       @PathVariable Long diaryId, @PathVariable Long imageId) {

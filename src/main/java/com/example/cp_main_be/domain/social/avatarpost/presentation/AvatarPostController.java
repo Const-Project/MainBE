@@ -7,6 +7,7 @@ import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ public class AvatarPostController {
   private final BookmarkRepository bookmarkRepository;
   private final UserService userService;
 
+  @Operation(summary = "아바타 포스트 정보 조회", description = "아바타 포스트 정보를 조회합니다")
   @GetMapping("/{postId}")
   public ResponseEntity<ApiResponse<PostInfoResponse>> getPostInfo(@PathVariable Long postId) {
     User currentUser = userService.getCurrentUser();

@@ -1,12 +1,12 @@
 package com.example.cp_main_be.domain.social.like.presentation;
 
+import com.example.cp_main_be.domain.social.like.dto.response.LikeCountResponse;
 import com.example.cp_main_be.domain.social.like.service.LikeService;
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
