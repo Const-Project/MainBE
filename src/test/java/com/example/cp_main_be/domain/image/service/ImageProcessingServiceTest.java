@@ -39,7 +39,6 @@ class ImageProcessingServiceTest {
   static void registerDynamicProperties(DynamicPropertyRegistry registry) {
     registry.add("fastapi.server.url", () -> mockWebServer.url("/").toString());
     registry.add("jwt.secret", () -> "this-is-a-dummy-secret-key-for-testing-purpose");
-    registry.add("r");
   }
 
   @Test
