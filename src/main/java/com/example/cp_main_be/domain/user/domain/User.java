@@ -2,8 +2,6 @@ package com.example.cp_main_be.domain.user.domain;
 
 import com.example.cp_main_be.domain.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.garden.domain.Garden;
-import com.example.cp_main_be.domain.social.bookmark.domain.Bookmark;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,11 +42,11 @@ public class User {
       cascade = CascadeType.ALL,
       orphanRemoval = true) // User와 Avatar의 1:N 관계 설정
   @Builder.Default
-  private List<Avatar> avatarList = new ArrayList<>();
+  private List<Avatar> avatarList = new ArrayList<>(); // 아바타 목록 추가
 
-  @Builder.Default private Integer level = 1; // 기본 레벨 설정
+  @Builder.Default private Long level = 1L; // 기본 레벨 설정
 
-  @Builder.Default private Integer experience = 0; // 기본 경험치 설정
+  @Builder.Default private Integer temperatureScore = 0; // 기본 온도 점수 설정
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
@@ -64,14 +62,6 @@ public class User {
   @Builder.Default
   private List<Garden> gardens = new ArrayList<>();
 
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  @Builder.Default
-  private List<Diary> diaries = new ArrayList<>();
-
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-  @Builder.Default
-  private List<Bookmark> bookMarks = new ArrayList<>();
-
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
   protected void onCreate() {
     this.createdAt = LocalDateTime.now();
@@ -82,27 +72,5 @@ public class User {
   @PreUpdate // 엔티티가 업데이트되기 전에 실행되는 콜백 메서드
   protected void onUpdate() {
     this.updatedAt = LocalDateTime.now();
-  }
-
-  // == 정보 수정 메서드 ==//
-  public void updateProfile(String username, String profileImageUrl) {
-    if (username != null) {
-      this.username = username;
-    }
-    if (profileImageUrl != null) {
-      this.profileImageUrl = profileImageUrl;
-    }
-  }
-
-  // == 연관관계 편의 메서드 ==//
-  public void addGarden(Garden garden) {
-    this.gardens.add(garden);
-  }
-
-  // == 비즈니스 로직 메서드 (향후 확장용) ==//
-  public void addExperience(int amount) {
-    this.experience += amount;
-    // TODO: 여기에 레벨업 확인 로직을 추가할 수 있습니다.
-    // ex) if (this.experience >= getRequiredExperienceForNextLevel()) { levelUp(); }
   }
 }

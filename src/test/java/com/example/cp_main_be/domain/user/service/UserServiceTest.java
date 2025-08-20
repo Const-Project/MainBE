@@ -2,7 +2,9 @@ package com.example.cp_main_be.domain.user.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 
 import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.UserStatus;
@@ -62,7 +64,8 @@ class UserServiceTest {
         User.builder()
             .email("test@example.com")
             .passwordHash("hashedpassword")
-            .level(1)
+            .level(1L)
+            .temperatureScore(0)
             .status(UserStatus.ACTIVE)
             .build();
     doThrow(DataIntegrityViolationException.class).when(userRepository).save(any(User.class));
