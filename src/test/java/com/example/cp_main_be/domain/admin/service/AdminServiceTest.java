@@ -6,21 +6,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
-import com.example.cp_main_be.daily_keywords.domain.repository.DailyKeywordsRepository;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
-import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
-import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
-import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
-import com.example.cp_main_be.domain.plant_masters.domain.PlantMasters;
-import com.example.cp_main_be.domain.plant_masters.domain.repository.PlantMasterRepository;
-import com.example.cp_main_be.domain.quiz.domain.QuizOptions;
+import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
+import com.example.cp_main_be.domain.garden.plant_masters.domain.repository.PlantMasterRepository;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.UserStatus;
+import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
+import com.example.cp_main_be.domain.mission.daily_keywords.domain.repository.DailyKeywordsRepository;
+import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMasterRepository;
+import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.UserStatus;
-import com.example.cp_main_be.domain.user.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -36,7 +36,7 @@ class AdminServiceTest {
 
   @InjectMocks private AdminService adminService;
 
-  @Mock private DailyMissionMastersRepository dailyMissionMastersRepository;
+  @Mock private DailyMissionMasterRepository dailyMissionMasterRepository;
 
   @Mock private DailyKeywordsRepository dailyKeywordsRepository;
 
@@ -59,16 +59,16 @@ class AdminServiceTest {
             .rewardPoints(100L)
             .build();
 
-    DailyMissionMasters mission = DailyMissionMasters.builder().id(1L).title("새 미션").build();
-    given(dailyMissionMastersRepository.save(any(DailyMissionMasters.class))).willReturn(mission);
+    DailyMissionMaster mission = DailyMissionMaster.builder().id(1L).title("새 미션").build();
+    given(dailyMissionMasterRepository.save(any(DailyMissionMaster.class))).willReturn(mission);
 
     // When
-    DailyMissionMasters result = adminService.createDailyMissionMasters(requestDTO);
+    DailyMissionMaster result = adminService.createDailyMissionMasters(requestDTO);
 
     // Then
     assertThat(result.getId()).isEqualTo(1L);
     assertThat(result.getTitle()).isEqualTo("새 미션");
-    verify(dailyMissionMastersRepository, times(1)).save(any(DailyMissionMasters.class));
+    verify(dailyMissionMasterRepository, times(1)).save(any(DailyMissionMaster.class));
   }
 
   @Test
@@ -80,17 +80,17 @@ class AdminServiceTest {
         AdminRequestDTO.UpdateMissionRequestDTO.builder().build();
     requestDTO.setTitle("수정된 미션 제목");
 
-    DailyMissionMasters existingMission =
-        DailyMissionMasters.builder().id(missionId).title("원본 제목").build();
-    given(dailyMissionMastersRepository.findById(missionId))
+    DailyMissionMaster existingMission =
+        DailyMissionMaster.builder().id(missionId).title("원본 제목").build();
+    given(dailyMissionMasterRepository.findById(missionId))
         .willReturn(Optional.of(existingMission));
 
     // When
-    DailyMissionMasters result = adminService.updateDailyMissionMasters(requestDTO, missionId);
+    DailyMissionMaster result = adminService.updateDailyMissionMasters(requestDTO, missionId);
 
     // Then
     assertThat(result.getTitle()).isEqualTo("수정된 미션 제목");
-    verify(dailyMissionMastersRepository, times(1)).findById(missionId);
+    verify(dailyMissionMasterRepository, times(1)).findById(missionId);
   }
 
   @Test
@@ -100,7 +100,7 @@ class AdminServiceTest {
     Long missionId = 999L;
     AdminRequestDTO.UpdateMissionRequestDTO requestDTO =
         AdminRequestDTO.UpdateMissionRequestDTO.builder().build();
-    given(dailyMissionMastersRepository.findById(missionId)).willReturn(Optional.empty());
+    given(dailyMissionMasterRepository.findById(missionId)).willReturn(Optional.empty());
 
     // When & Then
     assertThrows(
@@ -184,8 +184,8 @@ class AdminServiceTest {
             .isCorrect(true)
             .build();
 
-    DailyMissionMasters missionMaster = DailyMissionMasters.builder().id(missionMasterId).build();
-    given(dailyMissionMastersRepository.findById(missionMasterId))
+    DailyMissionMaster missionMaster = DailyMissionMaster.builder().id(missionMasterId).build();
+    given(dailyMissionMasterRepository.findById(missionMasterId))
         .willReturn(Optional.of(missionMaster));
 
     // When
@@ -194,7 +194,7 @@ class AdminServiceTest {
     // Then
     assertThat(result.getOptionText()).isEqualTo("정답");
     assertThat(result.isCorrect()).isTrue();
-    verify(dailyMissionMastersRepository, times(1)).findById(missionMasterId);
+    verify(dailyMissionMasterRepository, times(1)).findById(missionMasterId);
   }
 
   @Test
@@ -204,7 +204,7 @@ class AdminServiceTest {
     Long missionMasterId = 999L;
     AdminRequestDTO.CreateQuizRequestDTO requestDTO =
         AdminRequestDTO.CreateQuizRequestDTO.builder().missionMasterId(missionMasterId).build();
-    given(dailyMissionMastersRepository.findById(missionMasterId)).willReturn(Optional.empty());
+    given(dailyMissionMasterRepository.findById(missionMasterId)).willReturn(Optional.empty());
 
     // When & Then
     assertThrows(

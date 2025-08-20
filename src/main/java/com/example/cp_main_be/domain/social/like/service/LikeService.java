@@ -1,15 +1,16 @@
 package com.example.cp_main_be.domain.social.like.service;
 
-import com.example.cp_main_be.domain.notification.domain.NotificationType;
-import com.example.cp_main_be.domain.notification.service.NotificationService;
+import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
+import com.example.cp_main_be.domain.member.notification.service.NotificationService;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.feed.domain.Feed;
 import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
 import com.example.cp_main_be.domain.social.like.domain.Like;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +35,11 @@ public class LikeService {
     }
 
     Like like = Like.builder().user(user).targetId(targetId).targetType(targetType).build();
-    likeRepository.save(like);
+    try {
+      likeRepository.save(like);
+    } catch (DataIntegrityViolationException e) {
+      throw new RuntimeException("이미 좋아요를 눌렀습니다.");
+    }
 
     if ("feed".equalsIgnoreCase(targetType)) {
       Feed feed =

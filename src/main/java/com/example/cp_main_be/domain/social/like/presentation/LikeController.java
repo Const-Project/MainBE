@@ -1,8 +1,8 @@
 package com.example.cp_main_be.domain.social.like.presentation;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.like.service.LikeService;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

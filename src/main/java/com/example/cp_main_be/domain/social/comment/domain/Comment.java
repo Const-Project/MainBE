@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.social.comment.domain;
 
-import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -33,6 +34,10 @@ public class Comment {
   // 현재는 임시로 대상 ID만 추가
   private Long targetId;
   private String targetType; // 예: "DIARY", "AVATAR_POST"
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "avatar_post", nullable = true)
+  private AvatarPost avatarPost;
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
