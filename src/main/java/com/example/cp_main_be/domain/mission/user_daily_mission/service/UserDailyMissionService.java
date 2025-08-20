@@ -87,6 +87,9 @@ public class UserDailyMissionService {
 
     // UserDailyMission에 답안 정보 저장 (엔티티 필드에 맞춰서)
     userDailyMission.setSelectedOptionId(selectedOption.getId());
+    userDailyMission.setSelectedAnswerNumber(selectedOption.getOptionOrder());
+    userDailyMission.setIsQuizCorrect(isCorrect);
+    userDailyMission.setQuizAnsweredAt(LocalDateTime.now());
 
     // 정답이면 미션 완료 처리
     if (isCorrect) {
