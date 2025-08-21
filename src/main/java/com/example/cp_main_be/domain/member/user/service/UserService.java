@@ -3,7 +3,7 @@ package com.example.cp_main_be.domain.member.user.service;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.member.user.dto.request.UserRequest;
+import com.example.cp_main_be.domain.member.user.dto.request.UserRegisterRequest;
 import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
@@ -22,12 +22,12 @@ public class UserService {
   private final UserRepository userRepository;
   private final JwtTokenProvider jwtTokenProvider;
 
-  public UserResponse registerUser(UserRequest userRequest) {
+  public UserResponse registerUser(UserRegisterRequest userRequest) {
     User user =
         User.builder()
-            .uuid(userRequest.getUuid() != null ? userRequest.getUuid() : UUID.randomUUID())
+            .uuid(UUID.randomUUID())
             .username(userRequest.getUsername())
-            .profileImageUrl(userRequest.getAvatarUrl())
+            .profileImageUrl(null)
             .build();
     // 최초 텃밭 생성 및 할당
     Garden firstGarden = Garden.builder().user(user).slotNumber(1).build();

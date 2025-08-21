@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.UserStatus;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.member.user.dto.request.UserRequest;
+import com.example.cp_main_be.domain.member.user.dto.request.UserRegisterRequest;
 import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
@@ -147,9 +147,8 @@ class UserServiceTest {
   @Test
   void registerUser_success_new_user() {
     // given
-    UserRequest userRequest = new UserRequest();
+    UserRegisterRequest userRequest = new UserRegisterRequest();
     userRequest.setUsername("newuser");
-    userRequest.setAvatarUrl("http://example.com/avatar.png");
 
     User newUser =
         User.builder()

@@ -3,8 +3,12 @@ package com.example.cp_main_be.domain.social.diary.domain;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.*;
 
 @Entity
@@ -47,12 +51,14 @@ public class Diary {
   @Builder.Default
   private int likeCount = 0;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "comment_id")
-  private Comment comment;
+  @OneToMany(mappedBy = "diary", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference // 2. 순환 참조 방지를 위해 ManagedReference 사용
+  @Builder.Default
+  private List<Comment> comments = new ArrayList<>();
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
+  @JsonBackReference
   private User user;
 
   @PrePersist
@@ -83,5 +89,10 @@ public class Diary {
 
   public void decreaseLikeCount() {
     this.likeCount = Math.max(0, this.likeCount - 1);
+  }
+
+  public void addComment(Comment comment) {
+    this.comments.add(comment);
+    comment.setDiary(this); // Comment 엔티티에 setDiary 메서드가 있다고 가정
   }
 }

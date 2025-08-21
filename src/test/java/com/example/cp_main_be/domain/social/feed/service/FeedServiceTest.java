@@ -4,6 +4,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.global.dto.FeedItemResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,7 @@ class FeedServiceTest {
     given(userRepository.findByUuid(userUuid)).willReturn(Optional.of(user));
 
     // when
-    List<Object> feedItems = feedService.getFeed(userUuid, null);
+    List<FeedItemResponse> feedItems = feedService.getFeed(userUuid, null);
 
     // then
     Assertions.assertNotNull(feedItems);
@@ -50,7 +51,7 @@ class FeedServiceTest {
     given(userRepository.findByUuid(userUuid)).willReturn(Optional.of(user));
 
     // when
-    List<Object> feedItems = feedService.getFeed(userUuid, "following");
+    List<FeedItemResponse> feedItems = feedService.getFeed(userUuid, "following");
 
     // then
     Assertions.assertNotNull(feedItems);

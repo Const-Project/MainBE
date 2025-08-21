@@ -2,7 +2,7 @@ package com.example.cp_main_be.domain.garden.garden.presentation;
 
 import com.example.cp_main_be.domain.garden.garden.dto.GardenResponse;
 import com.example.cp_main_be.domain.garden.garden.service.GardenService;
-import com.example.cp_main_be.global.util.ApiResponse;
+import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
