@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.daily_question.domain;
+package com.example.cp_main_be.domain.member.daily_question.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import jakarta.persistence.*;

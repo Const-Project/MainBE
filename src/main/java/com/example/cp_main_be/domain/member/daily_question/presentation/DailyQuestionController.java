@@ -1,9 +1,9 @@
-package com.example.cp_main_be.domain.daily_question.presentation;
+package com.example.cp_main_be.domain.member.daily_question.presentation;
 
-import com.example.cp_main_be.domain.daily_question.dto.DailyQuestionAnswerRequest;
-import com.example.cp_main_be.domain.daily_question.dto.DailyQuestionResponse;
-import com.example.cp_main_be.domain.daily_question.service.DailyQuestionAnswerService;
-import com.example.cp_main_be.domain.daily_question.service.DailyQuestionService;
+import com.example.cp_main_be.domain.member.daily_question.dto.DailyQuestionAnswerRequest;
+import com.example.cp_main_be.domain.member.daily_question.dto.DailyQuestionResponse;
+import com.example.cp_main_be.domain.member.daily_question.service.DailyQuestionAnswerService;
+import com.example.cp_main_be.domain.member.daily_question.service.DailyQuestionService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

@@ -158,14 +158,15 @@ class GardenServiceTest {
                     List.of(
                         Garden.builder().slotNumber(1).build(),
                         Garden.builder().slotNumber(2).build(),
-                        Garden.builder().slotNumber(3).build())))
+                        Garden.builder().slotNumber(3).build(),
+                        Garden.builder().slotNumber(4).build())))
             .build();
 
     // when & then
     IllegalStateException exception =
         assertThrows(IllegalStateException.class, () -> gardenService.unlockGarden(user));
 
-    assertThat(exception.getMessage()).isEqualTo("텃밭은 최대 3개까지만 생성할 수 있습니다.");
+    assertThat(exception.getMessage()).isEqualTo("텃밭은 최대 4개까지만 생성할 수 있습니다.");
     then(gardenRepository).should(never()).save(any(Garden.class));
   }
 }

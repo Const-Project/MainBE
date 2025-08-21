@@ -1,8 +1,8 @@
-package com.example.cp_main_be.domain.daily_question.service;
+package com.example.cp_main_be.domain.member.daily_question.service;
 
-import com.example.cp_main_be.domain.daily_question.domain.DailyQuestionAnswer;
-import com.example.cp_main_be.domain.daily_question.domain.repository.DailyQuestionAnswerRepository;
-import com.example.cp_main_be.domain.daily_question.dto.DailyQuestionAnswerRequest;
+import com.example.cp_main_be.domain.member.daily_question.domain.DailyQuestionAnswer;
+import com.example.cp_main_be.domain.member.daily_question.domain.repository.DailyQuestionAnswerRepository;
+import com.example.cp_main_be.domain.member.daily_question.dto.DailyQuestionAnswerRequest;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;

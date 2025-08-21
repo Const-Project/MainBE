@@ -85,6 +85,7 @@ public class CommentService {
     }
 
     comment.setContent(request.getContent());
+    commentRepository.save(comment);
 
     return getResponse(comment);
   }
@@ -104,14 +105,17 @@ public class CommentService {
   private CommentResponse getResponse(Comment comment) {
     Long targetId;
     String targetType;
-    if (comment.getDiary() == null) {
+
+    if (comment.getDiary() != null) {
+      targetId = comment.getDiary().getId();
+      targetType = "DIARY";
+    } else if (comment.getAvatarPost() != null) {
       targetId = comment.getAvatarPost().getId();
       targetType = "AVATAR_POST";
     } else {
-      targetId = comment.getDiary().getId();
-      targetType = "DIARY";
+      throw new IllegalStateException("Comment must be linked to either Diary or AvatarPost");
     }
 
-    return CommentResponse.from(commentRepository.save(comment), targetId, targetType);
+    return CommentResponse.from(comment, targetId, targetType);
   }
 }

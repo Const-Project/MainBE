@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.daily_question.domain;
+package com.example.cp_main_be.domain.member.daily_question.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

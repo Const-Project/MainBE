@@ -1,6 +1,6 @@
-package com.example.cp_main_be.domain.daily_question.dto;
+package com.example.cp_main_be.domain.member.daily_question.dto;
 
-import com.example.cp_main_be.domain.daily_question.domain.AnswerType;
+import com.example.cp_main_be.domain.member.daily_question.domain.AnswerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
