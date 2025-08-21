@@ -10,6 +10,7 @@ import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDail
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +60,8 @@ public class UserDailyMissionController {
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
-  @PostMapping("/photo/{userDailyMissionId}/upload")
+  @PostMapping(value = "/photo/{userDailyMissionId}/upload"
+          ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
   @Operation(summary = "미션 사진 업로드 API")
   public ResponseEntity<ApiResponse<String>> uploadPictureForMission(
       @RequestParam MultipartFile file,
