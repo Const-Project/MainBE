@@ -9,6 +9,8 @@ public enum NotificationType {
   FOLLOW("follow", "%s님이 회원님을 팔로우하기 시작했습니다."),
   POLLEN("pollen", "%s님이 회원님의 식물에 꽃가루를 주었습니다."),
   FEED_LIKE("feed_like", "%s님이 회원님의 일기를 좋아합니다."),
+  DIARY_LIKE("diary_like", "%s님이 회원님의 일기를 좋아합니다."),
+  AVATAR_POST_LIKE("avatar_post_like", "%s님이 회원님의 포스트를 좋아합니다."),
   FEED_COMMENT("feed_comment", "%s님이 회원님의 일기에 댓글을 남겼습니다."),
   GUESTBOOK("guestbook", "%s님이 방명록에 글을 남겼습니다."),
   WATERING("watering", "%s에게 물 줄 시간이에요!"),

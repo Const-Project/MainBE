@@ -4,7 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
@@ -164,7 +165,7 @@ class AdminServiceTest {
     given(userService.findUserById(userId)).willReturn(user);
 
     // When
-    User result = adminService.chageUserStatus(userId, requestDTO);
+    User result = adminService.changeUserStatus(userId, requestDTO);
 
     // Then
     assertThat(result.getStatus()).isEqualTo(UserStatus.INACTIVE);
