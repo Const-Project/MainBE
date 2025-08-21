@@ -7,9 +7,8 @@ import static org.mockito.BDDMockito.then;
 import com.example.cp_main_be.domain.mission.keyword.domain.Keyword;
 import com.example.cp_main_be.domain.mission.keyword.domain.repository.KeywordRepository;
 import com.example.cp_main_be.domain.mission.keyword.dto.response.KeywordResponse;
-import java.util.List;
-
 import com.example.cp_main_be.domain.mission.keyword.service.KeywordService;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

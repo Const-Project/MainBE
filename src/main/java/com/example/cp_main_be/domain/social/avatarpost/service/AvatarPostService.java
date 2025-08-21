@@ -1,11 +1,11 @@
 package com.example.cp_main_be.domain.social.avatarpost.service;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.response.PostInfoResponse;
 import com.example.cp_main_be.domain.social.bookmark.domain.repository.BookmarkRepository;
-import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

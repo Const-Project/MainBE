@@ -7,14 +7,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import com.example.cp_main_be.domain.content.image.ImageUploader;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
-import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

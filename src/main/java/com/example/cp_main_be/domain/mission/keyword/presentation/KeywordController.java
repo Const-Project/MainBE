@@ -5,13 +5,12 @@ import com.example.cp_main_be.domain.mission.keyword.dto.response.TodayKeywordRe
 import com.example.cp_main_be.domain.mission.keyword.service.KeywordService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor

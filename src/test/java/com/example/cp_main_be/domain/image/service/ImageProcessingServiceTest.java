@@ -1,8 +1,7 @@
 package com.example.cp_main_be.domain.image.service;
 
-import java.io.IOException;
-
 import com.example.cp_main_be.domain.content.image.service.ImageProcessingService;
+import java.io.IOException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;

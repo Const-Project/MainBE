@@ -1,5 +1,9 @@
 package com.example.cp_main_be.domain.garden.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.*;
+
 import com.example.cp_main_be.domain.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.domain.GardenBackground;
 import com.example.cp_main_be.domain.garden.domain.repository.GardenBackgroundRepository;
@@ -8,6 +12,10 @@ import com.example.cp_main_be.domain.garden.dto.response.GardenBackgroundCandida
 import com.example.cp_main_be.domain.garden.dto.response.GardenBackgroundResponse;
 import com.example.cp_main_be.domain.garden.dto.response.GardenResponse;
 import com.example.cp_main_be.domain.member.user.domain.User;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,15 +25,6 @@ import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class GardenServiceTest {

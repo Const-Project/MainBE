@@ -46,10 +46,7 @@ public class AuthService {
     String newNickname = "익명의 사용자-" + newUuid.substring(0, 4);
 
     User newUser =
-        User.builder()
-            .uuid(java.util.UUID.fromString(newUuid))
-            .username(newNickname)
-            .build();
+        User.builder().uuid(java.util.UUID.fromString(newUuid)).username(newNickname).build();
 
     userRepository.save(newUser);
 

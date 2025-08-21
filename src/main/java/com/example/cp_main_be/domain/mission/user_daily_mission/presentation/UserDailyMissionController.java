@@ -1,10 +1,10 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.presentation;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
-import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

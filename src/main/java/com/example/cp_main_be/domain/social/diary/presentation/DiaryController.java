@@ -1,22 +1,21 @@
 package com.example.cp_main_be.domain.social.diary.presentation;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryIdResponse;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.social.diary.service.DiaryService;
-import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor

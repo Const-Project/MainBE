@@ -1,6 +1,8 @@
 package com.example.cp_main_be.domain.social.diary.service;
 
 import com.example.cp_main_be.domain.content.image.ImageUploader;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
@@ -8,8 +10,6 @@ import com.example.cp_main_be.domain.social.diary.dto.response.DiaryIdResponse;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
-import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.List;
