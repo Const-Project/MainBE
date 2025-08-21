@@ -8,10 +8,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface DiaryRepository extends JpaRepository<Diary, Long> {
-    List<Diary> findByUserInAndIsPublicIsTrue(List<User> users, Pageable pageable);
+  List<Diary> findByUserInAndIsPublicIsTrue(List<User> users, Pageable pageable);
 
-    List<Diary> findByIsPublicIsTrue(Pageable pageable);
+  List<Diary> findByIsPublicIsTrue(Pageable pageable);
 
-    List<Diary> findByUserOrderByCreatedAtDesc(User user);
-
+  List<Diary> findByUserOrderByCreatedAtDesc(User user);
 }
