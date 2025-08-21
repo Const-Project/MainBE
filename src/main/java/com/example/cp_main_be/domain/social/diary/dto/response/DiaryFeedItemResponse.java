@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.social.diary.dto;
+package com.example.cp_main_be.domain.social.diary.dto.response;
 
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.global.dto.AuthorResponse;

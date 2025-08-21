@@ -19,10 +19,15 @@ public class DiaryImage {
   @Column(name = "image_url", nullable = false)
   private String imageUrl;
 
-  @OneToOne(fetch = FetchType.LAZY)
+  @Setter
+  @OneToOne
   @JoinColumn(name = "diary_id", nullable = false)
   private Diary diary;
 
   @Column(name = "created_at")
   private LocalDateTime createdAt;
+
+  public void updateImageUrl(String newImageUrl) {
+    this.imageUrl = newImageUrl;
+  }
 }

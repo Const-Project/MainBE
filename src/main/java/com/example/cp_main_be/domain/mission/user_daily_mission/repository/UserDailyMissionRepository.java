@@ -13,7 +13,7 @@ public interface UserDailyMissionRepository extends JpaRepository<UserDailyMissi
   List<UserDailyMission> findAllByUser_Id(Long userId);
 
   @Query(
-      "SELECT new com.example.cp_main_be.dto.MissionCountPerDay(DAY(udm.completedAt), COUNT(udm.id)) "
+      "SELECT new com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay(DAY(udm.completedAt), COUNT(udm.id)) "
           + "FROM UserDailyMission udm "
           + "WHERE udm.user = :user "
           + "  AND udm.isCompleted = true "

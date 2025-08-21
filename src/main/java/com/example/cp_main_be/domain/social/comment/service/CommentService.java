@@ -1,16 +1,20 @@
 package com.example.cp_main_be.domain.social.comment.service;
 
-import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
-import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
+import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
 import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
-import com.example.cp_main_be.domain.social.feed.domain.Feed;
-import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
+import com.example.cp_main_be.domain.social.comment.dto.request.UpdateCommentRequest;
+import com.example.cp_main_be.domain.social.comment.dto.response.CommentResponse;
+import com.example.cp_main_be.domain.social.diary.domain.Diary;
+import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
+import com.example.cp_main_be.global.event.CommentCreatedEvent;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,41 +25,56 @@ public class CommentService {
 
   private final CommentRepository commentRepository;
   private final UserRepository userRepository;
-  private final FeedRepository feedRepository;
-  private final NotificationService notificationService;
+  private final DiaryRepository diaryRepository; // Diary Repository 주입
+  private final AvatarPostRepository avatarPostRepository; // AvatarPost Repository 주입
+  private final ApplicationEventPublisher eventPublisher;
 
-  public Comment createComment(Long writerId, CommentRequest request) {
+  @Transactional
+  public CommentResponse createComment(Long writerId, CommentRequest request) {
+    // 1. 댓글 작성자 조회
     User writer =
         userRepository
             .findById(writerId)
             .orElseThrow(() -> new UserNotFoundException("작성자 사용자를 찾을 수 없습니다."));
 
-    Comment comment =
-        Comment.builder()
-            .writer(writer)
-            .content(request.getContent())
-            .targetId(request.getTargetId())
-            .targetType(request.getTargetType())
-            .build();
+    // 2. Comment 빌더 준비
+    Comment.CommentBuilder commentBuilder =
+        Comment.builder().writer(writer).content(request.getContent());
+
+    // 3. targetType에 따라 분기하여 부모 엔티티를 찾고 연관관계를 설정
+    String targetType = request.getTargetType();
+    Long targetId = request.getTargetId();
+
+    if ("DIARY".equalsIgnoreCase(targetType)) {
+      Diary diary =
+          diaryRepository
+              .findById(targetId)
+              .orElseThrow(
+                  () -> new IllegalArgumentException("ID에 해당하는 일기를 찾을 수 없습니다: " + targetId));
+      commentBuilder.diary(diary);
+    } else if ("AVATAR_POST".equalsIgnoreCase(targetType)) {
+      AvatarPost avatarPost =
+          avatarPostRepository
+              .findById(targetId)
+              .orElseThrow(
+                  () -> new IllegalArgumentException("ID에 해당하는 아바타 포스트를 찾을 수 없습니다: " + targetId));
+      commentBuilder.avatarPost(avatarPost);
+    } else {
+      throw new IllegalArgumentException("지원하지 않는 대상 타입입니다: " + targetType);
+    }
+
+    // 4. 최종적으로 Comment 객체를 빌드하고 저장
+    Comment comment = commentBuilder.build();
     commentRepository.save(comment);
 
-    if ("feed".equalsIgnoreCase(request.getTargetType())) {
-      Feed feed =
-          feedRepository
-              .findById(request.getTargetId())
-              .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
-      User receiver = feed.getUser();
+    // 5. 이벤트 발행
+    eventPublisher.publishEvent(new CommentCreatedEvent(comment));
 
-      // 자기 자신에게는 알림을 보내지 않음
-      if (!receiver.getId().equals(writerId)) {
-        notificationService.send(
-            receiver, writer, NotificationType.FEED_COMMENT, "/feeds/" + request.getTargetId());
-      }
-    }
-    return comment;
+    return getResponse(comment);
   }
 
-  public Comment updateComment(Long commentId, Long writerId, CommentRequest request) {
+  public CommentResponse updateComment(
+      Long commentId, Long writerId, UpdateCommentRequest request) {
     Comment comment =
         commentRepository
             .findById(commentId)
@@ -66,7 +85,8 @@ public class CommentService {
     }
 
     comment.setContent(request.getContent());
-    return commentRepository.save(comment);
+
+    return getResponse(comment);
   }
 
   public void deleteComment(Long commentId, Long writerId) {
@@ -79,5 +99,19 @@ public class CommentService {
       throw new RuntimeException("댓글 작성자만 삭제할 수 있습니다."); // TODO: Custom Exception
     }
     commentRepository.delete(comment);
+  }
+
+  private CommentResponse getResponse(Comment comment) {
+    Long targetId;
+    String targetType;
+    if (comment.getDiary() == null) {
+      targetId = comment.getAvatarPost().getId();
+      targetType = "AVATAR_POST";
+    } else {
+      targetId = comment.getDiary().getId();
+      targetType = "DIARY";
+    }
+
+    return CommentResponse.from(commentRepository.save(comment), targetId, targetType);
   }
 }

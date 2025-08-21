@@ -10,6 +10,8 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsR
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserImageMission;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserQuizMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.global.infra.S3Uploader;
 import java.time.LocalDateTime;
@@ -40,10 +42,11 @@ public class UserDailyMissionService {
   }
 
   public String uploadPictureForDailyMission(Long userDailyMissionId, MultipartFile file) {
-    UserDailyMission userDailyMission =
-        userDailyMissionRepository
-            .findById(userDailyMissionId)
-            .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
+    UserImageMission userDailyMission =
+        (UserImageMission)
+            userDailyMissionRepository
+                .findById(userDailyMissionId)
+                .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
 
     String imageUrl = s3Uploader.upload(file, "mission-images");
 
@@ -57,10 +60,11 @@ public class UserDailyMissionService {
   }
 
   public Boolean summitAnswer(QuizRequestDTO request, Long userDailyMissionId) {
-    UserDailyMission userDailyMission =
-        userDailyMissionRepository
-            .findById(userDailyMissionId)
-            .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
+    UserQuizMission userDailyMission =
+        (UserQuizMission)
+            userDailyMissionRepository
+                .findById(userDailyMissionId)
+                .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
 
     Quiz quiz =
         quizRepository

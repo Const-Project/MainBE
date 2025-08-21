@@ -11,6 +11,7 @@ import lombok.*;
 @Inheritance(strategy = InheritanceType.JOINED) // 1. 상속 전략 설정 (조인 전략)
 @DiscriminatorColumn(name = "mission_type") // 2. 타입을 구분할 컬럼
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Setter
 public abstract class UserDailyMission { // 3. 추상 클래스로 변경
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

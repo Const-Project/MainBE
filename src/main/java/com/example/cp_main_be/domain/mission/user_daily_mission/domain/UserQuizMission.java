@@ -7,9 +7,11 @@ import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @DiscriminatorValue("QUIZ") // 부모 테이블의 mission_type 컬럼에 "QUIZ"로 저장됨
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserQuizMission extends UserDailyMission {
@@ -22,5 +24,10 @@ public class UserQuizMission extends UserDailyMission {
   @Column(name = "quiz_answered_at")
   private LocalDateTime quizAnsweredAt;
 
-  // 생성자 등 필요한 로직 추가 ...
+  @Column(name = "selected_answer_number")
+  private Integer selectedAnswerNumber;
+
+  public void setSelectedAnswerNumber(int optionOrder) {
+    this.selectedAnswerNumber = optionOrder;
+  }
 }

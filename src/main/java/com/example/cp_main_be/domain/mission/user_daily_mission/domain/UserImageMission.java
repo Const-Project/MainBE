@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Setter
 @Getter
 @DiscriminatorValue("IMAGE") // 부모 테이블의 mission_type 컬럼에 "IMAGE"로 저장됨
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

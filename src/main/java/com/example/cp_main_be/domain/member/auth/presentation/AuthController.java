@@ -20,17 +20,21 @@ public class AuthController {
 
   private final AuthService authService;
 
-  @Operation(summary = "액세스 토큰 재발급", description = "액세스 토큰을 재발급합니다. 리프레시 토큰이 유효해야합니다.")
+  @Operation(summary = "액세스 토큰 재발급", description = "리프레시 토큰으로 새로운 액세스 토큰을 발급받습니다.")
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshAccessToken(
-      @RequestHeader("Authorization") String refreshToken) {
-    try {
-      TokenRefreshResponse response = authService.refreshAccessToken(refreshToken.substring(7));
-      return ResponseEntity.ok(ApiResponse.success(response));
-    } catch (RuntimeException e) {
-      // 리프레시 토큰 만료 시, 새로운 익명 계정 생성
-      TokenRefreshResponse response = authService.createNewAnonymousAccount();
-      return ResponseEntity.ok(ApiResponse.success(response));
-    }
+      // 1. "Authorization" 헤더 대신 커스텀 헤더 "X-Refresh-Token" 사용
+      @RequestHeader("X-Refresh-Token") String refreshToken) {
+
+    // 2. try-catch 블록 제거. 실패 시 예외가 발생하여 GlobalExceptionHandler가 처리하도록 함.
+    TokenRefreshResponse response = authService.refreshAccessToken(refreshToken);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(summary = "신규 익명 계정 등록", description = "첫 방문자를 위해 새로운 익명 계정을 생성하고 토큰을 발급합니다.")
+  @PostMapping("/register-anonymous")
+  public ResponseEntity<ApiResponse<TokenRefreshResponse>> registerAnonymous() {
+    TokenRefreshResponse tokens = authService.registerNewAnonymousUser();
+    return ResponseEntity.ok(ApiResponse.success(tokens));
   }
 }

@@ -3,7 +3,6 @@ package com.example.cp_main_be.domain.member.user.presentation;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
 import com.example.cp_main_be.domain.member.user.dto.request.NicknameChangeRequest;
-import com.example.cp_main_be.domain.member.user.dto.request.UserRegisterRequest;
 import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.common.ApiResponse;
@@ -22,14 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
   private final UserService userService;
-
-  @Operation(summary = "유저 등록 및 토큰 발급", description = "유저가 가입하고 액세스+리프레시 토큰을 반환합니다")
-  @PostMapping("/register")
-  public ResponseEntity<ApiResponse<UserResponse>> register(
-      @RequestBody @Valid UserRegisterRequest userRequest) {
-    UserResponse userResponse = userService.registerUser(userRequest);
-    return ResponseEntity.ok(ApiResponse.success(userResponse));
-  }
 
   //    @DeleteMapping("/register/nickname")
   //    public ResponseEntity<Void> delete(@RequestBody @Valid UserRequest userRequest) {

@@ -9,6 +9,8 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
 import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
+import com.example.cp_main_be.domain.social.comment.dto.request.UpdateCommentRequest;
+import com.example.cp_main_be.domain.social.comment.dto.response.CommentResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -44,12 +46,13 @@ class CommentServiceTest {
         .willAnswer(invocation -> invocation.getArgument(0));
 
     // when
-    Comment createdComment = commentService.createComment(writerId, request);
+    CommentResponse createdComment = commentService.createComment(writerId, request);
 
     // then
     Assertions.assertNotNull(createdComment);
     Assertions.assertEquals(request.getContent(), createdComment.getContent());
-    Assertions.assertEquals(writerId, createdComment.getWriter().getId());
+    Assertions.assertEquals(
+        writerId, userRepository.findByUsername(createdComment.getWriter()).get().getId());
     Assertions.assertEquals(request.getTargetId(), createdComment.getTargetId());
     Assertions.assertEquals(request.getTargetType(), createdComment.getTargetType());
     verify(commentRepository).save(any(Comment.class));
@@ -81,7 +84,7 @@ class CommentServiceTest {
     Long writerId = 1L;
     String oldContent = "이전 댓글";
     String newContent = "수정된 댓글";
-    CommentRequest request = new CommentRequest();
+    UpdateCommentRequest request = new UpdateCommentRequest();
     request.setContent(newContent);
 
     User writer = User.builder().id(writerId).username("writer").build();
@@ -92,7 +95,7 @@ class CommentServiceTest {
         .willAnswer(invocation -> invocation.getArgument(0));
 
     // when
-    Comment updatedComment = commentService.updateComment(commentId, writerId, request);
+    CommentResponse updatedComment = commentService.updateComment(commentId, writerId, request);
 
     // then
     Assertions.assertNotNull(updatedComment);
@@ -107,7 +110,7 @@ class CommentServiceTest {
     // given
     Long commentId = 1L;
     Long writerId = 1L;
-    CommentRequest request = new CommentRequest();
+    UpdateCommentRequest request = new UpdateCommentRequest();
     request.setContent("수정된 댓글");
 
     given(commentRepository.findById(commentId)).willReturn(Optional.empty());
@@ -125,7 +128,7 @@ class CommentServiceTest {
     Long commentId = 1L;
     Long writerId = 1L;
     Long otherUserId = 2L;
-    CommentRequest request = new CommentRequest();
+    UpdateCommentRequest request = new UpdateCommentRequest();
     request.setContent("수정된 댓글");
 
     User writer = User.builder().id(writerId).username("writer").build();

@@ -10,4 +10,6 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
   List<Diary> findByUserInAndIsPublicIsTrue(List<User> users, Pageable pageable);
 
   List<Diary> findByIsPublicIsTrue(Pageable pageable);
+
+  List<Diary> findByUserOrderByCreatedAtDesc(User user);
 }

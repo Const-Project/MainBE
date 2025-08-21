@@ -7,7 +7,7 @@ import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarP
 import com.example.cp_main_be.domain.social.avatarpost.dto.AvatarPostFeedItemResponse;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
-import com.example.cp_main_be.domain.social.diary.dto.DiaryFeedItemResponse;
+import com.example.cp_main_be.domain.social.diary.dto.response.DiaryFeedItemResponse;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.global.dto.FeedItemResponse;

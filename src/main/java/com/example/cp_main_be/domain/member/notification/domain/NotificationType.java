@@ -13,6 +13,8 @@ public enum NotificationType {
   GUESTBOOK("guestbook", "%s님이 방명록에 글을 남겼습니다."),
   WATERING("watering", "%s에게 물 줄 시간이에요!"),
   SUNSHINE("sunshine", "식물에게 햇빛을 줄 시간이에요!"),
+  DIARY_COMMENT("diary_comment", "내 일기에 누군가 댓글을 달았습니다."),
+  AVATAR_POST_COMMENT("avatar_comment", "내 아바타 포스트에 누군가 댓글을 달았습니다."),
   POLLEN_AVAILABLE("pollen_available", "꽃가루가 쌓여있어요, 친구들에게 나눠봐요!");
 
   private final String type;

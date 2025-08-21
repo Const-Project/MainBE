@@ -33,8 +33,7 @@ public class Diary {
 
   private String keyword;
 
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  @JoinColumn(name = "diary_image_id")
+  @OneToOne(mappedBy = "diary", fetch = FetchType.LAZY)
   private DiaryImage diaryImage;
 
   @Column(name = "is_public")
@@ -81,6 +80,9 @@ public class Diary {
 
   public void updateImage(DiaryImage diaryImage) {
     this.diaryImage = diaryImage;
+    if (diaryImage != null) {
+      diaryImage.setDiary(this); // 자식(DiaryImage)에게 부모(Diary)가 누구인지 알려줌
+    }
   }
 
   public void increaseLikeCount() {
