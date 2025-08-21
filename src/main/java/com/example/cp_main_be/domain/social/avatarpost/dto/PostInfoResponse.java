@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.social.avatarpost;
+package com.example.cp_main_be.domain.social.avatarpost.dto;
 
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import java.util.List;

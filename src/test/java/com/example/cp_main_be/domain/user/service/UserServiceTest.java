@@ -9,8 +9,6 @@ import static org.mockito.Mockito.verify;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.UserStatus;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.member.user.dto.request.UserRequest;
-import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
@@ -141,39 +139,6 @@ class UserServiceTest {
     Assertions.assertThrows(UserNotFoundException.class, () -> userService.deleteUser(userId));
     verify(userRepository).findById(userId);
     verify(userRepository, org.mockito.Mockito.never()).delete(any(User.class));
-  }
-
-  @DisplayName("유저 등록 성공 - 새로운 유저")
-  @Test
-  void registerUser_success_new_user() {
-    // given
-    UserRequest userRequest = new UserRequest();
-    userRequest.setUsername("newuser");
-    userRequest.setAvatarUrl("http://example.com/avatar.png");
-
-    User newUser =
-        User.builder()
-            .id(1L)
-            .uuid(UUID.randomUUID())
-            .username("newuser")
-            .profileImageUrl("http://example.com/avatar.png")
-            .build();
-
-    given(userRepository.save(any(User.class))).willReturn(newUser);
-    given(jwtTokenProvider.generateAccessToken(any(String.class))).willReturn("testAccessToken");
-    given(jwtTokenProvider.generateRefreshToken(any(String.class))).willReturn("testRefreshToken");
-
-    // when
-    UserResponse response = userService.registerUser(userRequest);
-
-    // then
-    Assertions.assertNotNull(response);
-    Assertions.assertEquals("newuser", response.getUsername());
-    Assertions.assertEquals("testAccessToken", response.getAccessToken());
-    Assertions.assertEquals("testRefreshToken", response.getRefreshToken());
-    verify(userRepository).save(any(User.class));
-    verify(jwtTokenProvider).generateAccessToken(any(String.class));
-    verify(jwtTokenProvider).generateRefreshToken(any(String.class));
   }
 
   @DisplayName("닉네임 변경 성공")

@@ -184,7 +184,8 @@ class AdminServiceTest {
             .isCorrect(true)
             .build();
 
-    DailyMissionMaster missionMaster = DailyMissionMaster.builder().id(missionMasterId).build();
+    DailyMissionMaster missionMaster =
+        DailyMissionMaster.builder().missionType(MissionType.QUIZ).id(missionMasterId).build();
     given(dailyMissionMasterRepository.findById(missionMasterId))
         .willReturn(Optional.of(missionMaster));
 

@@ -1,15 +1,14 @@
 package com.example.cp_main_be.domain.member.user.service;
 
-import com.example.cp_main_be.domain.garden.garden.domain.Garden;
+import com.example.cp_main_be.domain.member.level.service.LevelService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.member.user.dto.request.UserRequest;
 import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
-import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,26 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
-  private final JwtTokenProvider jwtTokenProvider;
+  private final LevelService levelService;
 
-  public UserResponse registerUser(UserRequest userRequest) {
-    User user =
-        User.builder()
-            .uuid(userRequest.getUuid() != null ? userRequest.getUuid() : UUID.randomUUID())
-            .username(userRequest.getUsername())
-            .profileImageUrl(userRequest.getAvatarUrl())
-            .build();
-    // 최초 텃밭 생성 및 할당
-    Garden firstGarden = Garden.builder().user(user).slotNumber(1).build();
-    user.addGarden(firstGarden);
-
-    userRepository.save(user);
-
-    String accessToken = jwtTokenProvider.generateAccessToken(user.getUuid().toString());
-    String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUuid().toString());
-
-    return new UserResponse(
-        user.getId(), user.getUsername(), user.getUuid(), accessToken, refreshToken);
+  public void addExperience(Long actorId, int points) {
+    User user = userRepository.findById(actorId).get();
+    user.addExperience(points);
+    levelService.checkLevelUp(user);
   }
 
   public void updateAvatar(Long userId, String newAvatarUrl) {
@@ -96,13 +81,24 @@ public class UserService {
         .build();
   }
 
-  // 현재 로그인한 유저 가져옴
   public User getCurrentUser() {
-    String uuidString =
-        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    UUID userUuid = UUID.fromString(uuidString);
-    return userRepository
-        .findByUuid(userUuid)
-        .orElseThrow(() -> new IllegalArgumentException("현재 로그인한 사용자를 찾을 수 없습니다."));
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Object principal = authentication.getPrincipal();
+
+    // Principal이 User 객체인 경우 (현재 JWT 필터에서 이렇게 저장함)
+    if (principal instanceof User) {
+      return (User) principal;
+    }
+
+    // Principal이 String(UUID)인 경우 (백업 처리)
+    if (principal instanceof String) {
+      String uuidString = (String) principal;
+      UUID userUuid = UUID.fromString(uuidString);
+      return userRepository
+          .findByUuid(userUuid)
+          .orElseThrow(() -> new IllegalArgumentException("현재 로그인한 사용자를 찾을 수 없습니다."));
+    }
+
+    throw new IllegalArgumentException("인증 정보를 찾을 수 없습니다.");
   }
 }

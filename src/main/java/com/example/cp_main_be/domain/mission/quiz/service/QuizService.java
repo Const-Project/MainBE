@@ -9,6 +9,7 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizReposito
 import com.example.cp_main_be.domain.mission.quiz.dto.CompletedQuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserQuizMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public class QuizService {
 
   // 새로운 메서드 - 완료된 퀴즈 결과 조회 (정답 정보 포함)
   public CompletedQuizResponseDTO getCompletedQuizResult(Long userDailyMissionId) {
-    UserDailyMission userDailyMission = getUserDailyMission(userDailyMissionId);
+    UserQuizMission userDailyMission = (UserQuizMission) getUserDailyMission(userDailyMissionId);
 
     // 답안을 제출하지 않은 미션은 결과 조회 불가
     if (userDailyMission.getSelectedOptionId() == null) {
