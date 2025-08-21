@@ -2,6 +2,10 @@ package com.example.cp_main_be.domain.admin.dto;
 
 import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
 import java.time.LocalDateTime;
+import java.util.UUID;
+
+import com.example.cp_main_be.domain.reports.domain.ReportReason;
+import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,5 +33,24 @@ public class AdminResponseDTO {
     private int growthStages;
     private int unlockLevel;
     private LocalDateTime createdAt;
+  }
+
+  @Getter
+  @Builder
+  public static class UserResDTO {
+    private Long id;
+    private UUID uuid;
+    private String username;
+  }
+
+  @Getter
+  @Builder
+  public static class ReportResDTO {
+    private Long reportId;
+    private ReportStatus status;
+    private ReportReason reportReason;
+    private LocalDateTime reportDate;
+    private Long reviewerId;
+    private LocalDateTime reviewDate;
   }
 }

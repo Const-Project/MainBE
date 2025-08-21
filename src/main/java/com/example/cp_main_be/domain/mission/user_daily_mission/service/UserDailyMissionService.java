@@ -74,7 +74,7 @@ public class UserDailyMissionService {
     boolean isCorrect = false;
 
     for (QuizOptions quizOptions : quizOptionsList) {
-      if (quizOptions.getOptionOrder() == request.getAnswerNumber()) {
+      if (quizOptions.getOptionOrder() == request.getSelectedOptionId()) {
         selectedOption = quizOptions;
         isCorrect = quizOptions.isCorrect();
         break;
