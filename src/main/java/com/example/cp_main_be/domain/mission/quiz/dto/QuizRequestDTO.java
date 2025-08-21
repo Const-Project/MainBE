@@ -9,5 +9,5 @@ import lombok.Setter;
 public class QuizRequestDTO {
 
   private QuizType quizType;
-  private Integer selectedOptionId;
+  private Long selectedOptionId;
 }
