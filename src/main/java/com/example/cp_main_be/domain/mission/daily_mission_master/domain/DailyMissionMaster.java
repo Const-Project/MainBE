@@ -4,9 +4,10 @@ import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -14,7 +15,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class DailyMissionMasters {
+public class DailyMissionMaster {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,15 +67,15 @@ public class DailyMissionMasters {
   }
 
   public static AdminResponseDTO.DailyMissionMastersResDTO toDailyMissionMastersResDTO(
-      DailyMissionMasters dailyMissionMasters) {
+      DailyMissionMaster dailyMissionMaster) {
     return AdminResponseDTO.DailyMissionMastersResDTO.builder()
-        .id(dailyMissionMasters.getId())
-        .missionType(dailyMissionMasters.getMissionType())
-        .title(dailyMissionMasters.getTitle())
-        .description(dailyMissionMasters.getDescription())
-        .content(dailyMissionMasters.getContent())
-        .rewardPoints(dailyMissionMasters.getRewardPoints())
-        .createdAt(dailyMissionMasters.getCreatedAt())
+        .id(dailyMissionMaster.getId())
+        .missionType(dailyMissionMaster.getMissionType())
+        .title(dailyMissionMaster.getTitle())
+        .description(dailyMissionMaster.getDescription())
+        .content(dailyMissionMaster.getContent())
+        .rewardPoints(dailyMissionMaster.getRewardPoints())
+        .createdAt(dailyMissionMaster.getCreatedAt())
         .build();
   }
 }

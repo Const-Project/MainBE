@@ -13,16 +13,16 @@ package com.example.cp_main_be.domain.admin.presentation;
 // POST /admin/plants (새 식물 등록)
 // PUT /admin/plants/{id} (식물 정보 수정)
 
-import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
-import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.global.dto.ListResponse;
 import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,9 +42,9 @@ public class AdminController {
   @Operation(summary = "일일 미션(미션마스터) 생성 API")
   public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>> createDailyMission(
       @RequestBody AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
-    DailyMissionMasters response = adminService.createDailyMissionMasters(requestDTO);
+    DailyMissionMaster response = adminService.createDailyMissionMasters(requestDTO);
     AdminResponseDTO.DailyMissionMastersResDTO result =
-        DailyMissionMasters.toDailyMissionMastersResDTO(response);
+        DailyMissionMaster.toDailyMissionMastersResDTO(response);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
@@ -52,9 +52,9 @@ public class AdminController {
   @Operation(summary = "일일 미션(미션마스터) 수정 API")
   public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>> updateDailyMission(
       @RequestBody AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
-    DailyMissionMasters response = adminService.updateDailyMissionMasters(requestDTO, id);
+    DailyMissionMaster response = adminService.updateDailyMissionMasters(requestDTO, id);
     AdminResponseDTO.DailyMissionMastersResDTO result =
-        DailyMissionMasters.toDailyMissionMastersResDTO(response);
+        DailyMissionMaster.toDailyMissionMastersResDTO(response);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
@@ -79,7 +79,7 @@ public class AdminController {
   public ResponseEntity<ApiResponse<User>> changeUserStatus(
       @PathVariable(name = "userId") Long userId,
       AdminRequestDTO.ChangeUserStatusRequestDTO request) {
-    User user = adminService.chageUserStatus(userId, request);
+    User user = adminService.changeUserStatus(userId, request);
     return ResponseEntity.ok(ApiResponse.success(user));
   }
 

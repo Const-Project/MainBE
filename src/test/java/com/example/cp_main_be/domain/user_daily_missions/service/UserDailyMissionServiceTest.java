@@ -1,27 +1,26 @@
 package com.example.cp_main_be.domain.user_daily_missions.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
-import com.example.cp_main_be.domain.infra.s3.S3Uploader;
 import com.example.cp_main_be.domain.mission.quiz.domain.Quiz;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
-import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMissions;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
+import com.example.cp_main_be.global.infra.S3Uploader;
 import java.util.List;
 import java.util.Optional;
-
-import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,17 +51,15 @@ class UserDailyMissionServiceTest {
   void getDailyMissions_Success() {
     // Given (준비)
     Long userId = 1L;
-    DailyMissionMasters missionMaster1 =
-        DailyMissionMasters.builder().id(101L).title("미션 1").build();
-    DailyMissionMasters missionMaster2 =
-        DailyMissionMasters.builder().id(102L).title("미션 2").build();
+    DailyMissionMaster missionMaster1 = DailyMissionMaster.builder().id(101L).title("미션 1").build();
+    DailyMissionMaster missionMaster2 = DailyMissionMaster.builder().id(102L).title("미션 2").build();
 
-    UserDailyMissions userMission1 =
-        UserDailyMissions.builder().id(1L).dailyMissionMasters(missionMaster1).build();
-    UserDailyMissions userMission2 =
-        UserDailyMissions.builder().id(2L).dailyMissionMasters(missionMaster2).build();
+    UserDailyMission userMission1 =
+        UserDailyMission.builder().id(1L).dailyMissionMaster(missionMaster1).build();
+    UserDailyMission userMission2 =
+        UserDailyMission.builder().id(2L).dailyMissionMaster(missionMaster2).build();
 
-    List<UserDailyMissions> missions = List.of(userMission1, userMission2);
+    List<UserDailyMission> missions = List.of(userMission1, userMission2);
 
     given(userDailyMissionRepository.findAllByUserId(userId)).willReturn(missions);
 
@@ -83,7 +80,7 @@ class UserDailyMissionServiceTest {
   void completeDailyMission_Success() {
     // Given
     Long dailyMissionId = 1L;
-    UserDailyMissions mission = UserDailyMissions.builder().id(dailyMissionId).build();
+    UserDailyMission mission = UserDailyMission.builder().id(dailyMissionId).build();
     given(userDailyMissionRepository.findById(dailyMissionId)).willReturn(Optional.of(mission));
 
     // When
@@ -122,7 +119,7 @@ class UserDailyMissionServiceTest {
     String expectedImageUrl = "http://s3.com/mission-images/test.jpg";
     MultipartFile mockFile =
         new MockMultipartFile("file", "test.jpg", "image/jpeg", "test image content".getBytes());
-    UserDailyMissions mission = UserDailyMissions.builder().id(userDailyMissionId).build();
+    UserDailyMission mission = UserDailyMission.builder().id(userDailyMissionId).build();
 
     given(userDailyMissionRepository.findById(userDailyMissionId)).willReturn(Optional.of(mission));
     given(s3Uploader.upload(mockFile, "mission-images")).willReturn(expectedImageUrl);
@@ -174,14 +171,11 @@ class UserDailyMissionServiceTest {
     QuizRequestDTO request = new QuizRequestDTO();
     request.setAnswerNumber(correctAnswerNumber);
 
-    DailyMissionMasters missionMaster =
-        DailyMissionMasters.builder().id(dailyMissionMasterId).build();
-    UserDailyMissions userMission =
-        UserDailyMissions.builder()
-            .id(userDailyMissionId)
-            .dailyMissionMasters(missionMaster)
-            .build();
-    Quiz quiz = Quiz.builder().id(quizId).dailyMissionMasters(missionMaster).build();
+    DailyMissionMaster missionMaster =
+        DailyMissionMaster.builder().id(dailyMissionMasterId).build();
+    UserDailyMission userMission =
+        UserDailyMission.builder().id(userDailyMissionId).dailyMissionMaster(missionMaster).build();
+    Quiz quiz = Quiz.builder().id(quizId).dailyMissionMaster(missionMaster).build();
 
     List<QuizOptions> options =
         List.of(
@@ -217,14 +211,11 @@ class UserDailyMissionServiceTest {
     QuizRequestDTO request = new QuizRequestDTO();
     request.setAnswerNumber(incorrectAnswerNumber);
 
-    DailyMissionMasters missionMaster =
-        DailyMissionMasters.builder().id(dailyMissionMasterId).build();
-    UserDailyMissions userMission =
-        UserDailyMissions.builder()
-            .id(userDailyMissionId)
-            .dailyMissionMasters(missionMaster)
-            .build();
-    Quiz quiz = Quiz.builder().id(quizId).dailyMissionMasters(missionMaster).build();
+    DailyMissionMaster missionMaster =
+        DailyMissionMaster.builder().id(dailyMissionMasterId).build();
+    UserDailyMission userMission =
+        UserDailyMission.builder().id(userDailyMissionId).dailyMissionMaster(missionMaster).build();
+    Quiz quiz = Quiz.builder().id(quizId).dailyMissionMaster(missionMaster).build();
 
     List<QuizOptions> options =
         List.of(
@@ -253,13 +244,10 @@ class UserDailyMissionServiceTest {
     QuizRequestDTO request = new QuizRequestDTO();
     request.setAnswerNumber(1);
 
-    DailyMissionMasters missionMaster =
-        DailyMissionMasters.builder().id(dailyMissionMasterId).build();
-    UserDailyMissions userMission =
-        UserDailyMissions.builder()
-            .id(userDailyMissionId)
-            .dailyMissionMasters(missionMaster)
-            .build();
+    DailyMissionMaster missionMaster =
+        DailyMissionMaster.builder().id(dailyMissionMasterId).build();
+    UserDailyMission userMission =
+        UserDailyMission.builder().id(userDailyMissionId).dailyMissionMaster(missionMaster).build();
 
     given(userDailyMissionRepository.findById(userDailyMissionId))
         .willReturn(Optional.of(userMission));

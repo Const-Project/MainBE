@@ -6,7 +6,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.quiz.domain.Quiz;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsRepository;
@@ -14,7 +14,7 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizReposito
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
-import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMissions;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
 import java.util.List;
 import java.util.Optional;
@@ -47,19 +47,19 @@ class QuizServiceTest {
     Long quizId = 201L;
 
     // 연관 데이터 설정
-    DailyMissionMasters dailyMissionMasters =
-        DailyMissionMasters.builder().id(dailyMissionMasterId).title("오늘의 퀴즈 미션").build();
+    DailyMissionMaster dailyMissionMasters =
+        DailyMissionMaster.builder().id(dailyMissionMasterId).title("오늘의 퀴즈 미션").build();
 
-    UserDailyMissions userDailyMissions =
-        UserDailyMissions.builder()
+    UserDailyMission userDailyMission =
+        UserDailyMission.builder()
             .id(userDailyMissionId)
-            .dailyMissionMasters(dailyMissionMasters)
+            .dailyMissionMaster(dailyMissionMasters)
             .build();
 
     Quiz quiz =
         Quiz.builder()
             .id(quizId)
-            .dailyMissionMasters(dailyMissionMasters)
+            .dailyMissionMaster(dailyMissionMasters)
             .quizType(QuizType.MULTI_CHOICE)
             .quizQuestion("다음 중 가장 큰 동물은?")
             .build();
@@ -71,7 +71,7 @@ class QuizServiceTest {
 
     // Mock 객체 동작 정의
     given(userDailyMissionRepository.findById(userDailyMissionId))
-        .willReturn(Optional.of(userDailyMissions));
+        .willReturn(Optional.of(userDailyMission));
     given(quizRepository.findByDailyMissionMasters_Id(dailyMissionMasterId))
         .willReturn(Optional.of(quiz));
     given(quizOptionsRepository.findAllByQuizId(quizId)).willReturn(quizOptions);
@@ -122,16 +122,16 @@ class QuizServiceTest {
     Long userDailyMissionId = 1L;
     Long dailyMissionMasterId = 101L;
 
-    DailyMissionMasters dailyMissionMasters =
-        DailyMissionMasters.builder().id(dailyMissionMasterId).build();
-    UserDailyMissions userDailyMissions =
-        UserDailyMissions.builder()
+    DailyMissionMaster dailyMissionMasters =
+        DailyMissionMaster.builder().id(dailyMissionMasterId).build();
+    UserDailyMission userDailyMission =
+        UserDailyMission.builder()
             .id(userDailyMissionId)
-            .dailyMissionMasters(dailyMissionMasters)
+            .dailyMissionMaster(dailyMissionMasters)
             .build();
 
     given(userDailyMissionRepository.findById(userDailyMissionId))
-        .willReturn(Optional.of(userDailyMissions));
+        .willReturn(Optional.of(userDailyMission));
     given(quizRepository.findByDailyMissionMasters_Id(dailyMissionMasterId))
         .willReturn(Optional.empty()); // 퀴즈가 없음
 

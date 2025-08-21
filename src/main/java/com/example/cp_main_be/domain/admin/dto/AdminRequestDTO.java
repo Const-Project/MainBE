@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.admin.dto;
 
+import com.example.cp_main_be.domain.member.user.domain.UserStatus;
 import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
-import com.example.cp_main_be.domain.user.domain.UserStatus;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.Builder;

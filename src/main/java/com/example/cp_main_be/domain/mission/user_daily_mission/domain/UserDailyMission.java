@@ -1,10 +1,9 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.domain;
 
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.content.image.DailyMissionImage;
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import lombok.*;
 
@@ -14,7 +13,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDailyMissions {
+public class UserDailyMission {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_mission_id")
@@ -34,7 +33,7 @@ public class UserDailyMissions {
 
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "mission_master_id")
-  DailyMissionMasters dailyMissionMasters;
+  DailyMissionMaster dailyMissionMaster;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")

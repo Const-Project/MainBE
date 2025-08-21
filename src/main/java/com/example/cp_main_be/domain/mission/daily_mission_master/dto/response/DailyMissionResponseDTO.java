@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.mission.daily_mission_master.dto.response;
 
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMasters;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,16 +20,16 @@ public class DailyMissionResponseDTO {
     Boolean isCompleted;
 
     public static DailyMissionResponseDTO.MissionSummaryDTO from(
-        DailyMissionMasters dailyMissionMasters) {
+        DailyMissionMaster dailyMissionMaster) {
       return MissionSummaryDTO.builder()
-          .missionId(dailyMissionMasters.getId())
-          .missionTitle(dailyMissionMasters.getTitle())
-          .missionDescription(dailyMissionMasters.getDescription())
+          .missionId(dailyMissionMaster.getId())
+          .missionTitle(dailyMissionMaster.getTitle())
+          .missionDescription(dailyMissionMaster.getDescription())
           .build();
     }
   }
 
-  public static DailyMissionResponseDTO from(List<DailyMissionMasters> dailyMissionMasters) {
+  public static DailyMissionResponseDTO from(List<DailyMissionMaster> dailyMissionMasters) {
     List<DailyMissionResponseDTO.MissionSummaryDTO> dailyMissionResponseDTOS =
         dailyMissionMasters.stream().map(MissionSummaryDTO::from).toList();
 

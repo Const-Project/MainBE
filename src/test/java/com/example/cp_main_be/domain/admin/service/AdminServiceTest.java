@@ -4,23 +4,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.daily_keywords.domain.DailyKeywords;
-import com.example.cp_main_be.daily_keywords.domain.repository.DailyKeywordsRepository;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
-import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMasters;
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
 import com.example.cp_main_be.domain.garden.plant_masters.domain.repository.PlantMasterRepository;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.UserStatus;
+import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
+import com.example.cp_main_be.domain.mission.daily_keywords.domain.repository.DailyKeywordsRepository;
+import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
-import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.member.user.domain.UserStatus;
-import com.example.cp_main_be.domain.member.user.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -59,16 +60,16 @@ class AdminServiceTest {
             .rewardPoints(100L)
             .build();
 
-    DailyMissionMasters mission = DailyMissionMasters.builder().id(1L).title("새 미션").build();
-    given(dailyMissionMastersRepository.save(any(DailyMissionMasters.class))).willReturn(mission);
+    DailyMissionMaster mission = DailyMissionMaster.builder().id(1L).title("새 미션").build();
+    given(dailyMissionMastersRepository.save(any(DailyMissionMaster.class))).willReturn(mission);
 
     // When
-    DailyMissionMasters result = adminService.createDailyMissionMasters(requestDTO);
+    DailyMissionMaster result = adminService.createDailyMissionMasters(requestDTO);
 
     // Then
     assertThat(result.getId()).isEqualTo(1L);
     assertThat(result.getTitle()).isEqualTo("새 미션");
-    verify(dailyMissionMastersRepository, times(1)).save(any(DailyMissionMasters.class));
+    verify(dailyMissionMastersRepository, times(1)).save(any(DailyMissionMaster.class));
   }
 
   @Test
@@ -80,13 +81,13 @@ class AdminServiceTest {
         AdminRequestDTO.UpdateMissionRequestDTO.builder().build();
     requestDTO.setTitle("수정된 미션 제목");
 
-    DailyMissionMasters existingMission =
-        DailyMissionMasters.builder().id(missionId).title("원본 제목").build();
+    DailyMissionMaster existingMission =
+        DailyMissionMaster.builder().id(missionId).title("원본 제목").build();
     given(dailyMissionMastersRepository.findById(missionId))
         .willReturn(Optional.of(existingMission));
 
     // When
-    DailyMissionMasters result = adminService.updateDailyMissionMasters(requestDTO, missionId);
+    DailyMissionMaster result = adminService.updateDailyMissionMasters(requestDTO, missionId);
 
     // Then
     assertThat(result.getTitle()).isEqualTo("수정된 미션 제목");
@@ -164,7 +165,7 @@ class AdminServiceTest {
     given(userService.findUserById(userId)).willReturn(user);
 
     // When
-    User result = adminService.chageUserStatus(userId, requestDTO);
+    User result = adminService.changeUserStatus(userId, requestDTO);
 
     // Then
     assertThat(result.getStatus()).isEqualTo(UserStatus.INACTIVE);
@@ -184,7 +185,7 @@ class AdminServiceTest {
             .isCorrect(true)
             .build();
 
-    DailyMissionMasters missionMaster = DailyMissionMasters.builder().id(missionMasterId).build();
+    DailyMissionMaster missionMaster = DailyMissionMaster.builder().id(missionMasterId).build();
     given(dailyMissionMastersRepository.findById(missionMasterId))
         .willReturn(Optional.of(missionMaster));
 
