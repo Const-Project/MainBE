@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.social.diary.presentation;
 
 import com.example.cp_main_be.domain.social.diary.service.DiaryService;
-import com.example.cp_main_be.global.util.ApiResponse;
+import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

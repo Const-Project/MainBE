@@ -3,8 +3,6 @@ package com.example.cp_main_be.domain.mission.keyword.presentation;
 import com.example.cp_main_be.domain.mission.keyword.dto.response.KeywordResponse;
 import com.example.cp_main_be.domain.mission.keyword.dto.response.TodayKeywordResponse;
 import com.example.cp_main_be.domain.mission.keyword.service.KeywordService;
-import com.example.cp_main_be.global.util.ApiResponse;
-import io.swagger.v3.oas.annotations.Operation;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

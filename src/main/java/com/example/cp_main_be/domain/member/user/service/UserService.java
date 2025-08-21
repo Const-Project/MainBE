@@ -20,20 +20,6 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final LevelService levelService;
-  private final JwtTokenProvider jwtTokenProvider;
-
-  public UserResponse registerUser(UserRequest userRequest) {
-    User user =
-        User.builder()
-            //            .uuid(userRequest.getUuid() != null ? userRequest.getUuid() :
-            // UUID.randomUUID())
-            .uuid(UUID.randomUUID())
-            .username(userRequest.getUsername())
-            //            .profileImageUrl(userRequest.getAvatarUrl())
-            .build();
-    // 최초 텃밭 생성 및 할당
-    Garden firstGarden = Garden.builder().user(user).slotNumber(1).build();
-    user.addGarden(firstGarden);
 
   public void addExperience(Long actorId, int points) {
     User user = userRepository.findById(actorId).get();

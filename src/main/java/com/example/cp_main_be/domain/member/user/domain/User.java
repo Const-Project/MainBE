@@ -76,7 +76,7 @@ public class User {
   @JsonManagedReference
   private List<Bookmark> bookMarks = new ArrayList<>();
 
-  private Boolean notificationEnabled = true;
+  @Builder.Default private Boolean notificationEnabled = true;
 
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
   protected void onCreate() {

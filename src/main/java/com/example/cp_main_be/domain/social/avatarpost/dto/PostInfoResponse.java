@@ -1,13 +1,10 @@
-<<<<<<<< HEAD:src/main/java/com/example/cp_main_be/domain/social/avatarpost/dto/response/PostInfoResponse.java
-package com.example.cp_main_be.domain.social.avatarpost.dto.response;
-========
 package com.example.cp_main_be.domain.social.avatarpost.dto;
->>>>>>>> develop:src/main/java/com/example/cp_main_be/domain/social/avatarpost/dto/PostInfoResponse.java
 
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 @Builder

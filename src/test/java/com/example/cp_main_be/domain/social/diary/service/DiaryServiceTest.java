@@ -11,8 +11,8 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
-import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
-import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
+import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
+import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
 import java.util.Optional;
@@ -26,7 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,24 +45,13 @@ class DiaryServiceTest {
   private User ownerUser;
   private User anotherUser;
   private Diary testDiary;
-  private DiaryImage testDiaryImage;
 
   @BeforeEach
   void setUp() {
-    // 테스트에서 사용할 공통 객체들을 미리 생성합니다.
     ownerUser = User.builder().id(1L).username("owner").uuid(UUID.randomUUID()).build();
     anotherUser = User.builder().id(2L).username("another").uuid(UUID.randomUUID()).build();
-
     testDiary =
-        Diary.builder()
-            .id(10L)
-            .title("Test Diary Title")
-            .content("Test Diary Content")
-            .user(ownerUser)
-            .build();
-
-    testDiaryImage =
-        DiaryImage.builder().id(100L).imageUrl("https://s3.com/image.jpg").diary(testDiary).build();
+        Diary.builder().id(10L).title("Test Title").content("Test Content").user(ownerUser).build();
 
     // SecurityContextHolder Mocking 설정
     SecurityContextHolder.setContext(securityContext);
@@ -75,26 +63,62 @@ class DiaryServiceTest {
   }
 
   @Nested
+  @DisplayName("일기 생성 (createDiary)")
+  class CreateDiaryTest {
+
+    @Test
+    @DisplayName("성공 - 이미지가 없는 일기를 생성한다")
+    void createDiary_Success_WithoutImage() {
+      // given
+      CreateDiaryRequest request = new CreateDiaryRequest("New Title", "New Content", null, true);
+      given(diaryRepository.save(any(Diary.class)))
+          .willAnswer(invocation -> invocation.getArgument(0));
+
+      // when
+      diaryService.createDiary(ownerUser, request);
+
+      // then
+      ArgumentCaptor<Diary> diaryCaptor = ArgumentCaptor.forClass(Diary.class);
+      verify(diaryRepository).save(diaryCaptor.capture());
+      verify(diaryImageRepository, never()).save(any());
+
+      Diary savedDiary = diaryCaptor.getValue();
+      assertThat(savedDiary.getTitle()).isEqualTo("New Title");
+      assertThat(savedDiary.getUser()).isEqualTo(ownerUser);
+    }
+
+    @Test
+    @DisplayName("성공 - 이미지가 있는 일기를 생성한다")
+    void createDiary_Success_WithImage() {
+      // given
+      CreateDiaryRequest request =
+          new CreateDiaryRequest("New Title", "New Content", "image_url", true);
+      given(diaryRepository.save(any(Diary.class)))
+          .willAnswer(invocation -> invocation.getArgument(0));
+
+      // when
+      diaryService.createDiary(ownerUser, request);
+
+      // then
+      verify(diaryRepository).save(any(Diary.class));
+      verify(diaryImageRepository).save(any(DiaryImage.class));
+    }
+  }
+
+  @Nested
   @DisplayName("일기 수정 (updateDiary)")
   class UpdateDiaryTest {
 
     @Test
-    @DisplayName("성공 - 소유자가 일기를 수정한다")
-    void updateDiary_Success() {
+    @DisplayName("성공 - 소유자가 일기 내용을 수정한다")
+    void updateDiary_Success_ContentOnly() {
       // given
-      mockSecurityContext(ownerUser);
       given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
-      given(userRepository.findByUuid(ownerUser.getUuid())).willReturn(Optional.of(ownerUser));
-
-      DiaryWriteRequest request =
-          DiaryWriteRequest.builder()
-              .title("Updated Title")
-              .content("Updated Content")
-              .isPublic(false)
-              .build();
+      UpdateDiaryRequest request =
+          new UpdateDiaryRequest("Updated Title", "Updated Content", null, false);
 
       // when
-      Diary updatedDiary = diaryService.updateDiary(testDiary.getId(), request);
+      Diary updatedDiary = diaryService.updateDiary(ownerUser.getId(), testDiary.getId(), request);
 
       // then
       assertThat(updatedDiary.getTitle()).isEqualTo("Updated Title");
@@ -103,51 +127,88 @@ class DiaryServiceTest {
     }
 
     @Test
-    @DisplayName("실패 - 다른 사용자가 수정을 시도하면 예외가 발생한다")
-    void updateDiary_Fail_NotOwner() {
+    @DisplayName("성공 - 기존 이미지가 없는 일기에 이미지를 추가한다")
+    void updateDiary_Success_AddNewImage() {
       // given
-      mockSecurityContext(anotherUser);
       given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
-      given(userRepository.findByUuid(anotherUser.getUuid())).willReturn(Optional.of(anotherUser));
+      UpdateDiaryRequest request =
+          new UpdateDiaryRequest("Title", "Content", "new_image_url", true);
 
-      DiaryWriteRequest request = DiaryWriteRequest.builder().build();
+      // when
+      diaryService.updateDiary(ownerUser.getId(), testDiary.getId(), request);
 
-      // when & then
-      assertThatThrownBy(() -> diaryService.updateDiary(testDiary.getId(), request))
-          .isInstanceOf(IllegalStateException.class)
-          .hasMessage("해당 다이어리를 수정할 권한이 없습니다.");
+      // then
+      ArgumentCaptor<DiaryImage> imageCaptor = ArgumentCaptor.forClass(DiaryImage.class);
+      verify(diaryImageRepository).save(imageCaptor.capture());
+      assertThat(imageCaptor.getValue().getImageUrl()).isEqualTo("new_image_url");
     }
 
     @Test
-    @DisplayName("실패 - 존재하지 않는 다이어리를 수정하려하면 예외가 발생한다")
-    void updateDiary_Fail_DiaryNotFound() {
+    @DisplayName("성공 - 기존 이미지를 다른 이미지로 변경한다")
+    void updateDiary_Success_UpdateExistingImage() {
       // given
-      mockSecurityContext(ownerUser);
-      given(diaryRepository.findById(anyLong())).willReturn(Optional.empty());
+      DiaryImage existingImage =
+          DiaryImage.builder().id(100L).imageUrl("old_url").diary(testDiary).build();
+      testDiary.updateImage(existingImage); // 기존 이미지 설정
 
-      DiaryWriteRequest request = DiaryWriteRequest.builder().build();
+      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
+      UpdateDiaryRequest request =
+          new UpdateDiaryRequest("Title", "Content", "updated_image_url", true);
+
+      // when
+      diaryService.updateDiary(ownerUser.getId(), testDiary.getId(), request);
+
+      // then
+      verify(diaryImageRepository, never()).save(any()); // 새로 저장하지 않음
+      verify(diaryImageRepository, never()).delete(any()); // 삭제하지 않음
+      assertThat(existingImage.getImageUrl()).isEqualTo("updated_image_url");
+    }
+
+    @Test
+    @DisplayName("성공 - 기존 이미지를 삭제한다")
+    void updateDiary_Success_RemoveImage() {
+      // given
+      DiaryImage existingImage =
+          DiaryImage.builder().id(100L).imageUrl("old_url").diary(testDiary).build();
+      testDiary.updateImage(existingImage);
+
+      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
+      UpdateDiaryRequest request = new UpdateDiaryRequest("Title", "Content", null, true);
+
+      // when
+      diaryService.updateDiary(ownerUser.getId(), testDiary.getId(), request);
+
+      // then
+      verify(diaryImageRepository).delete(existingImage);
+    }
+
+    @Test
+    @DisplayName("실패 - 다른 사용자가 수정을 시도하면 예외가 발생한다")
+    void updateDiary_Fail_NotOwner() {
+      // given
+      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
+      UpdateDiaryRequest request = new UpdateDiaryRequest("Title", "Content", null, true);
 
       // when & then
-      assertThatThrownBy(() -> diaryService.updateDiary(999L, request))
-          .isInstanceOf(IllegalArgumentException.class)
-          .hasMessage("해당 다이어리가 존재하지 않습니다.");
+      assertThatThrownBy(
+              () -> diaryService.updateDiary(anotherUser.getId(), testDiary.getId(), request))
+          .isInstanceOf(SecurityException.class)
+          .hasMessage("일기를 수정할 권한이 없습니다.");
     }
   }
 
   @Nested
-  @DisplayName("일기 삭제 (deleteDiaryById)")
+  @DisplayName("일기 삭제 (deleteDiary)")
   class DeleteDiaryTest {
 
     @Test
     @DisplayName("성공 - 소유자가 일기를 삭제한다")
     void deleteDiary_Success() {
       // given
-      mockSecurityContext(ownerUser);
       given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
-      given(userRepository.findByUuid(ownerUser.getUuid())).willReturn(Optional.of(ownerUser));
 
       // when
-      diaryService.deleteDiaryById(testDiary.getId());
+      diaryService.deleteDiary(ownerUser.getId(), testDiary.getId());
 
       // then
       verify(diaryRepository).delete(testDiary);
@@ -157,44 +218,14 @@ class DiaryServiceTest {
     @DisplayName("실패 - 다른 사용자가 삭제를 시도하면 예외가 발생한다")
     void deleteDiary_Fail_NotOwner() {
       // given
-      mockSecurityContext(anotherUser);
       given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
-      given(userRepository.findByUuid(anotherUser.getUuid())).willReturn(Optional.of(anotherUser));
 
       // when & then
-      assertThatThrownBy(() -> diaryService.deleteDiaryById(testDiary.getId()))
-          .isInstanceOf(IllegalStateException.class)
-          .hasMessage("해당 다이어리를 삭제할 권한이 없습니다.");
+      assertThatThrownBy(() -> diaryService.deleteDiary(anotherUser.getId(), testDiary.getId()))
+          .isInstanceOf(SecurityException.class)
+          .hasMessage("일기를 삭제할 권한이 없습니다.");
 
       verify(diaryRepository, never()).delete(any());
-    }
-  }
-
-  @Nested
-  @DisplayName("이미지 저장 (saveDiaryImage)")
-  class SaveImageTest {
-
-    @Test
-    @DisplayName("성공 - 소유자가 이미지를 저장한다")
-    void saveImage_Success() {
-      // given
-      mockSecurityContext(ownerUser);
-      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
-      given(userRepository.findByUuid(ownerUser.getUuid())).willReturn(Optional.of(ownerUser));
-      given(imageUploader.upload(any(), anyString())).willReturn("new_image_url");
-
-      MockMultipartFile file =
-          new MockMultipartFile("image", "test.jpg", "image/jpeg", "content".getBytes());
-
-      // when
-      DiaryResponse response = diaryService.saveDiaryImage(testDiary.getId(), file);
-
-      // then
-      ArgumentCaptor<DiaryImage> imageCaptor = ArgumentCaptor.forClass(DiaryImage.class);
-      verify(diaryImageRepository).save(imageCaptor.capture());
-
-      assertThat(imageCaptor.getValue().getImageUrl()).isEqualTo("new_image_url");
-      assertThat(response.getImageUrl()).isEqualTo("new_image_url");
     }
   }
 
@@ -207,27 +238,30 @@ class DiaryServiceTest {
     void deleteImage_Success() {
       // given
       mockSecurityContext(ownerUser);
-      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
       given(userRepository.findByUuid(ownerUser.getUuid())).willReturn(Optional.of(ownerUser));
-      given(diaryImageRepository.findById(testDiaryImage.getId()))
-          .willReturn(Optional.of(testDiaryImage));
+      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
+
+      DiaryImage diaryImage =
+          DiaryImage.builder().id(100L).imageUrl("image_url").diary(testDiary).build();
+      given(diaryImageRepository.findById(diaryImage.getId())).willReturn(Optional.of(diaryImage));
+
       doNothing().when(imageUploader).delete(anyString());
 
       // when
-      diaryService.deleteDiaryImage(testDiary.getId(), testDiaryImage.getId());
+      diaryService.deleteDiaryImage(testDiary.getId(), diaryImage.getId());
 
       // then
-      verify(imageUploader).delete(testDiaryImage.getImageUrl());
-      verify(diaryImageRepository).deleteById(testDiaryImage.getId());
+      verify(imageUploader).delete(diaryImage.getImageUrl());
+      verify(diaryImageRepository).deleteById(diaryImage.getId());
     }
 
     @Test
     @DisplayName("실패 - 다른 사용자가 삭제를 시도하면 예외가 발생한다")
     void deleteImage_Fail_NotOwner() {
       // given
-      mockSecurityContext(anotherUser);
-      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
+      mockSecurityContext(anotherUser); // 다른 사용자로 로그인
       given(userRepository.findByUuid(anotherUser.getUuid())).willReturn(Optional.of(anotherUser));
+      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
 
       // when & then
       assertThatThrownBy(() -> diaryService.deleteDiaryImage(testDiary.getId(), 100L))
@@ -243,8 +277,8 @@ class DiaryServiceTest {
     void deleteImage_Fail_ImageNotBelongToDiary() {
       // given
       mockSecurityContext(ownerUser);
-      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
       given(userRepository.findByUuid(ownerUser.getUuid())).willReturn(Optional.of(ownerUser));
+      given(diaryRepository.findById(testDiary.getId())).willReturn(Optional.of(testDiary));
 
       // 다른 다이어리에 속한 이미지 생성
       Diary anotherDiary = Diary.builder().id(99L).build();
