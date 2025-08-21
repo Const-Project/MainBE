@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.member.user.service;
 
+import com.example.cp_main_be.domain.member.level.service.LevelService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
@@ -18,6 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final LevelService levelService;
+
+  public void addExperience(Long actorId, int points) {
+    User user = userRepository.findById(actorId).get();
+    user.addExperience(points);
+    levelService.checkLevelUp(user);
+  }
 
   public void updateAvatar(Long userId, String newAvatarUrl) {
     User user =

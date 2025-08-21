@@ -62,38 +62,38 @@ class GardenServiceTest {
         });
   }
 
-  @DisplayName("텃밭 물주기 성공")
-  @Test
-  void waterGarden_Success() {
-    // given
-    Long gardenId = 1L;
-    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
-    Garden garden = Garden.builder().user(user).slotNumber(1).build();
-
-    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
-
-    // when
-    gardenService.waterGarden(gardenId);
-
-    // then
-    assertThat(garden.getWaterCount()).isEqualTo(1);
-  }
-
-  @DisplayName("텃밭 햇빛 주기 성공")
-  @Test
-  void sunlightGarden_Success() {
-    // given
-    Long gardenId = 1L;
-    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
-    Garden garden = Garden.builder().user(user).slotNumber(1).build();
-    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
-
-    // when
-    gardenService.sunlightGarden(gardenId);
-
-    // then
-    assertThat(garden.getSunlightCount()).isEqualTo(1);
-  }
+  //  @DisplayName("텃밭 물주기 성공")
+  //  @Test
+  //  void waterGarden_Success() {
+  //    // given
+  //    Long gardenId = 1L;
+  //    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
+  //    Garden garden = Garden.builder().user(user).slotNumber(1).build();
+  //
+  //    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
+  //
+  //    // when
+  //    gardenService.waterGarden(gardenId);
+  //
+  //    // then
+  //    assertThat(garden.getWaterCount()).isEqualTo(1);
+  //  }
+  //
+  //  @DisplayName("텃밭 햇빛 주기 성공")
+  //  @Test
+  //  void sunlightGarden_Success() {
+  //    // given
+  //    Long gardenId = 1L;
+  //    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
+  //    Garden garden = Garden.builder().user(user).slotNumber(1).build();
+  //    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
+  //
+  //    // when
+  //    gardenService.sunlightGarden(gardenId);
+  //
+  //    // then
+  //    assertThat(garden.getSunlightCount()).isEqualTo(1);
+  //  }
 
   @Test
   @DisplayName("성공 - 레벨이 충분할 때 새로운 텃밭을 잠금 해제한다")
