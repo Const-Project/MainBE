@@ -144,8 +144,8 @@ public class NotificationService {
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
     // TODO: User 엔티티에 알림 설정 필드 추가 후 로직 구현
-    // user.setNotificationEnabled(request.isNotificationEnabled());
-    // userRepository.save(user);
+    user.setNotificationEnabled(request.isNotificationEnabled());
+    userRepository.save(user);
   }
 
   private void sendPushNotification(User receiver, Notification notification) {

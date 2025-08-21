@@ -1,8 +1,9 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.service;
 
 import com.example.cp_main_be.domain.content.image.DailyMissionImage;
+import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMasterRepository;
 import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.domain.Quiz;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
@@ -10,6 +11,8 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsR
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserImageMission;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserQuizMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.global.infra.S3Uploader;
 import java.time.LocalDateTime;
@@ -25,10 +28,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserDailyMissionService {
 
   private final UserDailyMissionRepository userDailyMissionRepository;
-  private final DailyMissionMasterRepository dailyMissionMasterRepository;
   private final S3Uploader s3Uploader;
   private final QuizOptionsRepository quizOptionsRepository;
   private final QuizRepository quizRepository;
+  private final UserService userService;
 
   public DailyMissionResponseDTO getDailyMissions(Long userId) {
     List<UserDailyMission> dailyMissions = userDailyMissionRepository.findAllByUser_Id(userId);
@@ -40,10 +43,11 @@ public class UserDailyMissionService {
   }
 
   public String uploadPictureForDailyMission(Long userDailyMissionId, MultipartFile file) {
-    UserDailyMission userDailyMission =
-        userDailyMissionRepository
-            .findById(userDailyMissionId)
-            .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
+    UserImageMission userDailyMission =
+        (UserImageMission)
+            userDailyMissionRepository
+                .findById(userDailyMissionId)
+                .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
 
     String imageUrl = s3Uploader.upload(file, "mission-images");
 
@@ -57,10 +61,11 @@ public class UserDailyMissionService {
   }
 
   public Boolean summitAnswer(QuizRequestDTO request, Long userDailyMissionId) {
-    UserDailyMission userDailyMission =
-        userDailyMissionRepository
-            .findById(userDailyMissionId)
-            .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
+    UserQuizMission userDailyMission =
+        (UserQuizMission)
+            userDailyMissionRepository
+                .findById(userDailyMissionId)
+                .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
 
     Quiz quiz =
         quizRepository
@@ -109,6 +114,16 @@ public class UserDailyMissionService {
     UserDailyMission userDailyMission = getUserDailyMission(userDailyMissionId);
     userDailyMission.setCompleted(true);
     userDailyMission.setCompletedAt(LocalDateTime.now());
+    final int PHOTO_MISSION_COMPLETE_POINT = 15;
+    final int QUIZ_MISSION_COMPLETE_POINT = 15;
+    final int DIARY_MISSION_COMPLETE_POINT = 15;
+    MissionType type = userDailyMission.getDailyMissionMaster().getMissionType();
+    if (type.equals(MissionType.PHOTO))
+      userService.addExperience(userService.getCurrentUser().getId(), PHOTO_MISSION_COMPLETE_POINT);
+    else if (type.equals(MissionType.QUIZ))
+      userService.addExperience(userService.getCurrentUser().getId(), QUIZ_MISSION_COMPLETE_POINT);
+    else
+      userService.addExperience(userService.getCurrentUser().getId(), DIARY_MISSION_COMPLETE_POINT);
     userDailyMissionRepository.save(userDailyMission);
   }
 

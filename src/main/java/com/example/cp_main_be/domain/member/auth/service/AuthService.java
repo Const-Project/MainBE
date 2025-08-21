@@ -1,9 +1,15 @@
 package com.example.cp_main_be.domain.member.auth.service;
 
+import com.example.cp_main_be.domain.member.auth.domain.RefreshToken;
+import com.example.cp_main_be.domain.member.auth.domain.repository.RefreshTokenRepository;
 import com.example.cp_main_be.domain.member.auth.dto.response.TokenRefreshResponse;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,43 +23,102 @@ public class AuthService {
 
   private final JwtTokenProvider jwtTokenProvider;
   private final UserRepository userRepository;
+  private final RefreshTokenRepository refreshTokenRepository;
   private final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
-  public TokenRefreshResponse refreshAccessToken(String refreshToken) {
-    // Refresh Token 유효성 검사
-    if (!jwtTokenProvider.validateToken(refreshToken)) {
-      throw new RuntimeException("Invalid Refresh Token"); // TODO: Custom Exception
+  /** 리프레시 토큰으로 액세스 토큰 재발급 + (권장) 리프레시 토큰 롤링 */
+  public TokenRefreshResponse refreshAccessToken(String incomingRefreshToken, String deviceId) {
+    // 1) 서명/만료 기본 검증
+    if (!jwtTokenProvider.validateToken(incomingRefreshToken)) {
+      throw new CustomApiException(ErrorCode.INVALID_TOKEN);
     }
 
-    String uuid = jwtTokenProvider.getUuidFromToken(refreshToken);
+    // 2) DB에 존재하는지 확인 (서버 관리 토큰이 아닌 경우 거절)
+    RefreshToken saved =
+        refreshTokenRepository
+            .findByToken(incomingRefreshToken)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.INVALID_TOKEN));
 
-    // 사용자 존재 여부 확인 (선택 사항, Refresh Token이 유효하면 사용자도 유효하다고 가정할 수 있음)
-    userRepository
-        .findByUuid(java.util.UUID.fromString(uuid))
-        .orElseThrow(() -> new RuntimeException("User not found")); // TODO: Custom Exception
+    // 3) 서버 인지 만료도 체크 (DB 기록 기준)
+    if (saved.getExpiresAt().isBefore(LocalDateTime.now())) {
+      refreshTokenRepository.deleteByToken(incomingRefreshToken);
+      throw new CustomApiException(ErrorCode.INVALID_TOKEN);
+    }
 
-    // 새로운 Access Token과 Refresh Token 모두 발급
-    String newAccessToken = jwtTokenProvider.generateAccessToken(uuid);
-    String newRefreshToken = jwtTokenProvider.generateRefreshToken(uuid);
+    // 4) JWT에서 uuid 추출
+    String uuidStr = jwtTokenProvider.getUuidFromToken(incomingRefreshToken);
+    UUID uuid = UUID.fromString(uuidStr);
+
+    // 5) 사용자 존재 확인 (안전망)
+    User user =
+        userRepository
+            .findByUuid(uuid)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+
+    // 6) 액세스 토큰 새로 발급
+    String newAccessToken = jwtTokenProvider.generateAccessToken(uuid.toString());
+
+    // === 선택 사항: 롤링 여부 설정 ===
+    boolean rotateRefreshToken = true; // 필요 시 yml로 뺄 수 있음
+    if (!rotateRefreshToken) {
+      // 롤링 안 함 → 기존 리프레시 토큰 그대로 반환
+      return new TokenRefreshResponse(newAccessToken, incomingRefreshToken, false);
+    }
+
+    // 7) 롤링: 기존 토큰 삭제 → 신규 토큰 발급/저장
+    refreshTokenRepository.deleteByToken(incomingRefreshToken);
+
+    String newRefreshToken = jwtTokenProvider.generateRefreshToken(uuid.toString());
+    LocalDateTime newExpiry = jwtTokenProvider.getExpirationLocalDateTime(newRefreshToken);
+
+    RefreshToken newRt =
+        RefreshToken.builder()
+            .token(newRefreshToken)
+            .userUuid(uuid)
+            .expiresAt(newExpiry)
+            .deviceId(deviceId)
+            .build();
+    refreshTokenRepository.save(newRt);
 
     return new TokenRefreshResponse(newAccessToken, newRefreshToken, false);
   }
 
-  public TokenRefreshResponse createNewAnonymousAccount() {
-    // 새로운 UUID 생성하여 사용자 등록
-    String newUuid = java.util.UUID.randomUUID().toString();
-    // 닉네임에 UUID 일부를 추가하여 고유성 확보
-    String newNickname = "익명의 사용자-" + newUuid.substring(0, 4);
+  /** 신규 익명 사용자 등록: 토큰 발급 + 리프레시 토큰 저장 */
+  public TokenRefreshResponse registerNewAnonymousUser(String deviceId) {
+    UUID newUuid = UUID.randomUUID();
+    String newNickname = "익명의 새싹-" + newUuid.toString().substring(0, 4);
 
-    User newUser =
-        User.builder().uuid(java.util.UUID.fromString(newUuid)).username(newNickname).build();
-
+    User newUser = User.builder().uuid(newUuid).username(newNickname).build();
     userRepository.save(newUser);
 
-    String accessToken = jwtTokenProvider.generateAccessToken(newUuid);
-    String refreshToken = jwtTokenProvider.generateRefreshToken(newUuid);
+    String accessToken = jwtTokenProvider.generateAccessToken(newUuid.toString());
+    String refreshToken = jwtTokenProvider.generateRefreshToken(newUuid.toString());
+    LocalDateTime expiry = jwtTokenProvider.getExpirationLocalDateTime(refreshToken);
 
-    logger.warn("리프레시 토큰 만료로 인해 새로운 익명 계정을 생성했습니다. 이전 데이터는 더 이상 연결되지 않습니다. New UUID: {}", newUuid);
+    RefreshToken rt =
+        RefreshToken.builder()
+            .token(refreshToken)
+            .userUuid(newUuid)
+            .expiresAt(expiry)
+            .deviceId(deviceId)
+            .build();
+    refreshTokenRepository.save(rt);
+
     return new TokenRefreshResponse(accessToken, refreshToken, true);
+  }
+
+  /** 특정 리프레시 토큰 무효화(로그아웃) */
+  public void revokeRefreshToken(String refreshToken) {
+    refreshTokenRepository.deleteByToken(refreshToken);
+  }
+
+  /** 해당 유저의 전체 리프레시 토큰 무효화(강제 로그아웃 All) */
+  public void revokeAllByUser(UUID userUuid) {
+    refreshTokenRepository.deleteAllByUserUuid(userUuid);
+  }
+
+  /** 만료된 리프레시 토큰 청소 (스케쥴러로 주기적으로 호출) */
+  public void purgeExpiredTokens() {
+    refreshTokenRepository.deleteAllByExpiresAtBefore(LocalDateTime.now());
   }
 }

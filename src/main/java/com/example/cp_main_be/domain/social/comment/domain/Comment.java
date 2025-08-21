@@ -2,6 +2,8 @@ package com.example.cp_main_be.domain.social.comment.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
+import com.example.cp_main_be.domain.social.diary.domain.Diary;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -30,14 +32,16 @@ public class Comment {
   @Column(nullable = false)
   private String content;
 
-  // TODO: 댓글이 달리는 대상 (일기, 아바타 포스트 등)에 대한 필드 추가 필요
-  // 현재는 임시로 대상 ID만 추가
-  private Long targetId;
-  private String targetType; // 예: "DIARY", "AVATAR_POST"
+  // 2. 각 부모와 명확한 연관관계를 설정 (둘 중 하나만 값이 있게 됨)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "avatar_post_id") // 컬럼 이름 명시
+  @JsonBackReference // 순환 참조 방지
+  private AvatarPost avatarPost;
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "avatar_post", nullable = true)
-  private AvatarPost avatarPost;
+  @JoinColumn(name = "diary_id") // Diary와 연결될 컬럼 추가
+  @JsonBackReference // 순환 참조 방지
+  private Diary diary;
 
   @Column(nullable = false)
   private LocalDateTime createdAt;

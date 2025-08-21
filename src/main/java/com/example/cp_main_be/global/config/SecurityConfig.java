@@ -1,5 +1,6 @@
 package com.example.cp_main_be.global.config;
 
+import com.example.cp_main_be.global.jwt.ExceptionHandlerFilter;
 import com.example.cp_main_be.global.jwt.JwtAuthenticationFilter;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -20,6 +22,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final ExceptionHandlerFilter exceptionHandlerFilter;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -31,8 +34,9 @@ public class SecurityConfig {
             authorize ->
                 authorize
                     .requestMatchers(
-                        "/api/v1/register",
+                        "/api/v1/auth/register-anonymous",
                         "/api/v1/auth/refresh",
+                        "/api/v1/policy",
                         "/swagger-ui/**", // Swagger UI 페이지
                         "/v3/api-docs/**", // OpenAPI 명세서
                         "/swagger-resources/**")
@@ -40,6 +44,7 @@ public class SecurityConfig {
                     .anyRequest()
                     .authenticated() // 그 외 모든 요청은 인증 필요
             )
+        .addFilterBefore(exceptionHandlerFilter, LogoutFilter.class)
         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
