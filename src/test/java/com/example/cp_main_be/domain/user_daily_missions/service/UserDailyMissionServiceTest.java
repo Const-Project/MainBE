@@ -1,5 +1,13 @@
 package com.example.cp_main_be.domain.user_daily_missions.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsRepository;
@@ -8,6 +16,8 @@ import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDaily
 import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import com.example.cp_main_be.global.infra.S3Uploader;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,17 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class UserDailyMissionServiceTest {
