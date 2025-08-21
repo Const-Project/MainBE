@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.social.follow.service;
 
-import com.example.cp_main_be.domain.notification.domain.NotificationType;
-import com.example.cp_main_be.domain.notification.service.NotificationService;
+import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
+import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.user.domain.User;

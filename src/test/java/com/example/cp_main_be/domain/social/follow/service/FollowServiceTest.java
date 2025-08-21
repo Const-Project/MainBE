@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.domain.notification.service.NotificationService;
+import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.user.domain.User;

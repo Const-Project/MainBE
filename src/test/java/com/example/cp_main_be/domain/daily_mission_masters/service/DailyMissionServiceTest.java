@@ -8,7 +8,7 @@ import com.example.cp_main_be.domain.daily_mission_masters.MissionType;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.DailyMissionMasters;
 import com.example.cp_main_be.domain.daily_mission_masters.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.daily_mission_masters.dto.response.DailyMissionResponseDTO;
-import com.example.cp_main_be.domain.user_daily_missions.service.UserDailyMissionService;
+import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;

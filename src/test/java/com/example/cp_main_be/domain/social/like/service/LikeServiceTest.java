@@ -6,8 +6,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.domain.notification.domain.NotificationType;
-import com.example.cp_main_be.domain.notification.service.NotificationService;
+import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
+import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;

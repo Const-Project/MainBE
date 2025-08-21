@@ -7,7 +7,7 @@ import com.example.cp_main_be.domain.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.garden.dto.response.GardenBackgroundCandidateResponse;
 import com.example.cp_main_be.domain.garden.dto.response.GardenBackgroundResponse;
 import com.example.cp_main_be.domain.garden.dto.response.GardenResponse;
-import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
