@@ -12,14 +12,13 @@ import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
