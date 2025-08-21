@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.mission.quiz.dto;
 
+import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,5 +8,6 @@ import lombok.Setter;
 @Setter
 public class QuizRequestDTO {
 
-  private Integer answerNumber;
+  private QuizType quizType;
+  private Integer selectedOptionId;
 }
