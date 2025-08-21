@@ -12,13 +12,14 @@ import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class DiaryService {
   }
 
   public List<DiaryResponse> findAllDiariesByUserId(Long userId) {
-    List<Diary> diaries = diaryRepository.findAllByUser_id(userId);
+    List<Diary> diaries = diaryRepository.findAllByUserId(userId);
     return diaries.stream().map(DiaryResponse::from).collect(Collectors.toList());
   }
 
@@ -140,6 +141,9 @@ public class DiaryService {
     String imageUrl = imageUploader.upload(file, "diary-images");
 
     DiaryImage diaryImage = DiaryImage.builder().imageUrl(imageUrl).diary(diary).build();
+
+    // 새로 생성된 DiaryImage를 명시적으로 저장합니다.
+    diaryImageRepository.save(diaryImage);
 
     // 5. 다이어리 엔티티의 imageUrl 필드 업데이트
     diary.updateImage(diaryImage);

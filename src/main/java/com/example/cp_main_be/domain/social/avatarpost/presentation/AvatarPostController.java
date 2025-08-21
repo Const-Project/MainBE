@@ -25,7 +25,7 @@ public class AvatarPostController {
   private final BookmarkRepository bookmarkRepository;
   private final UserService userService;
 
-  @Operation(summary = "아바타 포스트 정보 조회", description = "아바타 포스트 정보를 조회합니다")
+  @Operation(summary = "아바타 포스트 상세 정보 조회", description = "아바타 포스트 정보를 조회합니다")
   @GetMapping("/{postId}")
   public ResponseEntity<ApiResponse<PostInfoResponse>> getPostInfo(@PathVariable Long postId) {
     User currentUser = userService.getCurrentUser();

@@ -2,11 +2,12 @@ package com.example.cp_main_be.domain.garden.garden.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -29,9 +30,11 @@ public class Garden {
   private Integer slotNumber;
 
   @Column(nullable = false)
+  @Builder.Default
   private Integer waterCount = 0;
 
   @Column(nullable = false)
+  @Builder.Default
   private Integer sunlightCount = 0;
 
   @ManyToOne(fetch = FetchType.LAZY)
