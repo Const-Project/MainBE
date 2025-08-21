@@ -48,7 +48,7 @@ public class AdminController {
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
-  @PutMapping("/missions/daily/{id}")
+  @PutMapping("/missions/daily/{dailyMissionMasterId}")
   @Operation(summary = "일일 미션(미션마스터) 수정 API")
   public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>> updateDailyMission(
       @RequestBody AdminRequestDTO.UpdateMissionRequestDTO requestDTO, @PathVariable Long id) {
@@ -68,9 +68,14 @@ public class AdminController {
 
   @GetMapping("/users")
   @Operation(summary = "사용자 목록 조회 API")
-  public ResponseEntity<ApiResponse<ListResponse<User>>> getUsers() {
+  public ResponseEntity<ApiResponse<ListResponse<AdminResponseDTO.UserResDTO>>> getUsers() {
     List<User> users = adminService.getUsers();
-    ListResponse<User> listResponse = new ListResponse<>(users);
+    ListResponse<AdminResponseDTO.UserResDTO> listResponse = new ListResponse<>( users.stream()
+            .map(user -> AdminResponseDTO.UserResDTO.builder()
+                    .username(user.getUsername())
+                    .uuid(user.getUuid())
+                    .id(user.getId())
+                    .build()).toList());
     return ResponseEntity.ok(ApiResponse.success(listResponse));
   }
 
@@ -100,10 +105,10 @@ public class AdminController {
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
-  @PutMapping("/plants/{id}")
+  @PutMapping("/plants/{plantId}")
   @Operation(summary = "식물 정보 수정 API")
   public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> updatePlantMasters(
-      @PathVariable(name = "id") Long plantId,
+      @PathVariable(name = "plantId") Long plantId,
       AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
     PlantMasters plantMaster = adminService.updatePlantMasters(plantId, requestDTO);
     AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
@@ -112,18 +117,36 @@ public class AdminController {
 
   @GetMapping("/reports")
   @Operation(summary = "신고 목록 조회 API")
-  public ResponseEntity<ApiResponse<ListResponse<Reports>>> getAllReports() {
+  public ResponseEntity<ApiResponse<ListResponse<AdminResponseDTO.ReportResDTO>>> getAllReports() {
     List<Reports> reports = adminService.getAllReports();
-    ListResponse<Reports> listResponse = new ListResponse<>(reports);
+    ListResponse<AdminResponseDTO.ReportResDTO> listResponse = new ListResponse<>(reports.stream()
+            .map(request -> AdminResponseDTO.ReportResDTO.builder()
+                    .reportReason(request.getReason())
+                    .reportDate(request.getCreatedAt())
+                    .reportId(request.getId())
+                    .status(request.getStatus())
+                    .reviewDate(request.getReviewedAt())
+                    .reviewerId(request.getReviewerId())
+                    .build()
+            ).toList());
     return ResponseEntity.ok(ApiResponse.success(listResponse));
   }
 
   @PutMapping("/reports/{reportId}")
   @Operation(summary = "신고 상태 변경 API")
-  public ResponseEntity<ApiResponse<Reports>> updateReportStatus(
+  public ResponseEntity<ApiResponse<AdminResponseDTO.ReportResDTO>> updateReportStatus(
       @PathVariable(name = "reportId") Long reportId,
       @RequestParam(name = "status") ReportStatus reportStatus) {
     Reports result = adminService.updateReportStatus(reportId, reportStatus);
-    return ResponseEntity.ok(ApiResponse.success(result));
+    AdminResponseDTO.ReportResDTO reportResDTO = AdminResponseDTO.ReportResDTO.builder()
+            .reportReason(result.getReason())
+            .status(result.getStatus())
+            .reportDate(result.getCreatedAt())
+            .reportId(result.getId())
+            .reviewDate(result.getReviewedAt())
+            .reviewerId(result.getReviewerId())
+            .build();
+
+    return ResponseEntity.ok(ApiResponse.success(reportResDTO));
   }
 }
