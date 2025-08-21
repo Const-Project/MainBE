@@ -1,12 +1,11 @@
 package com.example.cp_main_be.domain.social.diary.domain;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
-import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "diaries")
@@ -35,6 +34,7 @@ public class Diary {
   private DiaryImage diaryImage;
 
   @Column(name = "is_public")
+  @Builder.Default
   private boolean isPublic = true; // 기본값 true
 
   @Column(name = "created_at")
@@ -44,6 +44,7 @@ public class Diary {
   private LocalDateTime updatedAt;
 
   @Column(name = "like_count")
+  @Builder.Default
   private int likeCount = 0;
 
   @ManyToOne(fetch = FetchType.LAZY)

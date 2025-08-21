@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.social.follow.domain;
 
-import com.example.cp_main_be.domain.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

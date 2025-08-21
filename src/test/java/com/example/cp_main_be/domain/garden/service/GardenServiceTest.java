@@ -1,9 +1,18 @@
 package com.example.cp_main_be.domain.garden.service;
 
-import com.example.cp_main_be.domain.garden.domain.Garden;
-import com.example.cp_main_be.domain.garden.domain.repository.GardenRepository;
-import com.example.cp_main_be.domain.garden.dto.GardenResponse;
-import com.example.cp_main_be.domain.user.domain.User;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.*;
+
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
+import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
+import com.example.cp_main_be.domain.garden.garden.dto.GardenResponse;
+import com.example.cp_main_be.domain.garden.garden.service.GardenService;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,15 +20,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class GardenServiceTest {
@@ -103,7 +103,7 @@ class GardenServiceTest {
     User user =
         User.builder()
             .id(1L)
-            .level(2)
+            .level(2L)
             .gardens(new ArrayList<>(List.of(Garden.builder().slotNumber(1).build())))
             .build();
 
@@ -132,7 +132,7 @@ class GardenServiceTest {
     User user =
         User.builder()
             .id(1L)
-            .level(1)
+            .level(1L)
             .gardens(new ArrayList<>(List.of(Garden.builder().slotNumber(1).build())))
             .build();
 
@@ -152,7 +152,7 @@ class GardenServiceTest {
     User user =
         User.builder()
             .id(1L)
-            .level(4)
+            .level(4L)
             .gardens(
                 new ArrayList<>(
                     List.of(

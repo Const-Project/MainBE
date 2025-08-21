@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.social.guestbook.domain.repository;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
-import com.example.cp_main_be.domain.user.domain.User;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
