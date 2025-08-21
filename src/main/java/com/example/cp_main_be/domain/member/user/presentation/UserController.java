@@ -83,4 +83,13 @@ public class UserController {
             user.getId(), user.getUsername(), user.getUuid(), null, null); // 토큰은 응답에 포함하지 않음
     return ResponseEntity.ok(ApiResponse.success(userResponse));
   }
+
+  @GetMapping("/level")
+  @Operation(summary = "점수 및 레벨 조회")
+  public ResponseEntity<ApiResponse<UserResponse.LevelStatusResponseDTO>> getLevel() {
+    String uuid = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    User user = userService.findUserByUuid(UUID.fromString(uuid));
+    UserResponse.LevelStatusResponseDTO levelStatusResponseDTO = userService.getLevel(user);
+    return ResponseEntity.ok(ApiResponse.success(levelStatusResponseDTO));
+  }
 }

@@ -4,8 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import com.example.cp_main_be.domain.avatar.domain.Avatar;
-import com.example.cp_main_be.domain.avatar.domain.repository.AvatarRepository;
+import com.example.cp_main_be.domain.content.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.content.avatar.domain.repository.AvatarRepository;
+import com.example.cp_main_be.domain.content.avatar.service.AvatarService;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;

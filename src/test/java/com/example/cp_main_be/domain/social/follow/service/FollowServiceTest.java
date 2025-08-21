@@ -5,10 +5,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;

@@ -61,7 +61,7 @@ class UserDailyMissionServiceTest {
 
     List<UserDailyMission> missions = List.of(userMission1, userMission2);
 
-    given(userDailyMissionRepository.findAllByUserId(userId)).willReturn(missions);
+    given(userDailyMissionRepository.findAllByUser_Id(userId)).willReturn(missions);
 
     // When (실행)
     DailyMissionResponseDTO result = userDailyMissionService.getDailyMissions(userId);
@@ -72,7 +72,7 @@ class UserDailyMissionServiceTest {
     assertThat(result.getTodayMissions().get(0).getMissionTitle()).isEqualTo("미션 1");
     assertThat(result.getTodayMissions().get(1).getMissionTitle()).isEqualTo("미션 2");
 
-    verify(userDailyMissionRepository, times(1)).findAllByUserId(userId);
+    verify(userDailyMissionRepository, times(1)).findAllByUser_Id(userId);
   }
 
   @Test
@@ -88,7 +88,7 @@ class UserDailyMissionServiceTest {
 
     // Then
     verify(userDailyMissionRepository, times(1)).findById(dailyMissionId);
-    verify(userDailyMissionRepository, times(1)).delete(mission);
+    verify(userDailyMissionRepository, times(1)).save(mission);
   }
 
   @Test
@@ -106,7 +106,7 @@ class UserDailyMissionServiceTest {
               userDailyMissionService.completeDailyMission(dailyMissionId);
             });
 
-    assertThat(exception.getMessage()).isEqualTo("미션을 찾을 수 없습니다.");
+    assertThat(exception.getMessage()).isEqualTo("해당 ID를 갖는 미션이 존재하지 않습니다.");
     verify(userDailyMissionRepository, times(1)).findById(dailyMissionId);
     verify(userDailyMissionRepository, times(0)).delete(any());
   }
@@ -185,7 +185,7 @@ class UserDailyMissionServiceTest {
 
     given(userDailyMissionRepository.findById(userDailyMissionId))
         .willReturn(Optional.of(userMission));
-    given(quizRepository.findByDailyMissionMasters_Id(dailyMissionMasterId))
+    given(quizRepository.findByDailyMissionMaster_Id(dailyMissionMasterId))
         .willReturn(Optional.of(quiz));
     given(quizOptionsRepository.findAllByQuizId(quizId)).willReturn(options);
 
@@ -195,7 +195,7 @@ class UserDailyMissionServiceTest {
     // Then
     assertThat(result).isTrue();
     verify(userDailyMissionRepository, times(1)).findById(userDailyMissionId);
-    verify(quizRepository, times(1)).findByDailyMissionMasters_Id(dailyMissionMasterId);
+    verify(quizRepository, times(1)).findByDailyMissionMaster_Id(dailyMissionMasterId);
     verify(quizOptionsRepository, times(1)).findAllByQuizId(quizId);
   }
 
@@ -224,7 +224,7 @@ class UserDailyMissionServiceTest {
 
     given(userDailyMissionRepository.findById(userDailyMissionId))
         .willReturn(Optional.of(userMission));
-    given(quizRepository.findByDailyMissionMasters_Id(dailyMissionMasterId))
+    given(quizRepository.findByDailyMissionMaster_Id(dailyMissionMasterId))
         .willReturn(Optional.of(quiz));
     given(quizOptionsRepository.findAllByQuizId(quizId)).willReturn(options);
 
@@ -251,7 +251,7 @@ class UserDailyMissionServiceTest {
 
     given(userDailyMissionRepository.findById(userDailyMissionId))
         .willReturn(Optional.of(userMission));
-    given(quizRepository.findByDailyMissionMasters_Id(dailyMissionMasterId))
+    given(quizRepository.findByDailyMissionMaster_Id(dailyMissionMasterId))
         .willReturn(Optional.empty());
 
     // When & Then

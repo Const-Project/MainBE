@@ -6,6 +6,8 @@ import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.feed.domain.Feed;
 import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
 import com.example.cp_main_be.domain.social.like.domain.Like;
@@ -14,6 +16,7 @@ import com.example.cp_main_be.domain.user.domain.User;
 import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +43,11 @@ public class LikeService {
     }
 
     Like like = Like.builder().user(user).targetId(targetId).targetType(targetType).build();
-    likeRepository.save(like);
+    try {
+      likeRepository.save(like);
+    } catch (DataIntegrityViolationException e) {
+      throw new RuntimeException("이미 좋아요를 눌렀습니다.");
+    }
 
     // 좋아요 알림 로직
     if ("feed".equalsIgnoreCase(targetType)) {

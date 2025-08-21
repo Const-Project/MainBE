@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.mission.quiz.dto;
 
-import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import java.util.List;
 import lombok.Builder;
@@ -9,9 +8,16 @@ import lombok.Getter;
 @Getter
 @Builder
 public class QuizResponseDTO {
-  String quizQuestion;
-  QuizType quizType;
-  Long missionId;
-  List<QuizOptions> quizOptions; // 나중에 ListResponse<QuizOptionResponseDTO> 타입으로 수정
-  Boolean isCompleted;
+  private final String quizQuestion;
+  private final QuizType quizType;
+  private final Long missionId;
+  private final List<QuizOptionResponseDTO> quizOptions;
+  private final Boolean isCompleted;
+
+  @Getter
+  @Builder
+  public static class QuizOptionResponseDTO {
+    private final Long id;
+    private final String text;
+  }
 }

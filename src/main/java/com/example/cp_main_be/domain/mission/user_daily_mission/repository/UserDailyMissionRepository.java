@@ -5,5 +5,5 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserDailyMissionRepository extends JpaRepository<UserDailyMission, Long> {
-  List<UserDailyMission> findAllByUserId(Long userId);
+  List<UserDailyMission> findAllByUser_Id(Long userId);
 }

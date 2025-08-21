@@ -2,11 +2,11 @@ package com.example.cp_main_be.domain.social.guestbook.service;
 
 import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

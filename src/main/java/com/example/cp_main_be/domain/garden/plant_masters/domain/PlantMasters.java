@@ -33,9 +33,11 @@ public class PlantMasters {
   private String imageUrl;
 
   @Column(name = "growth_stages")
+  @Builder.Default
   private int growthStages = 0;
 
   @Column(name = "unlock_level")
+  @Builder.Default
   private int unlockLevel = 0;
 
   @Column(name = "created_at")

@@ -22,11 +22,9 @@ public class KeywordService {
   }
 
   public List<KeywordResponse> getAllKeywords() {
-    List<KeywordResponse> allKeywords =
-        keywordRepository.findAll().stream()
-            .map(keyword -> new KeywordResponse(keyword.getCreatedAt(), keyword.getKeyword()))
-            .collect(Collectors.toList());
 
-    return allKeywords;
+    return keywordRepository.findAll().stream()
+        .map(keyword -> new KeywordResponse(keyword.getCreatedAt(), keyword.getKeyword()))
+        .collect(Collectors.toList());
   }
 }

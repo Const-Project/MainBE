@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.social.avatarpost.domain;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
-import com.example.cp_main_be.domain.user.domain.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +31,7 @@ public class AvatarPost {
   private String caption;
 
   @Column(name = "like_count")
+  @Builder.Default
   private int likeCount = 0;
 
   @OneToMany(mappedBy = "avatarPost", cascade = CascadeType.ALL)

@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:src/main/java/com/example/cp_main_be/domain/garden/garden/dto/response/GardenResponse.java
 package com.example.cp_main_be.domain.garden.garden.dto.response;
+========
+package com.example.cp_main_be.domain.garden.garden.dto;
+>>>>>>>> develop:src/main/java/com/example/cp_main_be/domain/garden/garden/dto/GardenResponse.java
 
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import java.time.LocalDateTime;

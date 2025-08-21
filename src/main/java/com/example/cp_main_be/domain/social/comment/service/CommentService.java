@@ -2,13 +2,13 @@ package com.example.cp_main_be.domain.social.comment.service;
 
 import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
 import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
 import com.example.cp_main_be.domain.social.feed.domain.Feed;
 import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

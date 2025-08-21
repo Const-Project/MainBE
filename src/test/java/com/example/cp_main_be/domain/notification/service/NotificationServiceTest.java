@@ -9,8 +9,8 @@ import com.example.cp_main_be.domain.member.notification.domain.repository.Devic
 import com.example.cp_main_be.domain.member.notification.dto.request.NotificationSettingsRequest;
 import com.example.cp_main_be.domain.member.notification.dto.request.NotificationTokenRequest;
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
-import com.example.cp_main_be.domain.user.domain.User;
-import com.example.cp_main_be.domain.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
