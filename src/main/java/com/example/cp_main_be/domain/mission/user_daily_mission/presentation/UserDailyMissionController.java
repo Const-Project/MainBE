@@ -60,8 +60,9 @@ public class UserDailyMissionController {
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
-  @PostMapping(value = "/photo/{userDailyMissionId}/upload"
-          ,consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
+  @PostMapping(
+      value = "/photo/{userDailyMissionId}/upload",
+      consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Operation(summary = "미션 사진 업로드 API")
   public ResponseEntity<ApiResponse<String>> uploadPictureForMission(
       @RequestParam MultipartFile file,

@@ -70,12 +70,17 @@ public class AdminController {
   @Operation(summary = "사용자 목록 조회 API")
   public ResponseEntity<ApiResponse<ListResponse<AdminResponseDTO.UserResDTO>>> getUsers() {
     List<User> users = adminService.getUsers();
-    ListResponse<AdminResponseDTO.UserResDTO> listResponse = new ListResponse<>( users.stream()
-            .map(user -> AdminResponseDTO.UserResDTO.builder()
-                    .username(user.getUsername())
-                    .uuid(user.getUuid())
-                    .id(user.getId())
-                    .build()).toList());
+    ListResponse<AdminResponseDTO.UserResDTO> listResponse =
+        new ListResponse<>(
+            users.stream()
+                .map(
+                    user ->
+                        AdminResponseDTO.UserResDTO.builder()
+                            .username(user.getUsername())
+                            .uuid(user.getUuid())
+                            .id(user.getId())
+                            .build())
+                .toList());
     return ResponseEntity.ok(ApiResponse.success(listResponse));
   }
 
@@ -119,16 +124,20 @@ public class AdminController {
   @Operation(summary = "신고 목록 조회 API")
   public ResponseEntity<ApiResponse<ListResponse<AdminResponseDTO.ReportResDTO>>> getAllReports() {
     List<Reports> reports = adminService.getAllReports();
-    ListResponse<AdminResponseDTO.ReportResDTO> listResponse = new ListResponse<>(reports.stream()
-            .map(request -> AdminResponseDTO.ReportResDTO.builder()
-                    .reportReason(request.getReason())
-                    .reportDate(request.getCreatedAt())
-                    .reportId(request.getId())
-                    .status(request.getStatus())
-                    .reviewDate(request.getReviewedAt())
-                    .reviewerId(request.getReviewerId())
-                    .build()
-            ).toList());
+    ListResponse<AdminResponseDTO.ReportResDTO> listResponse =
+        new ListResponse<>(
+            reports.stream()
+                .map(
+                    request ->
+                        AdminResponseDTO.ReportResDTO.builder()
+                            .reportReason(request.getReason())
+                            .reportDate(request.getCreatedAt())
+                            .reportId(request.getId())
+                            .status(request.getStatus())
+                            .reviewDate(request.getReviewedAt())
+                            .reviewerId(request.getReviewerId())
+                            .build())
+                .toList());
     return ResponseEntity.ok(ApiResponse.success(listResponse));
   }
 
@@ -138,7 +147,8 @@ public class AdminController {
       @PathVariable(name = "reportId") Long reportId,
       @RequestParam(name = "status") ReportStatus reportStatus) {
     Reports result = adminService.updateReportStatus(reportId, reportStatus);
-    AdminResponseDTO.ReportResDTO reportResDTO = AdminResponseDTO.ReportResDTO.builder()
+    AdminResponseDTO.ReportResDTO reportResDTO =
+        AdminResponseDTO.ReportResDTO.builder()
             .reportReason(result.getReason())
             .status(result.getStatus())
             .reportDate(result.getCreatedAt())

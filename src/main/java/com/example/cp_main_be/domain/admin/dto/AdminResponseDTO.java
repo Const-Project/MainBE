@@ -1,11 +1,10 @@
 package com.example.cp_main_be.domain.admin.dto;
 
 import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
-import java.time.LocalDateTime;
-import java.util.UUID;
-
 import com.example.cp_main_be.domain.reports.domain.ReportReason;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
+import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 
