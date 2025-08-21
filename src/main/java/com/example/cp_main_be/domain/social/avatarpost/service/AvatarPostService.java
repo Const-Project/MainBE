@@ -5,6 +5,7 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.response.PostInfoResponse;
+import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
 import com.example.cp_main_be.domain.social.bookmark.domain.repository.BookmarkRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

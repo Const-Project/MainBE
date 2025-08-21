@@ -5,82 +5,71 @@ import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.dto.request.DiaryWriteRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryIdResponse;
+import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
+import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.social.diary.service.DiaryService;
 import com.example.cp_main_be.global.util.ApiResponse;
+import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/v1/diaries")
 @RequiredArgsConstructor
-@RequestMapping("api/v1/diaries")
+@Tag(name = "일기 API", description = "일기 관련 기능을 제공합니다.")
 public class DiaryController {
 
   private final DiaryService diaryService;
-  private final UserService userService;
 
-  @Operation(summary = "내 모든 일기 조회", description = "유저가 작성한 모든 일기 조회")
-  @GetMapping
-  public ResponseEntity<ApiResponse<List<DiaryResponse>>> getDiaries() {
-    String userUuid =
-        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-    User user = userService.findUserByUuid(UUID.fromString(userUuid));
-    List<DiaryResponse> diaryResponses = diaryService.findAllDiariesByUserId(user.getId());
-    return ResponseEntity.ok(ApiResponse.success(diaryResponses));
-  }
-
-  @Operation(summary = "일기 등록", description = "일기를 등록합니다")
+  @Operation(summary = "일기 작성", description = "일기를 작성합니다")
   @PostMapping
-  public ResponseEntity<ApiResponse<DiaryIdResponse>> registerDiary(
-      @Valid @RequestBody DiaryWriteRequest request) {
-    String userUuid =
-        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-    User user = userService.findUserByUuid(UUID.fromString(userUuid));
-
-    Long diaryId =
-        diaryService.registerDiary(
-            request.getTitle(),
-            request.getContent(),
-            request.getKeyword(),
-            user,
-            request.isPublic());
-
-    DiaryIdResponse diaryIdResponse = diaryService.getDiaryIdResponseById(diaryId);
-    return ResponseEntity.ok(ApiResponse.success(diaryIdResponse));
+  public ResponseEntity<ApiResponse<DiaryResponse>> createDiary(
+      @AuthenticationPrincipal User user, @RequestBody @Valid CreateDiaryRequest request) {
+    Diary createdDiary = diaryService.createDiary(user, request);
+    return ResponseEntity.ok(ApiResponse.success(DiaryResponse.from(createdDiary)));
   }
 
-  @Operation(summary = "특정 일기 조회", description = "특정 일기를 조회합니다")
+  @Operation(summary = "내 일기 목록 조회", description = "내 일기 목록을 조회합니다")
+  @GetMapping
+  public ResponseEntity<ApiResponse<List<DiaryResponse>>> getMyDiaries(
+      @AuthenticationPrincipal User user) {
+    List<Diary> diaries = diaryService.findMyDiaries(user);
+    List<DiaryResponse> responses = diaries.stream().map(DiaryResponse::from).toList();
+    return ResponseEntity.ok(ApiResponse.success(responses));
+  }
+
+  @Operation(summary = "특정 일기 조회", description = "특정 id로 일기를 조회합니다")
   @GetMapping("/{diaryId}")
-  public ResponseEntity<ApiResponse<DiaryResponse>> getDiaryById(@PathVariable Long diaryId) {
-
-    // id로 일기 조회할거임, 남이 적은 일기도 접근 가능한 상황
-    DiaryResponse diaryById = diaryService.getDiaryResponseById(diaryId);
-    return ResponseEntity.ok(ApiResponse.success(diaryById));
+  public ResponseEntity<ApiResponse<DiaryResponse>> getDiaryDetail(@PathVariable Long diaryId) {
+    Diary diary = diaryService.findDiaryById(diaryId);
+    // TODO: 비공개 글일 경우 작성자만 볼 수 있도록 하는 로직 추가 필요
+    return ResponseEntity.ok(ApiResponse.success(DiaryResponse.from(diary)));
   }
 
-  @Operation(summary = "특정 일기 수정", description = "특정 일기를 수정합니다")
+  @Operation(summary = "일기 수정", description = "일기를 수정합니다")
   @PutMapping("/{diaryId}")
-  public ResponseEntity<ApiResponse<DiaryResponse>> updateDiaryById(
-      @PathVariable Long diaryId, @Valid @RequestBody DiaryWriteRequest request) {
-    // 작성한 사람만 수정 가능
-    Diary diary = diaryService.updateDiary(diaryId, request);
-    DiaryResponse diaryResponse = DiaryResponse.from(diary);
-    return ResponseEntity.ok(ApiResponse.success(diaryResponse));
+  public ResponseEntity<ApiResponse<DiaryResponse>> updateDiary(
+      @AuthenticationPrincipal User user,
+      @PathVariable Long diaryId,
+      @RequestBody @Valid UpdateDiaryRequest request) {
+    Diary updatedDiary = diaryService.updateDiary(user.getId(), diaryId, request);
+    return ResponseEntity.ok(ApiResponse.success(DiaryResponse.from(updatedDiary)));
   }
 
-  @Operation(summary = "특정 일기 삭제", description = "특정 일기를 삭제합니다")
+  @Operation(summary = "일기 삭제", description = "일기를 삭제합니다")
   @DeleteMapping("/{diaryId}")
-  public ResponseEntity<ApiResponse<Void>> deleteDiaryById(@PathVariable Long diaryId) {
-    // 작성한 사람만 삭제 가능
-    diaryService.deleteDiaryById(diaryId);
+  public ResponseEntity<ApiResponse<Void>> deleteDiary(
+      @AuthenticationPrincipal User user, @PathVariable Long diaryId) {
+    diaryService.deleteDiary(user.getId(), diaryId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 }

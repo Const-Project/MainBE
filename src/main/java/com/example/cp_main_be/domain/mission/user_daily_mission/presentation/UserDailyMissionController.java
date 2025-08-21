@@ -7,8 +7,9 @@ import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
-import com.example.cp_main_be.global.util.ApiResponse;
+import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/mission")
 @RequiredArgsConstructor
+@Tag(name = "일일미션 API", description = "일일미션 관련 기능을 제공합니다.")
 public class UserDailyMissionController {
 
   private final UserDailyMissionService userDailyMissionService;

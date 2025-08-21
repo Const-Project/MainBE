@@ -23,9 +23,10 @@ import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMi
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
+import com.example.cp_main_be.global.common.ApiResponse;
 import com.example.cp_main_be.global.dto.ListResponse;
-import com.example.cp_main_be.global.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
+@Tag(name = "어드민 API", description = "어드민 권한의 기능을 제공합니다.")
 public class AdminController {
 
   private final AdminService adminService;

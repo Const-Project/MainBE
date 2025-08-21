@@ -7,6 +7,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.repository.DailyKeywordsRepository;
+import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
@@ -79,6 +80,10 @@ public class AdminService {
         dailyMissionMastersRepository
             .findById(requestDTO.getMissionMasterId())
             .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 미션이 존재하지 않습니다."));
+
+    if (dailyMissionMaster.getMissionType() != MissionType.QUIZ) {
+      throw new IllegalArgumentException("퀴즈 타입의 미션에만 선지를 추가할 수 있습니다.");
+    }
 
     return QuizOptions.builder() // QuizOptions 퀴즈의 선지
         .optionText(requestDTO.getOptionText())

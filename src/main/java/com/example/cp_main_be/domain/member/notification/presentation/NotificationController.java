@@ -6,17 +6,15 @@ import com.example.cp_main_be.domain.member.notification.dto.response.Notificati
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
-import com.example.cp_main_be.global.util.ApiResponse;
+import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -56,10 +54,7 @@ public class NotificationController {
   @Operation(summary = "알림 등록", description = "알림 토큰을 등록합니다")
   @PostMapping("/token")
   public ResponseEntity<ApiResponse<Void>> registerNotificationToken(
-      @RequestBody @Valid NotificationTokenRequest request) {
-    String userUuid =
-        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    User user = userService.findUserByUuid(UUID.fromString(userUuid));
+      @AuthenticationPrincipal User user, @RequestBody @Valid NotificationTokenRequest request) {
     notificationService.registerOrUpdateDeviceToken(user.getId(), request);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
@@ -67,10 +62,7 @@ public class NotificationController {
   @Operation(summary = "알림 설정", description = "알림 설정을 변경합니다")
   @PatchMapping("/settings")
   public ResponseEntity<ApiResponse<Void>> updateNotificationSettings(
-      @RequestBody @Valid NotificationSettingsRequest request) {
-    String userUuid =
-        (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    User user = userService.findUserByUuid(UUID.fromString(userUuid));
+      @AuthenticationPrincipal User user, @RequestBody @Valid NotificationSettingsRequest request) {
     notificationService.updateNotificationSettings(user.getId(), request);
     return ResponseEntity.ok(ApiResponse.success(null));
   }

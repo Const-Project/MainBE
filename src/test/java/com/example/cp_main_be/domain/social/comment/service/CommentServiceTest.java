@@ -9,6 +9,10 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
 import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
+import com.example.cp_main_be.domain.social.comment.dto.request.UpdateCommentRequest;
+import com.example.cp_main_be.domain.social.comment.dto.response.CommentResponse;
+import com.example.cp_main_be.domain.social.diary.domain.Diary;
+import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -18,12 +22,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
 
   @Mock private CommentRepository commentRepository;
   @Mock private UserRepository userRepository;
+  @Mock private DiaryRepository diaryRepository;
+  @Mock private ApplicationEventPublisher eventPublisher;
 
   @InjectMocks private CommentService commentService;
 
@@ -38,18 +45,20 @@ class CommentServiceTest {
     request.setTargetType("DIARY");
 
     User writer = User.builder().id(writerId).username("writer").build();
-
+    Diary diary = Diary.builder().id(10L).title("테스트 다이어리").build();
+    given(diaryRepository.findById(10L)).willReturn(Optional.of(diary));
     given(userRepository.findById(writerId)).willReturn(Optional.of(writer));
     given(commentRepository.save(any(Comment.class)))
         .willAnswer(invocation -> invocation.getArgument(0));
 
     // when
-    Comment createdComment = commentService.createComment(writerId, request);
+    CommentResponse createdComment = commentService.createComment(writerId, request);
 
     // then
     Assertions.assertNotNull(createdComment);
     Assertions.assertEquals(request.getContent(), createdComment.getContent());
-    Assertions.assertEquals(writerId, createdComment.getWriter().getId());
+    Assertions.assertEquals(writer.getId(), writerId);
+    Assertions.assertEquals(writer.getUsername(), createdComment.getWriter());
     Assertions.assertEquals(request.getTargetId(), createdComment.getTargetId());
     Assertions.assertEquals(request.getTargetType(), createdComment.getTargetType());
     verify(commentRepository).save(any(Comment.class));
@@ -81,22 +90,36 @@ class CommentServiceTest {
     Long writerId = 1L;
     String oldContent = "이전 댓글";
     String newContent = "수정된 댓글";
-    CommentRequest request = new CommentRequest();
+    UpdateCommentRequest request = new UpdateCommentRequest();
     request.setContent(newContent);
 
+    // Writer 객체
     User writer = User.builder().id(writerId).username("writer").build();
-    Comment comment = Comment.builder().id(commentId).writer(writer).content(oldContent).build();
 
+    // Comment 객체 (Diary, AvatarPost는 null)
+    Diary diary = Diary.builder().id(10L).title("테스트 다이어리").build();
+    Comment comment =
+        Comment.builder()
+            .id(commentId)
+            .writer(writer)
+            .content(oldContent)
+            .diary(diary) // <-- 연결 추가
+            .build();
+
+    // Mock repository
     given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));
     given(commentRepository.save(any(Comment.class)))
         .willAnswer(invocation -> invocation.getArgument(0));
 
     // when
-    Comment updatedComment = commentService.updateComment(commentId, writerId, request);
+    CommentResponse updatedComment = commentService.updateComment(commentId, writerId, request);
 
     // then
     Assertions.assertNotNull(updatedComment);
     Assertions.assertEquals(newContent, updatedComment.getContent());
+    Assertions.assertEquals(writer.getUsername(), updatedComment.getWriter());
+    Assertions.assertEquals(10L, updatedComment.getTargetId());
+    Assertions.assertEquals("DIARY", updatedComment.getTargetType()); // 안전하게 null 체크
     verify(commentRepository).findById(commentId);
     verify(commentRepository).save(any(Comment.class));
   }
@@ -107,7 +130,7 @@ class CommentServiceTest {
     // given
     Long commentId = 1L;
     Long writerId = 1L;
-    CommentRequest request = new CommentRequest();
+    UpdateCommentRequest request = new UpdateCommentRequest();
     request.setContent("수정된 댓글");
 
     given(commentRepository.findById(commentId)).willReturn(Optional.empty());
@@ -125,7 +148,7 @@ class CommentServiceTest {
     Long commentId = 1L;
     Long writerId = 1L;
     Long otherUserId = 2L;
-    CommentRequest request = new CommentRequest();
+    UpdateCommentRequest request = new UpdateCommentRequest();
     request.setContent("수정된 댓글");
 
     User writer = User.builder().id(writerId).username("writer").build();

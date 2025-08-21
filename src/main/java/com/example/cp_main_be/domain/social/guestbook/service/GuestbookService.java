@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.member.notification.domain.NotificationType
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
@@ -23,6 +24,7 @@ public class GuestbookService {
   private final GuestbookRepository guestbookRepository;
   private final UserRepository userRepository;
   private final NotificationService notificationService;
+  private final UserService userService;
 
   public void createGuestbook(Long writerId, Long ownerId, GuestbookRequest request) {
     User writer =
@@ -47,6 +49,9 @@ public class GuestbookService {
     Guestbook guestbook =
         Guestbook.builder().writer(writer).owner(owner).content(request.getContent()).build();
     guestbookRepository.save(guestbook);
+
+    final int GUESTBOOK_POINT = 6;
+    userService.addExperience(userService.getCurrentUser().getId(), GUESTBOOK_POINT);
 
     // 자기 자신에게는 알림을 보내지 않음
     if (!writerId.equals(ownerId)) {

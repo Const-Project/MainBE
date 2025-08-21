@@ -1,75 +1,52 @@
 package com.example.cp_main_be.domain.social.diary.dto.response;
 
-import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import java.time.LocalDateTime;
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 public class DiaryResponse {
+  private Long id;
+  private String title;
+  private String content;
+  private String imageUrl;
+  private boolean isPublic;
+  private int likeCount;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
-  private final Long id;
-  private final Long userId;
-  private final String title;
-  private final String content;
-  private final String keyword;
-  private final String imageUrl;
-  private final Comment comment;
-  private final Long likeCount;
-  private final LocalDateTime createdAt;
-  private final LocalDateTime updatedAt;
+  // private AuthorDto author; // 작성자 정보가 필요하면 추가
 
-  @Builder
+  public static DiaryResponse from(Diary diary) {
+    String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
+    return new DiaryResponse(
+        diary.getId(),
+        diary.getTitle(),
+        diary.getContent(),
+        imageUrl,
+        diary.isPublic(),
+        diary.getLikeCount(),
+        diary.getCreatedAt(),
+        diary.getUpdatedAt());
+  }
+
+  // Lombok Builder나 생성자를 통해 더 유연하게 만들 수 있습니다.
   private DiaryResponse(
       Long id,
-      Long userId,
       String title,
       String content,
-      String keyword,
       String imageUrl,
-      Comment comment,
-      Long likeCount,
+      boolean isPublic,
+      int likeCount,
       LocalDateTime createdAt,
       LocalDateTime updatedAt) {
     this.id = id;
-    this.userId = userId;
     this.title = title;
     this.content = content;
-    this.keyword = keyword;
     this.imageUrl = imageUrl;
-    this.comment = comment;
+    this.isPublic = isPublic;
     this.likeCount = likeCount;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-  }
-
-  public static DiaryResponse from(Diary diary) {
-    if (diary.getDiaryImage() == null) {
-      return DiaryResponse.builder()
-          .id(diary.getId())
-          .userId(diary.getUser().getId())
-          .title(diary.getTitle())
-          .content(diary.getContent())
-          .keyword(diary.getKeyword())
-          .comment(diary.getComment())
-          .likeCount((long) diary.getLikeCount())
-          .createdAt(diary.getCreatedAt())
-          .updatedAt(diary.getUpdatedAt())
-          .build();
-    } else {
-      return DiaryResponse.builder()
-          .id(diary.getId())
-          .userId(diary.getUser().getId())
-          .title(diary.getTitle())
-          .content(diary.getContent())
-          .keyword(diary.getKeyword())
-          .imageUrl(diary.getDiaryImage().getImageUrl())
-          .comment(diary.getComment())
-          .likeCount((long) diary.getLikeCount())
-          .createdAt(diary.getCreatedAt())
-          .updatedAt(diary.getUpdatedAt())
-          .build();
-    }
   }
 }

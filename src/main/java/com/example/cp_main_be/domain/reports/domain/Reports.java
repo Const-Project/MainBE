@@ -23,6 +23,12 @@ public class Reports {
   @Column(name = "target_type")
   private TargetType targetType;
 
+  @Column(name = "target_id")
+  private Long targetId;
+
+  @Column(name = "reported_user_id")
+  private Long reportedUserId;
+
   @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "report_reason_id")
   private ReportReason reason;

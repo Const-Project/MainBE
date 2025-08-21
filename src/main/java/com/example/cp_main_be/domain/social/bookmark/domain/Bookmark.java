@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.social.bookmark.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -20,12 +21,14 @@ public class Bookmark {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
+  @JsonBackReference
   private User user;
 
   private String targetType;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "avatar_post_id", nullable = true)
+  @JsonBackReference
   private AvatarPost avatarPost;
 
   @Column(name = "created_at", nullable = false)

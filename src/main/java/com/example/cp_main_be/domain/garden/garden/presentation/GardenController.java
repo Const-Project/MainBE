@@ -7,38 +7,48 @@ import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.util.ApiResponse;
+import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/gardens")
+@Tag(name = "텃밭 API", description = "텃밭 관련 기능을 제공합니다.")
 public class GardenController {
 
   private final GardenService gardenService;
   private final UserService userService;
 
-  @Operation(summary = "텃밭 가져오기", description = "텃밭 가져오기")
+  @Operation(summary = "텃밭 슬롯 조회", description = "텃밭 슬롯을 조회합니다")
   @GetMapping("/{gardenId}")
   public ResponseEntity<ApiResponse<GardenResponse>> getGarden(@PathVariable Long gardenId) {
     GardenResponse gardenResponse = gardenService.findGardenById(gardenId);
     return ResponseEntity.ok(ApiResponse.success(gardenResponse));
   }
 
-  @Operation(summary = "텃밭 물주기", description = "텃밭 waterCount 증가")
-  @PutMapping("/{gardenId}/water")
-  public ResponseEntity<ApiResponse<Void>> waterGarden(@PathVariable Long gardenId) {
-    gardenService.waterGarden(gardenId);
+  @Operation(summary = "정원에 물 주기", description = "자신 또는 다른 사람의 정원에 물을 줍니다.")
+  @PostMapping("/{gardenId}/water")
+  public ResponseEntity<ApiResponse<Void>> waterGarden(
+      @AuthenticationPrincipal Long userId, @PathVariable Long gardenId) {
+    gardenService.waterGarden(userId, gardenId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  @Operation(summary = "텃밭 햇빛주기", description = "텃밭 sunlightCount 증가")
-  @PutMapping({"/{gardenId}/sunlight"})
-  public ResponseEntity<ApiResponse<Void>> sunlightGarden(@PathVariable Long gardenId) {
-    gardenService.sunlightGarden(gardenId);
+  @Operation(summary = "정원에 햇빛 주기", description = "자신의 정원에 햇빛을 줍니다.")
+  @PostMapping("/{gardenId}/sunlight")
+  public ResponseEntity<ApiResponse<Void>> sunlightGarden(
+      @AuthenticationPrincipal Long userId, @PathVariable Long gardenId) {
+    gardenService.sunlightGarden(userId, gardenId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 

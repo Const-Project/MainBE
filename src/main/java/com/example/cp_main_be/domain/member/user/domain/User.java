@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.content.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.social.bookmark.domain.Bookmark;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -62,15 +63,20 @@ public class User {
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
+  @JsonManagedReference
   private List<Garden> gardens = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
+  @JsonManagedReference
   private List<Diary> diaries = new ArrayList<>();
 
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
+  @JsonManagedReference
   private List<Bookmark> bookMarks = new ArrayList<>();
+
+  private Boolean notificationEnabled = true;
 
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
   protected void onCreate() {
@@ -104,5 +110,10 @@ public class User {
     this.experience += amount;
     // TODO: 여기에 레벨업 확인 로직을 추가할 수 있습니다.
     // ex) if (this.experience >= getRequiredExperienceForNextLevel()) { levelUp(); }
+  }
+
+  public void levelUp(long remainingExp) {
+    this.level++;
+    this.experience = remainingExp;
   }
 }

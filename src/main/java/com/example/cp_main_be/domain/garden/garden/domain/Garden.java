@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.garden.garden.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -23,6 +24,7 @@ public class Garden {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id", nullable = false)
+  @JsonBackReference
   private User user;
 
   @Column(nullable = false)

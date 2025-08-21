@@ -1,10 +1,14 @@
 package com.example.cp_main_be.global.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -63,5 +67,25 @@ public class JwtTokenProvider {
       // TODO: Handle specific exceptions (ExpiredJwtException, UnsupportedJwtException, etc.)
       return false;
     }
+  }
+
+  public LocalDateTime getExpirationLocalDateTime(String token) {
+    // 1. parserBuilder()로 시작합니다.
+    Claims claims =
+        Jwts.parser()
+            // 2. 서명 키를 설정합니다.
+            .setSigningKey(getSigningKey())
+            // 3. 파서를 빌드합니다.
+            .build()
+            // 4. 토큰을 파싱하여 Claims(내용)를 가져옵니다.
+            .parseClaimsJws(token)
+            .getBody();
+
+    // Claims에서 만료 시간을 가져옵니다.
+    Date expiration = claims.getExpiration();
+    Instant expInstant = expiration.toInstant();
+
+    // Instant를 시스템 기본 시간대의 LocalDateTime으로 변환합니다.
+    return LocalDateTime.ofInstant(expInstant, ZoneId.systemDefault());
   }
 }
