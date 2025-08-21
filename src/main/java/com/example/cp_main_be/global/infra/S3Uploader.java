@@ -1,7 +1,6 @@
 package com.example.cp_main_be.global.infra;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.example.cp_main_be.domain.content.image.ImageUploader;
 import java.io.IOException;
@@ -42,7 +41,7 @@ public class S3Uploader implements ImageUploader {
 
     try {
       // S3에 삭제 요청을 보냄
-      amazonS3.deleteObject(new DeleteObjectRequest(bucket, key));
+      amazonS3.deleteObject(bucket, key);
     } catch (Exception e) {
       throw new RuntimeException("파일 삭제에 실패했습니다: " + e.getMessage());
     }
