@@ -8,7 +8,10 @@ import com.example.cp_main_be.domain.garden.garden.dto.GardenResponse;
 import com.example.cp_main_be.domain.garden.garden.dto.response.GardenBackgroundCandidateResponse;
 import com.example.cp_main_be.domain.garden.garden.dto.response.GardenBackgroundResponse;
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.event.WateredByFriendEvent;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,6 +33,7 @@ public class GardenService {
   private final UserService userService;
   private final ApplicationEventPublisher eventPublisher;
   private final GardenBackgroundRepository gardenBackgroundRepository;
+  private final UserRepository userRepository;
 
   public GardenResponse findGardenById(Long gardenId) {
     Garden garden =
@@ -80,26 +84,29 @@ public class GardenService {
   }
 
   @Transactional
-  public void unlockGarden(User user) {
+  public void unlockNewGardenSlot(Long userId) {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+
     int currentGardens = user.getGardens().size();
-    long userLevel = user.getLevel();
 
-    // 최대 텃밭 개수(4개)를 초과하는지 확인
+    // 최대 텃밭 개수 제한은 여전히 유효하므로 여기서 검사
     if (currentGardens >= MAX_GARDEN_COUNT) {
-      throw new IllegalStateException("텃밭은 최대 " + MAX_GARDEN_COUNT + "개까지만 생성할 수 있습니다.");
+      // 이미 최대치이므로 조용히 종료하거나 예외를 던질 수 있습니다.
+      // 여기서는 추가 생성을 막고 그냥 리턴합니다.
+      return;
     }
 
-    // 사용자의 레벨이 현재 보유한 텃밭 수보다 많아야 새 텃밭을 열 수 있음
-    if (userLevel <= currentGardens) {
-      throw new IllegalStateException("레벨이 부족하여 더 이상 텃밭을 잠금 해제할 수 없습니다.");
-    }
+    // [기존 레벨 체크 로직 삭제!]
 
-    // 새 텃밭 생성 (슬롯 번호는 기존 텃밭 수 + 1)
+    // TODO: 새로 생성된 텃밭의 기본 Avatar, Background 설정 로직 필요
     Garden newGarden = Garden.builder().user(user).slotNumber(currentGardens + 1).build();
 
     gardenRepository.save(newGarden);
 
-    // User 엔티티의 gardens 리스트에도 추가하여 영속성 컨텍스트와 객체 상태의 일관성을 맞춤
+    // User 엔티티의 gardens 리스트에도 추가
     user.addGarden(newGarden);
   }
 

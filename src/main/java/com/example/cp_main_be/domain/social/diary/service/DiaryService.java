@@ -1,10 +1,10 @@
 package com.example.cp_main_be.domain.social.diary.service;
 
-import com.example.cp_main_be.domain.content.image.ImageUploader;
+import com.example.cp_main_be.domain.avatar.image.ImageUploader;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
 import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;

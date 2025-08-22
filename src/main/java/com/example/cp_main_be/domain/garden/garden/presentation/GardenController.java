@@ -51,7 +51,7 @@ public class GardenController {
   @PutMapping("/slots/unlock")
   public ResponseEntity<ApiResponse<Void>> unlockGarden() {
     User currentUser = userService.getCurrentUser();
-    gardenService.unlockGarden(currentUser);
+    gardenService.unlockNewGardenSlot(currentUser.getId());
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 

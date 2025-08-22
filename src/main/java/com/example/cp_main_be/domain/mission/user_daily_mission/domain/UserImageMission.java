@@ -1,6 +1,6 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.domain;
 
-import com.example.cp_main_be.domain.content.image.DailyMissionImage;
+import com.example.cp_main_be.domain.avatar.image.DailyMissionImage;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

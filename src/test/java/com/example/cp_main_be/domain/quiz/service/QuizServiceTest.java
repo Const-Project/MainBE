@@ -8,7 +8,7 @@ import static org.mockito.Mockito.*;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
-import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

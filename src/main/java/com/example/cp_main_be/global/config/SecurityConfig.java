@@ -28,6 +28,7 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
         .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
+        .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함
         .authorizeHttpRequests(
@@ -39,7 +40,8 @@ public class SecurityConfig {
                         "/api/v1/policy",
                         "/swagger-ui/**", // Swagger UI 페이지
                         "/v3/api-docs/**", // OpenAPI 명세서
-                        "/swagger-resources/**")
+                        "/swagger-resources/**",
+                        "/h2-console/**")
                     .permitAll() // 회원가입 및 토큰 재발급은 인증 없이 허용
                     .anyRequest()
                     .authenticated() // 그 외 모든 요청은 인증 필요

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.verify;
 
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMasterRepository;
 import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
-import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import java.util.Collections;
 import org.junit.jupiter.api.DisplayName;

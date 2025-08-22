@@ -10,7 +10,7 @@ import static org.mockito.Mockito.verify;
 
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
-import com.example.cp_main_be.domain.mission.user_daily_mission.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import com.example.cp_main_be.global.infra.S3Uploader;
 import java.util.Optional;

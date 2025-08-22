@@ -2,6 +2,8 @@ package com.example.cp_main_be.domain.member.auth.service;
 
 import com.example.cp_main_be.domain.member.auth.domain.RefreshToken;
 import com.example.cp_main_be.domain.member.auth.domain.repository.RefreshTokenRepository;
+import com.example.cp_main_be.domain.member.auth.dto.request.RegistrationRequest;
+import com.example.cp_main_be.domain.member.auth.dto.response.AnonymousRegistrationResponse;
 import com.example.cp_main_be.domain.member.auth.dto.response.TokenRefreshResponse;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
@@ -83,12 +85,19 @@ public class AuthService {
     return new TokenRefreshResponse(newAccessToken, newRefreshToken, false);
   }
 
-  /** 신규 익명 사용자 등록: 토큰 발급 + 리프레시 토큰 저장 */
-  public TokenRefreshResponse registerNewAnonymousUser(String deviceId) {
-    UUID newUuid = UUID.randomUUID();
-    String newNickname = "익명의 새싹-" + newUuid.toString().substring(0, 4);
+  // [수정] 신규 사용자 가입 메서드
+  public AnonymousRegistrationResponse registerNewUser(
+      RegistrationRequest request, String deviceId) {
 
-    User newUser = User.builder().uuid(newUuid).username(newNickname).build();
+    // 2. 랜덤 닉네임 생성 로직 삭제, 요청받은 닉네임 사용
+    UUID newUuid = UUID.randomUUID();
+    String nickname = request.getNickname();
+
+    User newUser =
+        User.builder()
+            .uuid(newUuid)
+            .username(nickname) // 사용자가 입력한 닉네임으로 설정
+            .build();
     userRepository.save(newUser);
 
     String accessToken = jwtTokenProvider.generateAccessToken(newUuid.toString());
@@ -104,7 +113,12 @@ public class AuthService {
             .build();
     refreshTokenRepository.save(rt);
 
-    return new TokenRefreshResponse(accessToken, refreshToken, true);
+    return AnonymousRegistrationResponse.builder()
+        .accessToken(accessToken)
+        .refreshToken(refreshToken)
+        .nickname(nickname) // 생성된 닉네임 반환
+        .isNewUser(true)
+        .build();
   }
 
   /** 특정 리프레시 토큰 무효화(로그아웃) */

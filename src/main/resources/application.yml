@@ -1,0 +1,76 @@
+# ?? ??
+spring:
+  # ?? ???? local? ??
+  profiles:
+    active: local
+  application:
+    name: CP_Main_BE
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  security:
+    debug: true
+
+# JWT, Cloudflare R2, FastAPI ? ??? ???? ??
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration-milliseconds: 3600000
+  refresh-token-expiration-milliseconds: 604800000
+
+cloudflare:
+  r2:
+    endpoint: ${R2_ENDPOINT}
+    bucket: ${R2_BUCKET}
+    access-key: ${R2_ACCESS_KEY}
+    secret-key: ${R2_SECRET_KEY}
+
+fastapi:
+  server:
+    url: ${FASTAPI_URL}
+
+# ?? ??
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+
+---
+# "local" ???: ?? ?? ? CI/CD ?? ??
+spring:
+  config:
+    activate:
+      on-profile: local
+  # ????? H2 ???? DB? ???? ?? DB ??? ??
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # ????? ?? ? ??? ??, ?? ? ??
+    defer-datasource-initialization: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+---
+# "prod" ???: ?? ??(??) ??
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate # ????? ??? ??? ???? ?? ??? ?
+    show-sql: false
+  security:
+    debug: false

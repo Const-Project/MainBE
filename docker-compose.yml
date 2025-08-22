@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  spring-app:
+    # ECR에 푸시된 이미지 경로 (배포 스크립트에서 동적으로 결정되므로 여기서는 변수 사용)
+    image: ${ECR_REGISTRY}/cp_main_be:latest
+    container_name: spring-app-container
+    ports:
+      - "8080:8080"
+    # .env 파일에 정의된 환경 변수들을 컨테이너에 주입
+    env_file:
+      - ./.env
+    # Firebase 키 파일을 컨테이너 내부로 볼륨 마운트
+    volumes:
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json
+    restart: always

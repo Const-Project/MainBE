@@ -108,7 +108,7 @@ class GardenServiceTest {
             .build();
 
     // when
-    gardenService.unlockGarden(user);
+    gardenService.unlockNewGardenSlot(user.getId());
 
     // then
     // 1. gardenRepository.save()가 호출되었는지 검증
@@ -138,7 +138,8 @@ class GardenServiceTest {
 
     // when & then
     IllegalStateException exception =
-        assertThrows(IllegalStateException.class, () -> gardenService.unlockGarden(user));
+        assertThrows(
+            IllegalStateException.class, () -> gardenService.unlockNewGardenSlot(user.getId()));
 
     assertThat(exception.getMessage()).isEqualTo("레벨이 부족하여 더 이상 텃밭을 잠금 해제할 수 없습니다.");
     then(gardenRepository).should(never()).save(any(Garden.class));
@@ -164,7 +165,8 @@ class GardenServiceTest {
 
     // when & then
     IllegalStateException exception =
-        assertThrows(IllegalStateException.class, () -> gardenService.unlockGarden(user));
+        assertThrows(
+            IllegalStateException.class, () -> gardenService.unlockNewGardenSlot(user.getId()));
 
     assertThat(exception.getMessage()).isEqualTo("텃밭은 최대 4개까지만 생성할 수 있습니다.");
     then(gardenRepository).should(never()).save(any(Garden.class));
