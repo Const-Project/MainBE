@@ -47,7 +47,7 @@ public class User {
   @Builder.Default
   private List<Avatar> avatarList = new ArrayList<>();
 
-  @Builder.Default private Long level = 1L; // 기본 레벨 설정
+  @Builder.Default private Integer level = 1; // 기본 레벨 설정
 
   @Builder.Default private Long experience = 0L; // 기본 경험치 설정
 
@@ -76,7 +76,7 @@ public class User {
   @JsonManagedReference
   private List<Bookmark> bookMarks = new ArrayList<>();
 
-  private Boolean notificationEnabled = true;
+  @Builder.Default private Boolean notificationEnabled = true;
 
   @PrePersist // 엔티티가 영속화되기 전에 실행되는 콜백 메서드
   protected void onCreate() {
