@@ -1,9 +1,7 @@
 package com.example.cp_main_be.domain.social.guestbook.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Getter
 @Setter
@@ -12,8 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class GuestbookResponse {
 
-    public String author;
-    public String content;
-    public LocalDateTime createdAt;
-
+  public String author;
+  public String content;
+  public LocalDateTime createdAt;
 }
