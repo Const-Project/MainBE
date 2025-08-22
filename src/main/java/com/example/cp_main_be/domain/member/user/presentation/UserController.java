@@ -38,11 +38,11 @@ public class UserController {
   }
 
   @Operation(summary = "아바타 수정", description = "새로운 아바타 정보로 업데이트합니다")
-  @PatchMapping("/users/me/avatar")
+  @PatchMapping("/users/me/{avatarId}")
   public ResponseEntity<ApiResponse<Void>> updateAvatar(
-      @AuthenticationPrincipal User user, @RequestBody @Valid AvatarChangeRequest request) {
+      @AuthenticationPrincipal User user, @RequestBody @Valid AvatarChangeRequest request, @RequestParam("avatarId") Long avatarId) {
 
-    userService.updateAvatar(user.getId(), request);
+    userService.updateAvatar(user, request, avatarId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
@@ -50,7 +50,7 @@ public class UserController {
   @PatchMapping("/users/me/nickname")
   public ResponseEntity<ApiResponse<Void>> updateNickname(
       @AuthenticationPrincipal User user, @RequestBody @Valid NicknameChangeRequest request) {
-    userService.updateNickname(user.getId(), request.getNewNickname());
+    userService.updateNickname(user, request.getNewNickname());
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 

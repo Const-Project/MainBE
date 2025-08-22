@@ -9,7 +9,6 @@ import lombok.Setter;
 public class AvatarChangeRequest {
 
   private String newAvatarUrl;
-
   private String newAvatarName;
 
 }
