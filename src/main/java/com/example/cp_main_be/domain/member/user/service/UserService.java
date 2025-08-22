@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.member.user.service;
 
 import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.avatar.avatar.domain.AvatarMaster;
 import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
 import com.example.cp_main_be.domain.member.level.service.LevelService;
 import com.example.cp_main_be.domain.member.user.domain.User;
@@ -39,9 +40,13 @@ public class UserService {
     if(avatar == null) return;
     if(request.getNewAvatarUrl() != null)
     {
-      Ava
+      avatar.getAvatarMaster().setDefaultImageUrl(request.getNewAvatarUrl());
     }
-    userRepository.save(user);
+    if(request.getNewAvatarName() != null)
+    {
+      avatar.setNickname(request.getNewAvatarName());
+    }
+    avatarRepository.save(avatar);
   }
 
   public void updateNickname(User user, String newNickname) {
