@@ -35,8 +35,8 @@ class FollowServiceTest {
     // given
     Long followerId = 1L;
     Long followingId = 2L;
-    User follower = User.builder().id(followerId).username("follower").build();
-    User following = User.builder().id(followingId).username("following").build();
+    User follower = User.builder().id(followerId).nickname("follower").build();
+    User following = User.builder().id(followingId).nickname("following").build();
 
     given(userRepository.findById(followerId)).willReturn(Optional.of(follower));
     given(userRepository.findById(followingId)).willReturn(Optional.of(following));
@@ -55,8 +55,8 @@ class FollowServiceTest {
     // given
     Long followerId = 1L;
     Long followingId = 2L;
-    User follower = User.builder().id(followerId).username("follower").build();
-    User following = User.builder().id(followingId).username("following").build();
+    User follower = User.builder().id(followerId).nickname("follower").build();
+    User following = User.builder().id(followingId).nickname("following").build();
 
     given(userRepository.findById(followerId)).willReturn(Optional.of(follower));
     given(userRepository.findById(followingId)).willReturn(Optional.of(following));
@@ -74,8 +74,8 @@ class FollowServiceTest {
     // given
     Long followerId = 1L;
     Long followingId = 2L;
-    User follower = User.builder().id(followerId).username("follower").build();
-    User following = User.builder().id(followingId).username("following").build();
+    User follower = User.builder().id(followerId).nickname("follower").build();
+    User following = User.builder().id(followingId).nickname("following").build();
     Follow follow = Follow.builder().follower(follower).following(following).build();
 
     given(userRepository.findById(followerId)).willReturn(Optional.of(follower));
@@ -96,8 +96,8 @@ class FollowServiceTest {
     // given
     Long followerId = 1L;
     Long followingId = 2L;
-    User follower = User.builder().id(followerId).username("follower").build();
-    User following = User.builder().id(followingId).username("following").build();
+    User follower = User.builder().id(followerId).nickname("follower").build();
+    User following = User.builder().id(followingId).nickname("following").build();
 
     given(userRepository.findById(followerId)).willReturn(Optional.of(follower));
     given(userRepository.findById(followingId)).willReturn(Optional.of(following));
@@ -115,9 +115,9 @@ class FollowServiceTest {
   void getFollowers_success() {
     // given
     Long userId = 1L;
-    User user = User.builder().id(userId).username("user").build();
-    User follower1 = User.builder().id(2L).username("follower1").build();
-    User follower2 = User.builder().id(3L).username("follower2").build();
+    User user = User.builder().id(userId).nickname("user").build();
+    User follower1 = User.builder().id(2L).nickname("follower1").build();
+    User follower2 = User.builder().id(3L).nickname("follower2").build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     given(followRepository.findByFollowing(user))
@@ -142,9 +142,9 @@ class FollowServiceTest {
   void getFollowing_success() {
     // given
     Long userId = 1L;
-    User user = User.builder().id(userId).username("user").build();
-    User following1 = User.builder().id(2L).username("following1").build();
-    User following2 = User.builder().id(3L).username("following2").build();
+    User user = User.builder().id(userId).nickname("user").build();
+    User following1 = User.builder().id(2L).nickname("following1").build();
+    User following2 = User.builder().id(3L).nickname("following2").build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     given(followRepository.findByFollower(user))

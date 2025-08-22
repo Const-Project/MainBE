@@ -2,7 +2,6 @@ package com.example.cp_main_be.domain.member.user.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import java.util.ArrayList;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,10 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             .findByUuid(UUID.fromString(uuid))
             .orElseThrow(() -> new UsernameNotFoundException("User not found with uuid: " + uuid));
 
-    return new org.springframework.security.core.userdetails.User(
-        user.getUuid().toString(),
-        "", // 비밀번호는 사용하지 않으므로 빈 문자열
-        new ArrayList<>() // 권한은 현재 없으므로 빈 리스트
-        );
+    // DB에서 조회한 '우리 User 엔티티'를 그대로 반환합니다.
+    return user;
   }
 }

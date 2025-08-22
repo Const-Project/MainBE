@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponse {
+public class UserRegisterResponse {
 
   private Long id;
   private String username;
@@ -21,5 +21,13 @@ public class UserResponse {
     // GET /level 의 Response
     private Integer level; // 레벨
     private Long experience; // 경험
+  }
+
+  @Getter
+  @Builder
+  public static class MyInfoResponseDTO {
+    private Long id;
+    private String username;
+    private UUID uuid;
   }
 }

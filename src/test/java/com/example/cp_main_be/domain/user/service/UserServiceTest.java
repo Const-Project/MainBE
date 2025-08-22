@@ -33,7 +33,7 @@ class UserServiceTest {
   @Test
   void 회원_생성시_uuid가_자동으로_생기는가() {
     // given
-    User user = User.builder().username("test").build();
+    User user = User.builder().nickname("test").build();
 
     // Simulate the @PrePersist behavior
     doAnswer(
@@ -81,7 +81,7 @@ class UserServiceTest {
     // given
     Long userId = 1L;
     UUID userUuid = UUID.randomUUID();
-    User user = User.builder().id(userId).uuid(userUuid).username("test").build();
+    User user = User.builder().id(userId).uuid(userUuid).nickname("test").build();
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
     // when
@@ -99,7 +99,7 @@ class UserServiceTest {
   void findUserByUuid_success() {
     // given
     UUID userUuid = UUID.randomUUID();
-    User user = User.builder().uuid(userUuid).username("testuser").build();
+    User user = User.builder().uuid(userUuid).nickname("testuser").build();
     given(userRepository.findByUuid(userUuid)).willReturn(Optional.of(user));
 
     // when
@@ -115,7 +115,7 @@ class UserServiceTest {
   void deleteUser_success() {
     // given
     Long userId = 1L;
-    User user = User.builder().id(userId).username("test").build();
+    User user = User.builder().id(userId).nickname("test").build();
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
     // when
@@ -146,7 +146,7 @@ class UserServiceTest {
     Long userId = 1L;
     String oldNickname = "oldname";
     String newNickname = "newname";
-    User user = User.builder().id(userId).username(oldNickname).build();
+    User user = User.builder().id(userId).nickname(oldNickname).build();
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     given(userRepository.save(any(User.class))).willReturn(user);
 

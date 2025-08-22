@@ -3,7 +3,7 @@ package com.example.cp_main_be.domain.member.user.service;
 import com.example.cp_main_be.domain.member.level.service.LevelService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
+import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
 import java.util.UUID;
@@ -73,9 +73,9 @@ public class UserService {
     return userRepository.findAll();
   }
 
-  public UserResponse.LevelStatusResponseDTO getLevel(User user) {
+  public UserRegisterResponse.LevelStatusResponseDTO getLevel(User user) {
 
-    return UserResponse.LevelStatusResponseDTO.builder()
+    return UserRegisterResponse.LevelStatusResponseDTO.builder()
         .level(user.getLevel())
         .experience(user.getExperience())
         .build();

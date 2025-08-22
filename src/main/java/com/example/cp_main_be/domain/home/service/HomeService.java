@@ -64,7 +64,7 @@ public class HomeService {
     // 3. DTO 조립
     HomeResponseDto.UserInfo userInfo =
         HomeResponseDto.UserInfo.builder()
-            .username(user.getUsername())
+            .username(user.getNickname())
             .level(user.getLevel())
             .currentExp(user.getExperience())
             .requiredExpForNextLevel(calculateRequiredExpForLevel(user.getLevel() + 1))

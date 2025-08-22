@@ -1,8 +1,9 @@
-package com.example.cp_main_be.domain.social.diary.presentation;
+package com.example.cp_main_be.domain.social.diaryimage.presentation;
 
 import com.example.cp_main_be.domain.social.diary.service.DiaryService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/diaries")
+@Tag(name = "일기 이미지 API", description = "일기의 이미지 관련 기능을 제공합니다")
 public class DiaryImageController {
 
   private final DiaryService diaryService;

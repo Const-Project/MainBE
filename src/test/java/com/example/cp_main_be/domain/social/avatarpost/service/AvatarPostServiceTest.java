@@ -37,7 +37,7 @@ class AvatarPostServiceTest {
   void getPostInfoWithBookmarkStatus_bookmarkedPost_success() {
     // Given
     Long postId = 1L;
-    User currentUser = User.builder().id(100L).username("currentUser").build();
+    User currentUser = User.builder().id(100L).nickname("currentUser").build();
     AvatarPost mockPost =
         AvatarPost.builder()
             .id(postId)
@@ -74,7 +74,7 @@ class AvatarPostServiceTest {
     // Given
     Long postId = 2L;
     User currentUser =
-        User.builder().id(101L).uuid(UUID.randomUUID()).username("currentUser2").build();
+        User.builder().id(101L).uuid(UUID.randomUUID()).nickname("currentUser2").build();
     AvatarPost mockPost =
         AvatarPost.builder()
             .id(postId)

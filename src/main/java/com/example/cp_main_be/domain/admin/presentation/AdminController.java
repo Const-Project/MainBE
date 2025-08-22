@@ -78,7 +78,7 @@ public class AdminController {
                 .map(
                     user ->
                         AdminResponseDTO.UserResDTO.builder()
-                            .username(user.getUsername())
+                            .username(user.getNickname())
                             .uuid(user.getUuid())
                             .id(user.getId())
                             .build())

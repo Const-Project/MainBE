@@ -2,7 +2,6 @@ package com.example.cp_main_be.domain.garden.garden.presentation;
 
 import com.example.cp_main_be.domain.garden.garden.dto.GardenResponse;
 import com.example.cp_main_be.domain.garden.garden.dto.response.GardenBackgroundCandidateResponse;
-import com.example.cp_main_be.domain.garden.garden.dto.response.GardenBackgroundResponse;
 import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
@@ -53,14 +52,6 @@ public class GardenController {
     User currentUser = userService.getCurrentUser();
     gardenService.unlockNewGardenSlot(currentUser.getId());
     return ResponseEntity.ok(ApiResponse.success(null));
-  }
-
-  @Operation(summary = "텃밭 배경화면 get", description = "텃밭의 배경화면을 조회한다.")
-  @GetMapping("/{gardenId}/background")
-  public ResponseEntity<ApiResponse<GardenBackgroundResponse>> getBackgroundImage(
-      @PathVariable Long gardenId) {
-    GardenBackgroundResponse response = gardenService.getGardenBackgroundImage(gardenId);
-    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @Operation(summary = "텃밭 배경화면 update", description = "텃밭의 배경화면을 수정한다.")

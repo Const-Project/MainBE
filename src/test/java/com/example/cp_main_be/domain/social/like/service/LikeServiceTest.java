@@ -13,7 +13,6 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.like.domain.Like;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
@@ -44,7 +43,7 @@ class LikeServiceTest {
   //    Long userId = 1L;
   //    Long targetId = 10L;
   //    String targetType = "DIARY";
-  //    User user = User.builder().id(userId).username("testuser").build();
+  //    User user = User.builder().id(userId).nickname("testuser").build();
   //
   //    given(userRepository.findById(userId)).willReturn(Optional.of(user));
   //    given(likeRepository.existsByUserAndTargetIdAndTargetType(user, targetId, targetType))
@@ -64,7 +63,7 @@ class LikeServiceTest {
     Long userId = 1L;
     Long targetId = 10L;
     String targetType = "DIARY";
-    User user = User.builder().id(userId).username("testuser").build();
+    User user = User.builder().id(userId).nickname("testuser").build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     given(likeRepository.existsByUserAndTargetIdAndTargetType(user, targetId, targetType))
@@ -99,7 +98,7 @@ class LikeServiceTest {
   //    Long userId = 1L;
   //    Long targetId = 10L;
   //    String targetType = "DIARY";
-  //    User user = User.builder().id(userId).username("testuser").build();
+  //    User user = User.builder().id(userId).nickname("testuser").build();
   //    Like like = Like.builder().user(user).targetId(targetId).targetType(targetType).build();
   //
   //    given(userRepository.findById(userId)).willReturn(Optional.of(user));
@@ -120,7 +119,7 @@ class LikeServiceTest {
     Long userId = 1L;
     Long targetId = 10L;
     String targetType = "DIARY";
-    User user = User.builder().id(userId).username("testuser").build();
+    User user = User.builder().id(userId).nickname("testuser").build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     given(likeRepository.findByUserAndTargetIdAndTargetType(user, targetId, targetType))
@@ -155,8 +154,8 @@ class LikeServiceTest {
     Long userId = 1L;
     Long receiverId = 2L;
     Long targetId = 10L;
-    User user = User.builder().id(userId).username("likingUser").build();
-    User receiver = User.builder().id(receiverId).username("ownerUser").build();
+    User user = User.builder().id(userId).nickname("likingUser").build();
+    User receiver = User.builder().id(receiverId).nickname("ownerUser").build();
 
     String targetType = "DIARY";
     Diary diary = Diary.builder().id(targetId).user(receiver).build();
@@ -185,8 +184,8 @@ class LikeServiceTest {
     Long userId = 1L;
     Long receiverId = 2L;
     Long targetId = 10L;
-    User user = User.builder().id(userId).username("likingUser").build();
-    User receiver = User.builder().id(receiverId).username("ownerUser").build();
+    User user = User.builder().id(userId).nickname("likingUser").build();
+    User receiver = User.builder().id(receiverId).nickname("ownerUser").build();
 
     String targetType = "AVATAR_POST";
     AvatarPost avatarPost = AvatarPost.builder().id(targetId).user(receiver).build();
@@ -215,8 +214,8 @@ class LikeServiceTest {
     Long userId = 1L;
     Long receiverId = 2L;
     Long targetId = 10L;
-    User user = User.builder().id(userId).username("likingUser").build();
-    User receiver = User.builder().id(receiverId).username("ownerUser").build();
+    User user = User.builder().id(userId).nickname("likingUser").build();
+    User receiver = User.builder().id(receiverId).nickname("ownerUser").build();
 
     String targetType = "diary"; // 현재 구현은 소문자를 사용
     Like like =
@@ -243,8 +242,8 @@ class LikeServiceTest {
     Long userId = 1L;
     Long receiverId = 2L;
     Long targetId = 10L;
-    User user = User.builder().id(userId).username("likingUser").build();
-    User receiver = User.builder().id(receiverId).username("ownerUser").build();
+    User user = User.builder().id(userId).nickname("likingUser").build();
+    User receiver = User.builder().id(receiverId).nickname("ownerUser").build();
 
     String targetType = "avatar_post"; // 현재 구현은 소문자를 사용
     Like like =

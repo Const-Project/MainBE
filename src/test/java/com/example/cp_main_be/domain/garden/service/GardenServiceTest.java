@@ -33,7 +33,7 @@ class GardenServiceTest {
   void findGardenById_Success() {
     // given
     Long gardenId = 1L;
-    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
+    User user = User.builder().id(1L).uuid(UUID.randomUUID()).nickname("testuser").build();
     Garden garden = Garden.builder().user(user).slotNumber(1).build();
 
     given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));

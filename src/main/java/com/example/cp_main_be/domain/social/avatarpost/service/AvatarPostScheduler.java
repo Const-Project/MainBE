@@ -29,7 +29,7 @@ public class AvatarPostScheduler {
       String caption =
           String.format(
               "%s님의 %s 아바타가 피드에 등장했어요! 구경해보세요!",
-              randomAvatar.getUser().getUsername(), randomAvatar.getNickname());
+              randomAvatar.getUser().getNickname(), randomAvatar.getNickname());
 
       // 3. 새로운 AvatarPost 생성 및 저장
       AvatarPost newPost = AvatarPost.builder().avatar(randomAvatar).caption(caption).build();

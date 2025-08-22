@@ -95,7 +95,7 @@ public class NotificationService {
 
   private Notification createNotification(
       User receiver, User sender, NotificationType notificationType, String url) {
-    String content = String.format(notificationType.getMessageTemplate(), sender.getUsername());
+    String content = String.format(notificationType.getMessageTemplate(), sender.getNickname());
     return Notification.builder()
         .receiver(receiver)
         .notificationType(notificationType)

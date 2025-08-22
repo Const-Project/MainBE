@@ -38,7 +38,7 @@ class NotificationServiceTest {
     NotificationTokenRequest request = new NotificationTokenRequest();
     request.setToken(token);
 
-    User user = User.builder().id(userId).username("testuser").build();
+    User user = User.builder().id(userId).nickname("testuser").build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     given(deviceTokenRepository.findByUser(user)).willReturn(Optional.empty());
@@ -62,7 +62,7 @@ class NotificationServiceTest {
     NotificationTokenRequest request = new NotificationTokenRequest();
     request.setToken(newToken);
 
-    User user = User.builder().id(userId).username("testuser").build();
+    User user = User.builder().id(userId).nickname("testuser").build();
     DeviceToken existingToken = DeviceToken.builder().user(user).token(oldToken).build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
@@ -103,7 +103,7 @@ class NotificationServiceTest {
     NotificationSettingsRequest request = new NotificationSettingsRequest();
     request.setNotificationEnabled(true);
 
-    User user = User.builder().id(userId).username("testuser").build();
+    User user = User.builder().id(userId).nickname("testuser").build();
 
     given(userRepository.findById(userId)).willReturn(Optional.of(user));
     // TODO: User 엔티티에 notificationEnabled 필드 추가 후 테스트 로직 보완

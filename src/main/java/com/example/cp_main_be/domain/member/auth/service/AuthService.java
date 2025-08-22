@@ -96,7 +96,7 @@ public class AuthService {
     User newUser =
         User.builder()
             .uuid(newUuid)
-            .username(nickname) // 사용자가 입력한 닉네임으로 설정
+            .nickname(nickname) // 사용자가 입력한 닉네임으로 설정
             .build();
     userRepository.save(newUser);
 

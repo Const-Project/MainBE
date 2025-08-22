@@ -12,7 +12,6 @@ import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
 import com.example.cp_main_be.domain.social.comment.dto.request.UpdateCommentRequest;
 import com.example.cp_main_be.domain.social.comment.dto.response.CommentResponse;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
@@ -44,7 +43,7 @@ class CommentServiceTest {
     request.setTargetId(10L);
     request.setTargetType("DIARY");
 
-    User writer = User.builder().id(writerId).username("writer").build();
+    User writer = User.builder().id(writerId).nickname("writer").build();
     Diary diary = Diary.builder().id(10L).title("테스트 다이어리").build();
     given(diaryRepository.findById(10L)).willReturn(Optional.of(diary));
     given(userRepository.findById(writerId)).willReturn(Optional.of(writer));
@@ -94,7 +93,7 @@ class CommentServiceTest {
     request.setContent(newContent);
 
     // Writer 객체
-    User writer = User.builder().id(writerId).username("writer").build();
+    User writer = User.builder().id(writerId).nickname("writer").build();
 
     // Comment 객체 (Diary, AvatarPost는 null)
     Diary diary = Diary.builder().id(10L).title("테스트 다이어리").build();
@@ -151,7 +150,7 @@ class CommentServiceTest {
     UpdateCommentRequest request = new UpdateCommentRequest();
     request.setContent("수정된 댓글");
 
-    User writer = User.builder().id(writerId).username("writer").build();
+    User writer = User.builder().id(writerId).nickname("writer").build();
     Comment comment = Comment.builder().id(commentId).writer(writer).content("이전 댓글").build();
 
     given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));
@@ -170,7 +169,7 @@ class CommentServiceTest {
     Long commentId = 1L;
     Long writerId = 1L;
 
-    User writer = User.builder().id(writerId).username("writer").build();
+    User writer = User.builder().id(writerId).nickname("writer").build();
     Comment comment = Comment.builder().id(commentId).writer(writer).content("댓글 내용").build();
 
     given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));
@@ -207,7 +206,7 @@ class CommentServiceTest {
     Long writerId = 1L;
     Long otherUserId = 2L;
 
-    User writer = User.builder().id(writerId).username("writer").build();
+    User writer = User.builder().id(writerId).nickname("writer").build();
     Comment comment = Comment.builder().id(commentId).writer(writer).content("댓글 내용").build();
 
     given(commentRepository.findById(commentId)).willReturn(Optional.of(comment));

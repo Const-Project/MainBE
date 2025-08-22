@@ -37,7 +37,7 @@ public class User implements UserDetails {
   private Role role; // 역할 필드 추가
 
   @Column(nullable = false)
-  private String username;
+  private String nickname;
 
   private String email;
 
@@ -97,9 +97,9 @@ public class User implements UserDetails {
   }
 
   // == 정보 수정 메서드 ==//
-  public void updateProfile(String username, String profileImageUrl) {
-    if (username != null) {
-      this.username = username;
+  public void updateProfile(String nickname, String profileImageUrl) {
+    if (nickname != null) {
+      this.nickname = nickname;
     }
     if (profileImageUrl != null) {
       this.profileImageUrl = profileImageUrl;

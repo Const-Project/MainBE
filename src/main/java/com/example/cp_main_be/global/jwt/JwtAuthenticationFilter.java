@@ -53,8 +53,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 userDetails.getAuthorities()); // UserDetails에서 직접 권한 목록을 가져옴
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
       } else {
         logger.warn("Token validation FAILED.");
       }

@@ -10,7 +10,6 @@ import com.example.cp_main_be.domain.avatar.image.ImageUploader;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
 import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
@@ -48,8 +47,8 @@ class DiaryServiceTest {
 
   @BeforeEach
   void setUp() {
-    ownerUser = User.builder().id(1L).username("owner").uuid(UUID.randomUUID()).build();
-    anotherUser = User.builder().id(2L).username("another").uuid(UUID.randomUUID()).build();
+    ownerUser = User.builder().id(1L).nickname("owner").uuid(UUID.randomUUID()).build();
+    anotherUser = User.builder().id(2L).nickname("another").uuid(UUID.randomUUID()).build();
     testDiary =
         Diary.builder().id(10L).title("Test Title").content("Test Content").user(ownerUser).build();
 

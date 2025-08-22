@@ -6,7 +6,6 @@ import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenBackg
 import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.garden.garden.dto.GardenResponse;
 import com.example.cp_main_be.domain.garden.garden.dto.response.GardenBackgroundCandidateResponse;
-import com.example.cp_main_be.domain.garden.garden.dto.response.GardenBackgroundResponse;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.UserService;
@@ -108,20 +107,6 @@ public class GardenService {
 
     // User 엔티티의 gardens 리스트에도 추가
     user.addGarden(newGarden);
-  }
-
-  public GardenBackgroundResponse getGardenBackgroundImage(Long gardenId) {
-    Garden garden =
-        gardenRepository
-            .findById(gardenId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
-
-    GardenBackground background = garden.getGardenBackground();
-    if (background == null) {
-      throw new IllegalStateException("해당 텃밭에 배경화면이 설정되어 있지 않습니다.");
-    }
-
-    return new GardenBackgroundResponse(background.getImageUrl());
   }
 
   @Transactional
