@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.social.feed.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.AvatarPostFeedItemResponse;
@@ -32,35 +33,38 @@ public class FeedService {
   private final DiaryRepository diaryRepository;
   private final FollowRepository followRepository;
   private final AvatarPostRepository avatarPostRepository;
+  private final UserBlockRepository userBlockRepository;
 
   public List<FeedItemResponse> getFeed(UUID currentUserUuid, String filter) {
-    // 실제로는 페이징 처리가 필요하지만, 여기서는 최신 100개씩 조회하는 것으로 가정
     Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+    User currentUser =
+        userRepository
+            .findByUuid(currentUserUuid)
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
+    // [추가] 1. 현재 사용자가 차단한 유저 ID 목록을 먼저 조회합니다.
+    List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(currentUser);
 
     List<Diary> diaries;
     List<AvatarPost> avatarPosts;
 
-    // "following" 필터가 적용된 경우
     if ("following".equalsIgnoreCase(filter)) {
-      // 1. 현재 사용자 엔티티를 조회합니다.
-      User currentUser =
-          userRepository
-              .findByUuid(currentUserUuid)
-              .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+      List<User> followingUsers =
+          followRepository.findByFollower(currentUser).stream().map(Follow::getFollowing).toList();
 
-      // 2. 현재 사용자가 팔로우하는 모든 관계를 조회합니다.
-      List<Follow> follows = followRepository.findByFollower(currentUser);
+      // [수정] 2. 차단된 유저를 제외하고 조회
+      diaries =
+          diaryRepository.findByUserInAndIsPublicIsTrueAndUser_IdNotIn(
+              followingUsers, blockedUserIds, pageable);
+      avatarPosts =
+          avatarPostRepository.findByUserInAndUser_IdNotIn(
+              followingUsers, blockedUserIds, pageable);
 
-      // 3. 팔로우 관계에서 '팔로잉 당하는' 사용자(following)들의 리스트를 추출합니다.
-      List<User> followingUsers = follows.stream().map(Follow::getFollowing).toList();
-
-      // 4. 팔로우하는 사용자들이 작성한 게시물만 조회합니다.
-      diaries = diaryRepository.findByUserInAndIsPublicIsTrue(followingUsers, pageable);
-      avatarPosts = avatarPostRepository.findByUserIn(followingUsers, pageable);
-
-    } else { // 필터가 없으면 모든 공개 게시물 조회
-      diaries = diaryRepository.findByIsPublicIsTrue(pageable);
-      avatarPosts = avatarPostRepository.findAll(pageable).getContent();
+    } else {
+      // [수정] 2. 차단된 유저를 제외하고 조회
+      diaries = diaryRepository.findByIsPublicIsTrueAndUser_IdNotIn(blockedUserIds, pageable);
+      avatarPosts = avatarPostRepository.findAllByUser_IdNotIn(blockedUserIds, pageable);
     }
 
     // 2. 각 게시물을 해당하는 DTO로 변환

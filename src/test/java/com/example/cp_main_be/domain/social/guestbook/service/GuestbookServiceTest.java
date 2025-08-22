@@ -18,7 +18,6 @@ import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRespo
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -178,14 +177,16 @@ class GuestbookServiceTest {
   void getGuestbookList_WhenGuestbooksExist_ShouldReturnResponseList() {
     // given (주어진 상황)
     // User 엔티티의 빌더를 사용하여 테스트용 User 객체 생성
-    User owner = User.builder()
+    User owner =
+        User.builder()
             .id(1L)
             .uuid(UUID.randomUUID())
             .username("방명록주인")
             .email("owner@test.com")
             .build();
 
-    User writer = User.builder()
+    User writer =
+        User.builder()
             .id(2L)
             .uuid(UUID.randomUUID())
             .username("글쓴이")
@@ -193,7 +194,8 @@ class GuestbookServiceTest {
             .build();
 
     // 테스트용 Guestbook 객체 생성
-    Guestbook guestbook1 = Guestbook.builder()
+    Guestbook guestbook1 =
+        Guestbook.builder()
             .id(101L)
             .owner(owner)
             .writer(writer)
@@ -201,7 +203,8 @@ class GuestbookServiceTest {
             .createdAt(LocalDateTime.now().minusDays(2))
             .build();
 
-    Guestbook guestbook2 = Guestbook.builder()
+    Guestbook guestbook2 =
+        Guestbook.builder()
             .id(102L)
             .owner(owner)
             .writer(writer)
@@ -219,7 +222,7 @@ class GuestbookServiceTest {
 
     // then (결과 검증)
     assertThat(result).isNotNull(); // 결과는 null이 아니어야 함
-    assertThat(result).hasSize(2);  // 결과 리스트의 크기는 2여야 함
+    assertThat(result).hasSize(2); // 결과 리스트의 크기는 2여야 함
 
     // DTO의 내용이 엔티티의 정보와 일치하는지 검증
     GuestbookResponse firstResponse = result.get(0);
@@ -235,10 +238,7 @@ class GuestbookServiceTest {
   @DisplayName("방명록 목록 조회 - 방명록이 존재하지 않을 경우 빈 리스트 반환")
   void getGuestbookList_WhenNoGuestbooksExist_ShouldReturnNull() {
     // given (주어진 상황)
-    User owner = User.builder()
-            .id(1L)
-            .username("방명록주인")
-            .build();
+    User owner = User.builder().id(1L).username("방명록주인").build();
 
     // Repository Mocking: findAllByOwner가 호출되면 빈 리스트를 반환하도록 설정
     when(guestbookRepository.findAllByOwner(owner)).thenReturn(Collections.emptyList());
