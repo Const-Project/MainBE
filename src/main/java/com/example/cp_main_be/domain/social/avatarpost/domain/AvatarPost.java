@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.social.avatarpost.domain;
 
+import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import jakarta.persistence.*;
@@ -23,6 +24,11 @@ public class AvatarPost {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
+  // [핵심 수정] 어떤 Avatar를 포스팅하는지에 대한 직접적인 참조
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "avatar_id", nullable = false)
+  private Avatar avatar;
+
   @Column(name = "image_url")
   private String imageUrl;
 
@@ -39,6 +45,13 @@ public class AvatarPost {
 
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
+
+  // Builder 및 생성자도 수정 필요
+  @Builder
+  public AvatarPost(Avatar avatar, String caption) {
+    this.avatar = avatar;
+    this.caption = caption;
+  }
 
   @PrePersist
   protected void onCreate() {

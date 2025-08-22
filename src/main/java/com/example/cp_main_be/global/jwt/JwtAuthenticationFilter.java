@@ -1,7 +1,7 @@
 package com.example.cp_main_be.global.jwt;
 
-import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.user.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -9,13 +9,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -26,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final JwtTokenProvider jwtTokenProvider;
   private final UserRepository userRepository;
   private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+  private final CustomUserDetailsService customUserDetailsService;
 
   @Override
   protected void doFilterInternal(
@@ -41,22 +41,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       logger.info("Token found: {}", token);
       if (jwtTokenProvider.validateToken(token)) {
         logger.info("Token validation successful.");
-        String uuidStr = jwtTokenProvider.getUuidFromToken(token); // uuid를 가져오는 로직이 필요합니다.
-        UUID uuid = UUID.fromString(uuidStr);
+        String uuidStr = jwtTokenProvider.getUuidFromToken(token);
 
-        User user =
-            userRepository
-                .findByUuid(uuid)
-                .orElseThrow(
-                    () -> new UsernameNotFoundException("User not found with uuid: " + uuid));
+        // UserDetailsService를 통해 사용자 정보 로드
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(uuidStr);
 
         UsernamePasswordAuthenticationToken authentication =
             new UsernamePasswordAuthenticationToken(
-                user,
+                userDetails, // Principal로 UserDetails 객체 사용
                 null,
-                java.util.Collections.singletonList(
-                    new org.springframework.security.core.authority.SimpleGrantedAuthority(
-                        "ROLE_USER")));
+                userDetails.getAuthorities()); // UserDetails에서 직접 권한 목록을 가져옴
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
       } else {

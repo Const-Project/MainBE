@@ -2,7 +2,7 @@ package com.example.cp_main_be.global.infra;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.example.cp_main_be.domain.content.image.ImageUploader;
+import com.example.cp_main_be.domain.avatar.image.ImageUploader;
 import java.io.IOException;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
