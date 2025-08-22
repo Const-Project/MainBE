@@ -29,6 +29,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,8 +104,8 @@ public class AdminController {
     return ResponseEntity.ok(ApiResponse.success(quizOptions));
   }
 
-  @PostMapping("/plants")
-  @Operation(summary = "새 식물 등록 API")
+  @PostMapping("/avatar-master")
+  @Operation(summary = "새 아바타 마스터 등록 API")
   public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> createNewPlant(
       AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
     PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
@@ -112,10 +113,10 @@ public class AdminController {
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
-  @PutMapping("/plants/{plantId}")
-  @Operation(summary = "식물 정보 수정 API")
+  @PutMapping("/plants/{avatar-master-id}")
+  @Operation(summary = "아바타 마스터 정보 수정 API")
   public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> updatePlantMasters(
-      @PathVariable(name = "plantId") Long plantId,
+      @PathVariable(name = "avatar-master-id") Long plantId,
       AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
     PlantMasters plantMaster = adminService.updatePlantMasters(plantId, requestDTO);
     AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
@@ -160,5 +161,11 @@ public class AdminController {
             .build();
 
     return ResponseEntity.ok(ApiResponse.success(reportResDTO));
+  }
+
+  @PostMapping(value = "/plant/delivery/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @Operation(summary = "택배로 받을 식물 사진 추가")
+  public ResponseEntity<ApiResponse<Boolean>> addDeliveryPlantImage(){
+
   }
 }
