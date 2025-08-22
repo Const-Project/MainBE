@@ -6,6 +6,7 @@ import com.example.cp_main_be.domain.mission.quiz.dto.CompletedQuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
+import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionPanelResponse;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +26,14 @@ public class UserDailyMissionController {
 
   private final UserDailyMissionService userDailyMissionService;
   private final QuizService quizService;
+
+  @GetMapping("/panel")
+  @Operation(summary = "미션 패널 정보 조회", description = "오늘의 미션 목록과 소망 나무 정보를 함께 조회합니다.")
+  public ResponseEntity<ApiResponse<MissionPanelResponse>> getMissionPanel(
+      @AuthenticationPrincipal User user) {
+    MissionPanelResponse response = userDailyMissionService.getMissionPanelData(user.getId());
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
 
   @GetMapping("/daily")
   @Operation(summary = "유저 일일 미션 목록 조회")

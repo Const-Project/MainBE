@@ -11,7 +11,7 @@ public class AuthorResponse {
 
   public AuthorResponse(User user) {
     this.userId = user.getId();
-    this.username = user.getUsername();
+    this.username = user.getNickname();
     this.profileImageUrl = user.getProfileImageUrl();
   }
 }

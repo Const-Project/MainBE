@@ -209,37 +209,37 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # AWS ECR 로그인
+            # EC2 인스턴스의 작업 디렉토리로 이동 (예: /home/ubuntu/app)
+            cd /home/${{ secrets.EC2_USER }}/app
+            
+            # 1. GitHub Secret에서 Firebase 키 파일 생성 (기존과 동일)
+            echo "${{ secrets.FIREBASE_KEY_JSON }}" > ./serviceAccountKey.json
+            
+            # 2. GitHub Secret에서 .env 파일 생성
+            echo "DB_URL=${{ secrets.DB_URL }}" > ./.env
+            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> ./.env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ./.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./.env
+            echo "R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}" >> ./.env
+            echo "R2_BUCKET=${{ secrets.R2_BUCKET }}" >> ./.env
+            echo "R2_ACCESS_KEY=${{ secrets.R2_ACCESS_KEY }}" >> ./.env
+            echo "R2_SECRET_KEY=${{ secrets.R2_SECRET_KEY }}" >> ./.env
+            echo "FASTAPI_URL=${{ secrets.FASTAPI_URL }}" >> ./.env
+            echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> ./.env
+            echo "SPRING_PROFILES_ACTIVE=prod" >> ./.env
+            echo "GOOGLE_APPLICATION_CREDENTIALS=/app/serviceAccountKey.json" >> ./.env
+            
+            # 3. AWS ECR 로그인
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
-            # 최신 이미지 pull
-            docker pull ${{ steps.login-ecr.outputs.registry }}/cp_main_be:latest
+            # 4. docker-compose.yml 파일이 있다면 최신 버전으로 업데이트 (git pull 등)
+            # git pull origin develop
             
-            # 기존 컨테이너 중지 및 삭제
-            if [ $(docker ps -a -q -f name=spring-app-container) ]; then
-              docker stop spring-app-container
-              docker rm spring-app-container
-            fi
-            
-            # 1. GitHub Secret에서 Firebase 키 파일 생성
-            echo "${{ secrets.FIREBASE_KEY_JSON }}" > /home/${{ secrets.EC2_USER }}/serviceAccountKey.json
-            
-            # 2. 모든 환경 변수를 포함하여 새 컨테이너 실행
-            docker run -d --name spring-app-container -p 8080:8080 \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e DB_URL="${{ secrets.DB_URL }}" \
-              -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
-              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-              -e R2_ENDPOINT="${{ secrets.R2_ENDPOINT }}" \
-              -e R2_BUCKET="${{ secrets.R2_BUCKET }}" \
-              -e R2_ACCESS_KEY="${{ secrets.R2_ACCESS_KEY }}" \
-              -e R2_SECRET_KEY="${{ secrets.R2_SECRET_KEY }}" \
-              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-              -e FASTAPI_URL="${{ secrets.FASTAPI_URL }}" \
-              -e API_TOKEN="${{ secrets.API_TOKEN }}" \
-              -e GOOGLE_APPLICATION_CREDENTIALS=/app/serviceAccountKey.json \
-              -v /home/${{ secrets.EC2_USER }}/serviceAccountKey.json:/app/serviceAccountKey.json \
-              ${{ steps.login-ecr.outputs.registry }}/cp_main_be:latest
+            # 5. docker-compose로 애플리케이션 실행 (pull & up)
+            # ECR 주소를 환경변수로 전달
+            export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
+            docker-compose pull # docker-compose.yml에 명시된 최신 이미지를 받아옴
+            docker-compose up -d --remove-orphans # 백그라운드에서 실행
   # 워크플로우 실행 결과 요약
   summary:
     runs-on: ubuntu-latest

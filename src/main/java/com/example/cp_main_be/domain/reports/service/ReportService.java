@@ -11,7 +11,7 @@ import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

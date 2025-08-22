@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.social.diary.domain.repository;
+package com.example.cp_main_be.domain.social.diary.domain.Repository;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;

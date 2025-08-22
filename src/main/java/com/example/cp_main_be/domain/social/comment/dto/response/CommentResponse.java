@@ -18,7 +18,7 @@ public class CommentResponse {
   public static CommentResponse from(Comment comment, Long targetId, String targetType) {
     CommentResponse response = new CommentResponse();
     response.setId(comment.getId());
-    response.setWriter(comment.getWriter().getUsername());
+    response.setWriter(comment.getWriter().getNickname());
     response.setContent(comment.getContent());
     response.setTargetId(targetId);
     response.setTargetType(targetType);

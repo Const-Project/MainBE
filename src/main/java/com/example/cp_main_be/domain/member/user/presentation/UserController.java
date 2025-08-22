@@ -3,7 +3,7 @@ package com.example.cp_main_be.domain.member.user.presentation;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
 import com.example.cp_main_be.domain.member.user.dto.request.NicknameChangeRequest;
-import com.example.cp_main_be.domain.member.user.dto.response.UserResponse;
+import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterResponse;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,19 +56,20 @@ public class UserController {
 
   @Operation(summary = "내 정보 조회", description = "내 정보를 조회합니다")
   @GetMapping("/users/me")
-  public ResponseEntity<ApiResponse<UserResponse>> getMyInfo(@AuthenticationPrincipal User user) {
+  public ResponseEntity<ApiResponse<UserRegisterResponse>> getMyInfo(
+      @AuthenticationPrincipal User user) {
     // SecurityContextHolder에서 현재 인증된 사용자(UUID)를 가져옴
-    UserResponse userResponse =
-        new UserResponse(
-            user.getId(), user.getUsername(), user.getUuid(), null, null); // 토큰은 응답에 포함하지 않음
-    return ResponseEntity.ok(ApiResponse.success(userResponse));
+    UserRegisterResponse userRegisterResponse =
+        new UserRegisterResponse(
+            user.getId(), user.getNickname(), user.getUuid(), null, null); // 토큰은 응답에 포함하지 않음
+    return ResponseEntity.ok(ApiResponse.success(userRegisterResponse));
   }
 
   @GetMapping("/level")
   @Operation(summary = "점수 및 레벨 조회")
-  public ResponseEntity<ApiResponse<UserResponse.LevelStatusResponseDTO>> getLevel(
+  public ResponseEntity<ApiResponse<UserRegisterResponse.LevelStatusResponseDTO>> getLevel(
       @AuthenticationPrincipal User user) {
-    UserResponse.LevelStatusResponseDTO levelStatusResponseDTO = userService.getLevel(user);
+    UserRegisterResponse.LevelStatusResponseDTO levelStatusResponseDTO = userService.getLevel(user);
     return ResponseEntity.ok(ApiResponse.success(levelStatusResponseDTO));
   }
 }
