@@ -1,7 +1,6 @@
 package com.example.cp_main_be.domain.member.user.service;
 
 import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
-import com.example.cp_main_be.domain.avatar.avatar.domain.AvatarMaster;
 import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
 import com.example.cp_main_be.domain.member.level.service.LevelService;
 import com.example.cp_main_be.domain.member.user.domain.User;
@@ -34,16 +33,16 @@ public class UserService {
   }
 
   public void updateAvatar(User user, AvatarChangeRequest request, Long avatarId) {
-    if(user == null) return;
-    Avatar avatar = avatarRepository.findById(avatarId)
+    if (user == null) return;
+    Avatar avatar =
+        avatarRepository
+            .findById(avatarId)
             .orElseThrow(() -> new AvatarNotFoundException("아바타를 찾을 수 없습니다."));
-    if(avatar == null) return;
-    if(request.getNewAvatarUrl() != null)
-    {
+    if (avatar == null) return;
+    if (request.getNewAvatarUrl() != null) {
       avatar.getAvatarMaster().setDefaultImageUrl(request.getNewAvatarUrl());
     }
-    if(request.getNewAvatarName() != null)
-    {
+    if (request.getNewAvatarName() != null) {
       avatar.setNickname(request.getNewAvatarName());
     }
     avatarRepository.save(avatar);

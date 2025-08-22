@@ -13,4 +13,9 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
 
   @Query("SELECT ap FROM AvatarPost ap LEFT JOIN FETCH ap.comments WHERE ap.id = :postId")
   Optional<AvatarPost> findByIdWithComments(Long postId);
+
+  List<AvatarPost> findByUserInAndUser_IdNotIn(
+      List<User> users, List<Long> blockedUserIds, Pageable pageable);
+
+  List<AvatarPost> findAllByUser_IdNotIn(List<Long> blockedUserIds, Pageable pageable);
 }

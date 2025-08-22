@@ -11,6 +11,5 @@ public interface GuestbookRepository extends JpaRepository<Guestbook, Long> {
   Optional<Guestbook> findByWriterAndOwnerAndCreatedAtBetween(
       User writer, User owner, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
-
   List<Guestbook> findAllByOwner(User user);
 }

@@ -16,6 +16,8 @@ package com.example.cp_main_be.domain.admin.presentation;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
+import com.example.cp_main_be.domain.delivery.domain.DeliveryPlant;
+import com.example.cp_main_be.domain.delivery.dto.request.DeliveryPlantRequest;
 import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
@@ -32,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -164,8 +167,9 @@ public class AdminController {
   }
 
   @PostMapping(value = "/plant/delivery/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  @Operation(summary = "택배로 받을 식물 사진 추가")
-  public ResponseEntity<ApiResponse<Boolean>> addDeliveryPlantImage(){
-
+  @Operation(summary = "택배로 받을 식물 추가")
+  public ResponseEntity<ApiResponse<DeliveryPlant>> addDeliveryPlant(@RequestParam MultipartFile file, @RequestBody DeliveryPlantRequest request) {
+      DeliveryPlant deliveryPlant = adminService.addDeliveryPlant(file,request);
+      return ResponseEntity.ok(ApiResponse.success(deliveryPlant));
   }
 }
