@@ -9,7 +9,7 @@ import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.repository.DailyKeywordsRepository;
 import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMasterRepository;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMastersRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AdminService {
 
-  private final DailyMissionMasterRepository dailyMissionMasterRepository;
+  private final DailyMissionMastersRepository dailyMissionMastersRepository;
   private final DailyKeywordsRepository dailyKeywordsRepository;
   private final PlantMasterRepository plantMasterRepository;
 
@@ -42,14 +42,14 @@ public class AdminService {
             .rewardPoints(requestDTO.getRewardPoints())
             .build();
 
-    return dailyMissionMasterRepository.save(dailyMissionMaster);
+    return dailyMissionMastersRepository.save(dailyMissionMaster);
   }
 
   public DailyMissionMaster updateDailyMissionMasters(
       AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
 
     DailyMissionMaster dailyMissionMaster =
-        dailyMissionMasterRepository
+        dailyMissionMastersRepository
             .findById(id)
             .orElseThrow(() -> new IllegalArgumentException("해당 ID의 미션을 찾을 수 없습니다."));
 
@@ -69,7 +69,7 @@ public class AdminService {
     return userService.findAllUsers();
   }
 
-  public User chageUserStatus(Long userId, AdminRequestDTO.ChangeUserStatusRequestDTO requestDTO) {
+  public User changeUserStatus(Long userId, AdminRequestDTO.ChangeUserStatusRequestDTO requestDTO) {
     User user = userService.findUserById(userId);
     user.setStatus(requestDTO.getUserStatus());
     return user;
@@ -77,7 +77,7 @@ public class AdminService {
 
   public QuizOptions createQuizOption(AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
     DailyMissionMaster dailyMissionMaster =
-        dailyMissionMasterRepository
+        dailyMissionMastersRepository
             .findById(requestDTO.getMissionMasterId())
             .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 미션이 존재하지 않습니다."));
 

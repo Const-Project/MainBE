@@ -13,7 +13,7 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
+import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.global.dto.FeedItemResponse;

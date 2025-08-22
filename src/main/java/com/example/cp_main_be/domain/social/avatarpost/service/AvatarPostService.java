@@ -31,9 +31,8 @@ public class AvatarPostService {
         bookmarkRepository.findByUserAndAvatarPost(currentUser, postById).isPresent();
 
     // 3. PostInfoResponse DTO 생성 및 반환
-    // 아직 이미지는 구현 x
     return PostInfoResponse.builder()
-        .imageUrl(null)
+        .imageUrl(postById.getImageUrl())
         .likeCount(postById.getLikeCount())
         .comments(postById.getComments())
         .isBookmarked(isBookmarked)

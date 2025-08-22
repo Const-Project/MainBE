@@ -12,7 +12,7 @@ import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
 import com.example.cp_main_be.domain.social.comment.dto.request.UpdateCommentRequest;
 import com.example.cp_main_be.domain.social.comment.dto.response.CommentResponse;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
+import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.Optional;
 import org.junit.jupiter.api.Assertions;

@@ -91,7 +91,7 @@ public class AdminController {
   public ResponseEntity<ApiResponse<User>> changeUserStatus(
       @PathVariable(name = "userId") Long userId,
       AdminRequestDTO.ChangeUserStatusRequestDTO request) {
-    User user = adminService.chageUserStatus(userId, request);
+    User user = adminService.changeUserStatus(userId, request);
     return ResponseEntity.ok(ApiResponse.success(user));
   }
 
