@@ -16,7 +16,6 @@ package com.example.cp_main_be.domain.admin.presentation;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
-import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
@@ -101,25 +100,6 @@ public class AdminController {
       AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
     QuizOptions quizOptions = adminService.createQuizOption(requestDTO);
     return ResponseEntity.ok(ApiResponse.success(quizOptions));
-  }
-
-  @PostMapping("/plants")
-  @Operation(summary = "새 식물 등록 API")
-  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> createNewPlant(
-      AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
-    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
-
-  @PutMapping("/plants/{plantId}")
-  @Operation(summary = "식물 정보 수정 API")
-  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> updatePlantMasters(
-      @PathVariable(name = "plantId") Long plantId,
-      AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMaster = adminService.updatePlantMasters(plantId, requestDTO);
-    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
-    return ResponseEntity.ok(ApiResponse.success(result));
   }
 
   @GetMapping("/reports")

@@ -40,7 +40,9 @@ public class UserController {
   @Operation(summary = "아바타 수정", description = "새로운 아바타 정보로 업데이트합니다")
   @PatchMapping("/users/me/{avatarId}")
   public ResponseEntity<ApiResponse<Void>> updateAvatar(
-      @AuthenticationPrincipal User user, @RequestBody @Valid AvatarChangeRequest request, @RequestParam("avatarId") Long avatarId) {
+      @AuthenticationPrincipal User user,
+      @RequestBody @Valid AvatarChangeRequest request,
+      @RequestParam("avatarId") Long avatarId) {
 
     userService.updateAvatar(user, request, avatarId);
     return ResponseEntity.ok(ApiResponse.success(null));

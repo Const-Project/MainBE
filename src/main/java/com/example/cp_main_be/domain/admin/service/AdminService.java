@@ -1,8 +1,6 @@
 package com.example.cp_main_be.domain.admin.service;
 
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
-import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
-import com.example.cp_main_be.domain.garden.plant_masters.domain.repository.PlantMasterRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
@@ -26,7 +24,6 @@ public class AdminService {
 
   private final DailyMissionMastersRepository dailyMissionMastersRepository;
   private final DailyKeywordsRepository dailyKeywordsRepository;
-  private final PlantMasterRepository plantMasterRepository;
 
   private final UserService userService;
   private final ReportRepository reportRepository;
@@ -90,28 +87,6 @@ public class AdminService {
         .optionOrder(requestDTO.getOptionOrder())
         .isCorrect(requestDTO.isCorrect())
         .build();
-  }
-
-  public PlantMasters createNewPlant(AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMasters =
-        PlantMasters.builder()
-            .plantName(requestDTO.getPlantName())
-            .plantType(requestDTO.getPlantType())
-            .imageUrl(requestDTO.getImageUrl())
-            .description(requestDTO.getDescription())
-            .build();
-
-    return plantMasterRepository.save(plantMasters);
-  }
-
-  public PlantMasters updatePlantMasters(
-      Long plantId, AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMasters =
-        plantMasterRepository
-            .findById(plantId)
-            .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 식물이 존재하지 않습니다."));
-    plantMasters.update(requestDTO);
-    return plantMasters;
   }
 
   public List<Reports> getAllReports() {
