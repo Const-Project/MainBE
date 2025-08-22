@@ -3,6 +3,7 @@ package com.example.cp_main_be.domain.member.user.service;
 import com.example.cp_main_be.domain.member.level.service.LevelService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
 import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
@@ -27,12 +28,12 @@ public class UserService {
     levelService.checkLevelUp(user);
   }
 
-  public void updateAvatar(Long userId, String newAvatarUrl) {
+  public void updateAvatar(Long userId, AvatarChangeRequest request) {
     User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-    user.updateProfile(null, newAvatarUrl);
+    user.updateProfile(null, request.getNewAvatarUrl());
     userRepository.save(user);
   }
 

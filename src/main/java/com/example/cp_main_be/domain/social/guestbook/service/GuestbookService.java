@@ -8,10 +8,14 @@ import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
+import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,5 +61,19 @@ public class GuestbookService {
     if (!writerId.equals(ownerId)) {
       notificationService.send(owner, writer, NotificationType.GUESTBOOK, "/guestbooks/" + ownerId);
     }
+  }
+
+  public List<GuestbookResponse> getGuestbookList(User user) {
+
+    List<Guestbook> guestbookList = guestbookRepository.findAllByOwner(user);
+
+    // 비어있는 리스트에 stream()을 호출해도 예외가 발생하지 않고 비어있는 stream이 반환됩니다.
+    return guestbookList.stream()
+            .map(guestbook -> GuestbookResponse.builder()
+                    .author(guestbook.getWriter().getUsername())
+                    .createdAt(guestbook.getCreatedAt())
+                    .content(guestbook.getContent())
+                    .build()
+            ).toList();
   }
 }

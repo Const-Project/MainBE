@@ -42,7 +42,7 @@ public class UserController {
   public ResponseEntity<ApiResponse<Void>> updateAvatar(
       @AuthenticationPrincipal User user, @RequestBody @Valid AvatarChangeRequest request) {
 
-    userService.updateAvatar(user.getId(), request.getNewAvatarUrl());
+    userService.updateAvatar(user.getId(), request);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
