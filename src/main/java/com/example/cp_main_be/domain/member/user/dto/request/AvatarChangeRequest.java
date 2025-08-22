@@ -7,6 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AvatarChangeRequest {
-  @NotBlank(message = "새로운 아바타 URL은 필수입니다.")
+
   private String newAvatarUrl;
+
+  private String newAvatarName;
+
 }
