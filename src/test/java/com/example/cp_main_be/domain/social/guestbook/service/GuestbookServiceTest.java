@@ -252,36 +252,36 @@
 //    verify(guestbookRepository).findAllByOwner(owner);
 //  }
 // }
-//package com.example.cp_main_be.domain.social.guestbook.service;
+// package com.example.cp_main_be.domain.social.guestbook.service;
 //
-//import static org.assertj.core.api.Assertions.assertThat;
-//import static org.junit.jupiter.api.Assertions.assertThrows;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.BDDMockito.given;
-//import static org.mockito.Mockito.*;
+// import static org.assertj.core.api.Assertions.assertThat;
+// import static org.junit.jupiter.api.Assertions.assertThrows;
+// import static org.mockito.ArgumentMatchers.any;
+// import static org.mockito.BDDMockito.given;
+// import static org.mockito.Mockito.*;
 //
-//import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
-//import com.example.cp_main_be.domain.member.notification.service.NotificationService;
-//import com.example.cp_main_be.domain.member.user.domain.User;
-//import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-//import com.example.cp_main_be.domain.member.user.service.UserService;
-//import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
-//import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
-//import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
-//import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookResponse;
-//import com.example.cp_main_be.global.exception.UserNotFoundException;
-//import java.time.LocalDateTime;
-//import java.util.*;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.ArgumentCaptor;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
+// import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
+// import com.example.cp_main_be.domain.member.notification.service.NotificationService;
+// import com.example.cp_main_be.domain.member.user.domain.User;
+// import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+// import com.example.cp_main_be.domain.member.user.service.UserService;
+// import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
+// import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
+// import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
+// import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookResponse;
+// import com.example.cp_main_be.global.exception.UserNotFoundException;
+// import java.time.LocalDateTime;
+// import java.util.*;
+// import org.junit.jupiter.api.DisplayName;
+// import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.extension.ExtendWith;
+// import org.mockito.ArgumentCaptor;
+// import org.mockito.InjectMocks;
+// import org.mockito.Mock;
+// import org.mockito.junit.jupiter.MockitoExtension;
 //
-//@ExtendWith(MockitoExtension.class)
-//class GuestbookServiceTest {
+// @ExtendWith(MockitoExtension.class)
+// class GuestbookServiceTest {
 //
 //  @InjectMocks private GuestbookService guestbookService;
 //
@@ -505,4 +505,4 @@
 //
 //    verify(guestbookRepository).findAllByOwner(owner);
 //  }
-//}
+// }

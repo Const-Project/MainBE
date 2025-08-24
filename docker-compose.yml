@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   spring-app:
     image: ${ECR_REGISTRY}/cp_main_be:latest
