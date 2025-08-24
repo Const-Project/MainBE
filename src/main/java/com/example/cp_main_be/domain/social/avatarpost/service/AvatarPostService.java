@@ -50,6 +50,7 @@ public class AvatarPostService {
             .content(postById.getCaption())
             .imageUrl(postById.getImageUrl())
             .isLiked(isLiked)
+            .isPublic(true)
             .commentCount(comments.size())
             .createdAt(postById.getCreatedAt())
             .updatedAt(postById.getUpdatedAt())
