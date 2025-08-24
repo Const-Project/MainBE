@@ -1,7 +1,5 @@
-# 워크플로우의 이름
 name: Spring Boot CI/CD with AWS
 
-# 워크플로우가 실행될 조건 정의
 on:
   push:
     branches: [ develop ]
@@ -9,7 +7,6 @@ on:
     types: [ opened, edited ]
     branches: [ develop ]
 
-# PR 생성, 코드 수정, AWS OIDC 토큰 요청을 위한 권한 설정
 permissions:
   id-token: write
   contents: write
@@ -17,33 +14,26 @@ permissions:
   checks: write
 
 jobs:
-  # 코드 포맷팅, 빌드, 테스트를 처리하는 Job
   build:
     runs-on: ubuntu-latest
-    outputs:
-      build-success: ${{ steps.build-status.outputs.success }}
 
     steps:
-      # 1. 소스 코드 체크아웃
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # 2. JDK 17 설치
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'corretto'
 
-      # === [추가된 부분] PR 템플릿 검사기 ===
+      # PR 템플릿 검사
       - name: Check PR Template
         if: github.event_name == 'pull_request' && github.event.pull_request.body == ''
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
-            # 템플릿 파일이 있는 경로를 정확히 지정해야 합니다.
-            # 예: .github/pr_templates/for_develop.md
             const template = fs.readFileSync('.github/pr_templates/for_develop.md', 'utf8');
             github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -51,10 +41,8 @@ jobs:
               issue_number: context.issue.number,
               body: `🚨 **PR 본문이 비어있습니다!**\n\n아래 템플릿을 복사하여 PR 내용을 작성해주세요.\n\n---\n\n${template}`
             });
-            core.setFailed('PR 본문을 템플릿에 맞게 작성해주세요.');
-      # =======================================
+            core.setFailed('PR 본문을 템플릿에 맞게 작성해주세요.')
 
-      # 3. Gradle 캐시 설정
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
@@ -65,11 +53,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # 4. Gradle 실행 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # 5. 코드 포맷팅 검사 또는 적용
       - name: Check code formatting (PR)
         if: github.event_name == 'pull_request'
         run: ./gradlew spotlessCheck
@@ -78,7 +64,6 @@ jobs:
         if: github.event_name == 'push'
         run: ./gradlew spotlessApply
 
-      # 6. 포맷팅 변경사항으로 PR 생성 (전략 2)
       - name: Create Pull Request with formatting changes
         if: github.event_name == 'push'
         id: create_pr
@@ -96,9 +81,8 @@ jobs:
           delete-branch: true
           labels: bot, chore
 
-      # 7. Gradle로 빌드 및 단위 테스트 실행
       - name: Build with Gradle
-        if: steps.create_pr.outputs.pull-request-number == ''
+        run: ./gradlew build --stacktrace --info
         env:
           R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
           R2_BUCKET: ${{ secrets.R2_BUCKET }}
@@ -107,30 +91,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           FASTAPI_URL: ${{ secrets.FASTAPI_URL }}
           API_TOKEN: ${{ secrets.API_TOKEN }}
-        run: ./gradlew build --stacktrace --info
 
-      # 8. 테스트 결과 업로드
-      - name: Publish Test Results
-        if: (success() || failure()) && steps.create_pr.outputs.pull-request-number == ''
-        uses: dorny/test-reporter@v1
-        with:
-          name: Gradle Tests
-          path: build/test-results/test/*.xml
-          reporter: java-junit
-
-      # 9. 빌드 성공 상태 설정
-      - name: Set build success status
-        id: build-status
-        if: success() && steps.create_pr.outputs.pull-request-number == ''
-        run: echo "success=true" >> $GITHUB_OUTPUT
-
-
-
-  # 이하 배포 관련 Job들은 'build' Job의 최종 성공 여부에 따라 실행됩니다.
   check-ec2:
     runs-on: ubuntu-latest
     needs: build
-    if: github.event_name == 'push' && needs.build.outputs.build-success == 'true'
+    if: github.event_name == 'push'
     outputs:
       ec2-available: ${{ steps.check-ec2-status.outputs.available }}
     steps:
@@ -146,13 +111,10 @@ jobs:
           fi
         continue-on-error: true
 
-
-
-  # Docker 이미지 빌드 및 ECR 푸시
   build-and-push-image:
     runs-on: ubuntu-latest
     needs: [build, check-ec2]
-    if: github.event_name == 'push' && needs.build.outputs.build-success == 'true' && needs.check-ec2.outputs.ec2-available == 'true'
+    if: github.event_name == 'push' && needs.check-ec2.outputs.ec2-available == 'true'
     outputs:
       image-pushed: ${{ steps.push-status.outputs.success }}
     steps:
@@ -181,8 +143,6 @@ jobs:
         if: success()
         run: echo "success=true" >> $GITHUB_OUTPUT
 
-
-  # EC2 배포 작업
   deploy:
     runs-on: ubuntu-latest
     needs: [build, check-ec2, build-and-push-image]
@@ -200,7 +160,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # === 필요한 파일들을 EC2로 복사 (scp-action 사용) ===
       - name: Create Firebase Service Account Key File
         env:
           FIREBASE_KEY_JSON: ${{ secrets.FIREBASE_KEY_JSON }}
@@ -225,7 +184,6 @@ jobs:
           source: "docker-compose.yml,.env,serviceAccountKey.json"
           target: "/home/${{ secrets.EC2_USER }}/app"
 
-      # === EC2 배포 (ssh-action 사용) ===
       - name: Deploy to EC2 instance
         uses: appleboy/ssh-action@master
         with:
@@ -234,16 +192,11 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/${{ secrets.EC2_USER }}/app
-            # AWS ECR 로그인
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
-            
-            # docker-compose로 애플리케이션 실행
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
             docker-compose pull
             docker-compose up -d --remove-orphans
-  
 
-  # 워크플로우 실행 결과 요약
   summary:
     runs-on: ubuntu-latest
     needs: [build, check-ec2, build-and-push-image, deploy]
@@ -254,12 +207,12 @@ jobs:
           echo "## 워크플로우 실행 결과" >> $GITHUB_STEP_SUMMARY
           echo "| 단계 | 상태 |" >> $GITHUB_STEP_SUMMARY
           echo "|------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| 빌드 및 테스트 | ${{ needs.build.result == 'success' && '✅ 성공' || '❌ 실패/건너뜀' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 빌드 및 테스트 | ${{ needs.build.result == 'success' && '✅ 성공' || '❌ 실패/건너뜀' }} |"
           
           if [[ "${{ github.event_name }}" == "push" ]]; then
-            echo "| EC2 상태 확인 | ${{ needs.check-ec2.result == 'success' && '✅ 성공' || (needs.check-ec2.result == 'skipped' && '⏭️ 건너뜀' || '❌ 실패') }} |" >> $GITHUB_STEP_SUMMARY
-            echo "| Docker 이미지 빌드/푸시 | ${{ needs.build-and-push-image.result == 'success' && '✅ 성공' || (needs.build-and-push-image.result == 'skipped' && '⏭️ 건너뜀' || '❌ 실패') }} |" >> $GITHUB_STEP_SUMMARY
-            echo "| EC2 배포 | ${{ needs.deploy.result == 'success' && '✅ 성공' || (needs.deploy.result == 'skipped' && '⏭️ 건너뜀' || '❌ 실패') }} |" >> $GITHUB_STEP_SUMMARY
+            echo "| EC2 상태 확인 | ${{ needs.check-ec2.result == 'success' && '✅ 성공' || (needs.check-ec2.result == 'skipped' && '⏭️ 건너뜀' || '❌ 실패') }} |"
+            echo "| Docker 이미지 빌드/푸시 | ${{ needs.build-and-push-image.result == 'success' && '✅ 성공' || (needs.build-and-push-image.result == 'skipped' && '⏭️ 건너뜀' || '❌ 실패') }} |"
+            echo "| EC2 배포 | ${{ needs.deploy.result == 'success' && '✅ 성공' || (needs.deploy.result == 'skipped' && '⏭️ 건너뜀' || '❌ 실패') }} |"
           else
-            echo "| 배포 관련 작업 | ⏭️ 건너뜀 (PR 이벤트) |" >> $GITHUB_STEP_SUMMARY
+            echo "| 배포 관련 작업 | ⏭️ 건너뜀 (PR 이벤트) |"
           fi
