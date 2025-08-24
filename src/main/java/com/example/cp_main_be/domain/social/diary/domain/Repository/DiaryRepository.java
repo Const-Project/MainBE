@@ -22,7 +22,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
   List<Diary> findByIsPublicIsTrueAndUser_IdNotIn(List<Long> blockedUserIds, Pageable pageable);
 
   @Query(
-      "SELECT d FROM Diary d "
+      "SELECT DISTINCT d FROM Diary d "
           + "LEFT JOIN FETCH d.user u " // 포스트 작성자 fetch
           + "LEFT JOIN FETCH d.diaryImage di " // 이미지 fetch
           + "LEFT JOIN FETCH d.comments c " // 댓글 목록 fetch

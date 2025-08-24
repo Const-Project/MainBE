@@ -13,7 +13,7 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
   List<AvatarPost> findByUserIn(List<User> users, Pageable pageable);
 
   @Query(
-      "SELECT ap FROM AvatarPost ap "
+      "SELECT DISTINCT ap FROM AvatarPost ap "
           + "LEFT JOIN FETCH ap.user u " // 포스트 작성자 fetch
           + "LEFT JOIN FETCH ap.comments c " // 댓글 목록 fetch
           + "LEFT JOIN FETCH c.writer cw " // 댓글 작성자 fetch

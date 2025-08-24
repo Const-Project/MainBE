@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,16 +77,18 @@ public class DiaryService {
             .findByIdWithDetails(diaryId)
             .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
 
-    // 비공개 글일 경우, 작성자 본인만 조회 가능하도록 권한을 확인합니다.
-    if (!diary.isPublic() && !diary.getUser().getId().equals(currentUser.getId())) {
-      // 실무에서는 전용 예외 클래스와 핸들러를 사용하는 것이 좋습니다.
-      throw new SecurityException("비공개 일기를 볼 권한이 없습니다.");
+    // 비공개 글 접근 제어: 비로그인 또는 작성자 외 사용자는 차단
+    if (!diary.isPublic()) {
+      if (currentUser == null || !diary.getUser().getId().equals(currentUser.getId())) {
+        throw new AccessDeniedException("비공개 일기를 볼 권한이 없습니다.");
+      }
     }
 
-    // 2. 현재 사용자의 '좋아요' 여부를 확인합니다.
-    // 'DIARY' 타입을 명시하여 다른 타입의 '좋아요'와 혼동되는 것을 방지합니다.
-    boolean isLiked =
-        likeRepository.existsByUserAndTargetIdAndTargetType(currentUser, diaryId, "DIARY");
+    boolean isLiked = false;
+    if (currentUser != null) {
+      isLiked = likeRepository.existsByUserAndTargetIdAndTargetType(currentUser, diaryId, "DIARY");
+      // 가능하다면 userId 기반 시그니처(existsByUser_Id...) 사용을 권장합니다.
+    }
 
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO의 팩토리 메서드로 변환하여 반환합니다.
     return DiaryInfoResponse.from(diary, isLiked);
