@@ -195,17 +195,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # === [추가된 부분] 필요한 파일들을 EC2로 복사 ===
-      - name: Transfer necessary files to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml,.env,serviceAccountKey.json"
-          target: "/home/${{ secrets.EC2_USER }}/app"
-      # ==================================================
-
       - name: Deploy to EC2 instance
         uses: appleboy/ssh-action@master
         with:
@@ -213,15 +202,28 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # EC2 인스턴스의 작업 디렉토리로 이동
+            mkdir -p /home/${{ secrets.EC2_USER }}/app
             cd /home/${{ secrets.EC2_USER }}/app
             
-            # 아래 환경 변수 및 키 파일 생성 부분은 이제 필요 없습니다.
-            # echo "${{ secrets.FIREBASE_KEY_JSON }}" > ./serviceAccountKey.json
-            # echo "DB_URL=${{ secrets.DB_URL }}" > ./.env
-            # ... (나머지 환경 변수 부분 삭제) ...
+            # GitHub Actions 저장소에서 docker-compose.yml 파일 복사
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ../app/docker-compose.yml .
             
-            # AWS ECR 로그인
+            # === serviceAccountKey.json 파일 생성 (secrets 사용) ===
+            echo "${{ secrets.FIREBASE_KEY_JSON }}" > ./serviceAccountKey.json
+            
+            # === .env 파일 생성 (secrets 사용) ===
+            echo "R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}" > ./.env
+            echo "R2_BUCKET=${{ secrets.R2_BUCKET }}" >> ./.env
+            echo "R2_ACCESS_KEY=${{ secrets.R2_ACCESS_KEY }}" >> ./.env
+            echo "R2_SECRET_KEY=${{ secrets.R2_SECRET_KEY }}" >> ./.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./.env
+            echo "FASTAPI_URL=${{ secrets.FASTAPI_URL }}" >> ./.env
+            echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> ./.env
+            # DB 관련 secrets이 있다면 여기에 추가해야 합니다. 예:
+            # echo "DB_URL=${{ secrets.DB_URL }}" >> ./.env
+    
+
+    # AWS ECR 로그인
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
             # docker-compose로 애플리케이션 실행
