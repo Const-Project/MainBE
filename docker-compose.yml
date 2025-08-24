@@ -1,3 +1,4 @@
+# docker-compose.yml
 services:
   spring-app:
     image: ${ECR_REGISTRY}/cp_main_be:latest
@@ -6,7 +7,7 @@ services:
       - "8080:8080"
     env_file:
       - ./.env
-    volumes:
-      # Firebase 서비스 계정 키 파일을 컨테이너 내부로 마운트
-      - ./napulnapul-d9572-firebase-adminsdk-fbsvc-0a2757f074.json:/app/napulnapul-d9572-firebase-adminsdk-fbsvc-0a2757f074.json:ro
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    # volumes 섹션은 완전히 삭제
     restart: always
