@@ -194,14 +194,7 @@ jobs:
             cd /home/${{ secrets.EC2_USER }}/app
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
-            
-            # 1. 기존에 실행 중인 컨테이너를 먼저 내립니다. (중지 및 삭제)
-            docker compose down
-            
-            # 2. 최신 이미지를 받아옵니다.
             docker compose pull
-            
-            # 3. 새로운 컨테이너를 실행합니다.
             docker compose up -d --remove-orphans
 
   summary:
