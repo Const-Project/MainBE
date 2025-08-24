@@ -167,19 +167,19 @@ jobs:
 
       - name: Create .env File
         run: |
-          echo "R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}" > ./.env
-          echo "R2_BUCKET=${{ secrets.R2_BUCKET }}" >> ./.env
-          echo "R2_ACCESS_KEY=${{ secrets.R2_ACCESS_KEY }}" >> ./.env
-          echo "R2_SECRET_KEY=${{ secrets.R2_SECRET_KEY }}" >> ./.env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./.env
-          echo "FASTAPI_URL=${{ secrets.FASTAPI_URL }}" >> ./.env
-          echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> ./.env
-            
-          # 👇 추가된 DB 및 Firebase 환경 변수
-          echo "DB_URL=${{ secrets.DB_URL }}" >> ./.env
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> ./.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ./.env
-          echo "FIREBASE_KEY_JSON='${{ secrets.FIREBASE_KEY_JSON }}'" >> ./.env
+          cat << EOF > ./.env
+          R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET=${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY=${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY=${{ secrets.R2_SECRET_KEY }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          FASTAPI_URL=${{ secrets.FASTAPI_URL }}
+          API_TOKEN=${{ secrets.API_TOKEN }}
+          DB_URL=${{ secrets.DB_URL }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          FIREBASE_KEY_JSON='${{ secrets.FIREBASE_KEY_JSON }}'
+          EOF
 
       - name: Transfer necessary files to EC2
         uses: appleboy/scp-action@master
