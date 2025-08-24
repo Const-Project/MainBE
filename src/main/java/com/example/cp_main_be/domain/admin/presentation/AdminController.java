@@ -16,6 +16,8 @@ package com.example.cp_main_be.domain.admin.presentation;
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
 import com.example.cp_main_be.domain.admin.dto.AdminResponseDTO;
 import com.example.cp_main_be.domain.admin.service.AdminService;
+import com.example.cp_main_be.domain.delivery.domain.DeliveryPlant;
+import com.example.cp_main_be.domain.delivery.dto.request.DeliveryPlantRequest;
 import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
@@ -29,8 +31,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -102,25 +106,25 @@ public class AdminController {
     QuizOptions quizOptions = adminService.createQuizOption(requestDTO);
     return ResponseEntity.ok(ApiResponse.success(quizOptions));
   }
-
-  @PostMapping("/plants")
-  @Operation(summary = "새 식물 등록 API")
-  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> createNewPlant(
-      AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
-    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
-
-  @PutMapping("/plants/{plantId}")
-  @Operation(summary = "식물 정보 수정 API")
-  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> updatePlantMasters(
-      @PathVariable(name = "plantId") Long plantId,
-      AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMaster = adminService.updatePlantMasters(plantId, requestDTO);
-    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
+//
+//  @PostMapping("/avatar-master")
+//  @Operation(summary = "새 아바타 마스터 등록 API")
+//  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> createNewPlant(
+//      AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
+//    PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
+//    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
+//    return ResponseEntity.ok(ApiResponse.success(result));
+//  }
+//
+//  @PutMapping("/plants/{avatar-master-id}")
+//  @Operation(summary = "아바타 마스터 정보 수정 API")
+//  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> updatePlantMasters(
+//      @PathVariable(name = "avatar-master-id") Long plantId,
+//      AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
+//    PlantMasters plantMaster = adminService.updatePlantMasters(plantId, requestDTO);
+//    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
+//    return ResponseEntity.ok(ApiResponse.success(result));
+//  }
 
   @GetMapping("/reports")
   @Operation(summary = "신고 목록 조회 API")
@@ -160,5 +164,12 @@ public class AdminController {
             .build();
 
     return ResponseEntity.ok(ApiResponse.success(reportResDTO));
+  }
+
+  @PostMapping(value = "/plant/delivery/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @Operation(summary = "택배로 받을 식물 추가")
+  public ResponseEntity<ApiResponse<DeliveryPlant>> addDeliveryPlant(@RequestParam MultipartFile file, @RequestBody DeliveryPlantRequest request) {
+      DeliveryPlant deliveryPlant = adminService.addDeliveryPlant(file,request);
+      return ResponseEntity.ok(ApiResponse.success(deliveryPlant));
   }
 }

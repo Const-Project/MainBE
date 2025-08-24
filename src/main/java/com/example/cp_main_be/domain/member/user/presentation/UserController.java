@@ -1,14 +1,17 @@
 package com.example.cp_main_be.domain.member.user.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
 import com.example.cp_main_be.domain.member.user.dto.request.NicknameChangeRequest;
 import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterResponse;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.common.ApiResponse;
+import com.example.cp_main_be.global.exception.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
   private final UserService userService;
+  private final UserRepository userRepository;
 
   //    @DeleteMapping("/register/nickname")
   //    public ResponseEntity<Void> delete(@RequestBody @Valid UserRequest userRequest) {
@@ -38,11 +42,13 @@ public class UserController {
   }
 
   @Operation(summary = "아바타 수정", description = "새로운 아바타 정보로 업데이트합니다")
-  @PatchMapping("/users/me/avatar")
+  @PatchMapping("/users/me/{avatarId}")
   public ResponseEntity<ApiResponse<Void>> updateAvatar(
-      @AuthenticationPrincipal User user, @RequestBody @Valid AvatarChangeRequest request) {
+      @AuthenticationPrincipal User user,
+      @RequestBody @Valid AvatarChangeRequest request,
+      @RequestParam("avatarId") Long avatarId) {
 
-    userService.updateAvatar(user.getId(), request.getNewAvatarUrl());
+    userService.updateAvatar(user, request, avatarId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
@@ -50,7 +56,7 @@ public class UserController {
   @PatchMapping("/users/me/nickname")
   public ResponseEntity<ApiResponse<Void>> updateNickname(
       @AuthenticationPrincipal User user, @RequestBody @Valid NicknameChangeRequest request) {
-    userService.updateNickname(user.getId(), request.getNewNickname());
+    userService.updateNickname(user, request.getNewNickname());
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
@@ -71,5 +77,16 @@ public class UserController {
       @AuthenticationPrincipal User user) {
     UserRegisterResponse.LevelStatusResponseDTO levelStatusResponseDTO = userService.getLevel(user);
     return ResponseEntity.ok(ApiResponse.success(levelStatusResponseDTO));
+  }
+  @Operation(summary = "유저 정보 조회", description = "유저 정보를 조회합니다")
+  @GetMapping("/{userId}")
+  public ResponseEntity<ApiResponse<UserRegisterResponse>> getUserInfo(
+          @PathParam("userId") Long userId) {
+    // SecurityContextHolder에서 현재 인증된 사용자(UUID)를 가져옴
+    User user = userRepository.findById(userId).orElseThrow(()->new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
+    UserRegisterResponse userRegisterResponse =
+            new UserRegisterResponse(
+                    user.getId(), user.getNickname(), user.getUuid(), null, null); // 토큰은 응답에 포함하지 않음
+    return ResponseEntity.ok(ApiResponse.success(userRegisterResponse));
   }
 }

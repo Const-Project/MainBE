@@ -1,8 +1,8 @@
 package com.example.cp_main_be.domain.admin.service;
 
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
-import com.example.cp_main_be.domain.garden.plant_masters.domain.PlantMasters;
-import com.example.cp_main_be.domain.garden.plant_masters.domain.repository.PlantMasterRepository;
+import com.example.cp_main_be.domain.delivery.domain.DeliveryPlant;
+import com.example.cp_main_be.domain.delivery.dto.request.DeliveryPlantRequest;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
@@ -15,9 +15,12 @@ import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import java.util.List;
+
+import com.example.cp_main_be.global.infra.S3Uploader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +29,10 @@ public class AdminService {
 
   private final DailyMissionMastersRepository dailyMissionMastersRepository;
   private final DailyKeywordsRepository dailyKeywordsRepository;
-  private final PlantMasterRepository plantMasterRepository;
 
   private final UserService userService;
   private final ReportRepository reportRepository;
+  private final S3Uploader s3Uploader;
 
   public DailyMissionMaster createDailyMissionMasters(
       AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
@@ -92,28 +95,6 @@ public class AdminService {
         .build();
   }
 
-  public PlantMasters createNewPlant(AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMasters =
-        PlantMasters.builder()
-            .plantName(requestDTO.getPlantName())
-            .plantType(requestDTO.getPlantType())
-            .imageUrl(requestDTO.getImageUrl())
-            .description(requestDTO.getDescription())
-            .build();
-
-    return plantMasterRepository.save(plantMasters);
-  }
-
-  public PlantMasters updatePlantMasters(
-      Long plantId, AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMasters =
-        plantMasterRepository
-            .findById(plantId)
-            .orElseThrow(() -> new IllegalStateException("해당 ID를 가진 식물이 존재하지 않습니다."));
-    plantMasters.update(requestDTO);
-    return plantMasters;
-  }
-
   public List<Reports> getAllReports() {
     List<Reports> reports = reportRepository.findAll();
     return reports;
@@ -126,5 +107,13 @@ public class AdminService {
             .orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다."));
     report.setStatus(reportStatus);
     return report;
+  }
+
+  public DeliveryPlant addDeliveryPlant(MultipartFile file, DeliveryPlantRequest request) {
+     String imageUrl = s3Uploader.upload(file, "/deliveryplant");
+      return DeliveryPlant.builder()
+              .name(request.getName())
+              .imageUrl(imageUrl)
+              .build();
   }
 }
