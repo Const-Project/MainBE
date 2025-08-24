@@ -10,13 +10,13 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryPlant {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+  @Column(name = "image_url")
+  private String imageUrl;
 
-    @Column(name = "name")
-    private String name;
+  @Column(name = "name")
+  private String name;
 }

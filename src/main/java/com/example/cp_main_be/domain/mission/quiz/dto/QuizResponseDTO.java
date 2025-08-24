@@ -12,6 +12,7 @@ public class QuizResponseDTO {
   private final String quizQuestion;
   private final QuizType quizType;
   private final List<QuizOptionResponseDTO> quizOptions;
+
   @Getter
   @Builder
   public static class QuizOptionResponseDTO {

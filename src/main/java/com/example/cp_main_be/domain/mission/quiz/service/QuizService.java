@@ -1,7 +1,6 @@
 package com.example.cp_main_be.domain.mission.quiz.service;
 
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.repository.DailyMissionMasterRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.Quiz;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsRepository;
@@ -12,10 +11,9 @@ import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserQuizMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,32 +108,30 @@ public class QuizService {
         .build();
   }
 
-
   public QuizResponseDTO getQuizByType(QuizType quizType) {
     Quiz quiz = quizRepository.findAllByQuizType(quizType).get(0);
-    if(quiz == null) throw new QuizNotFoundException("퀴즈가 존재하지 않습니다.");
+    if (quiz == null) throw new QuizNotFoundException("퀴즈가 존재하지 않습니다.");
     List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
 
     // 정답 정보 제외하고 DTO 생성
     List<QuizResponseDTO.QuizOptionResponseDTO> optionDTOs =
-            quizOptions.stream()
-                    .map(
-                            option ->
-                                    QuizResponseDTO.QuizOptionResponseDTO.builder()
-                                            .id(option.getId())
-                                            .text(option.getOptionText())
-                                            // isAnswer 필드 제거됨
-                                            .build())
-                    .collect(Collectors.toList());
+        quizOptions.stream()
+            .map(
+                option ->
+                    QuizResponseDTO.QuizOptionResponseDTO.builder()
+                        .id(option.getId())
+                        .text(option.getOptionText())
+                        // isAnswer 필드 제거됨
+                        .build())
+            .collect(Collectors.toList());
 
     return QuizResponseDTO.builder()
-            .quizType(quiz.getQuizType())
-            .quizQuestion(quiz.getQuizQuestion())
-            .quizOptions(optionDTOs)
-            .quizId(quiz.getId())
-            .build();
+        .quizType(quiz.getQuizType())
+        .quizQuestion(quiz.getQuizQuestion())
+        .quizOptions(optionDTOs)
+        .quizId(quiz.getId())
+        .build();
   }
-
 
   // 공통 메서드들
   private UserDailyMission getUserDailyMission(Long userDailyMissionId) {

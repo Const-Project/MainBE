@@ -9,7 +9,6 @@ import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepos
 import com.example.cp_main_be.domain.social.follow.dto.FollowResponseDTO;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,18 +69,18 @@ public class FollowService {
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
-    List<User> userList = followRepository.findByFollowing(user).stream()
-            .map(Follow::getFollower)
-            .toList();
-
+    List<User> userList =
+        followRepository.findByFollowing(user).stream().map(Follow::getFollower).toList();
 
     return userList.stream()
-            .map(member -> FollowResponseDTO.builder()
+        .map(
+            member ->
+                FollowResponseDTO.builder()
                     .username(member.getUsername())
                     .userImageUrl(member.getProfileImageUrl())
                     .userId(member.getId())
                     .build())
-            .toList();
+        .toList();
   }
 
   @Transactional(readOnly = true)
@@ -90,16 +89,17 @@ public class FollowService {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-    List<User> userList = followRepository.findByFollower(user).stream()
-        .map(Follow::getFollowing)
-        .toList();
+    List<User> userList =
+        followRepository.findByFollower(user).stream().map(Follow::getFollowing).toList();
 
     return userList.stream()
-            .map(member -> FollowResponseDTO.builder()
+        .map(
+            member ->
+                FollowResponseDTO.builder()
                     .username(member.getUsername())
                     .userImageUrl(member.getProfileImageUrl())
                     .userId(member.getId())
                     .build())
-            .toList();
+        .toList();
   }
 }
