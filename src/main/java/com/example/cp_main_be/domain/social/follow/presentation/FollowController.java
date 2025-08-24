@@ -39,14 +39,16 @@ public class FollowController {
 
   @Operation(summary = "팔로워 조회", description = "팔로우하는 유저 목록을 조회합니다")
   @GetMapping("/{userId}/followers")
-  public ResponseEntity<ApiResponse<List<FollowResponseDTO>>> getFollowers(@PathVariable Long userId) {
+  public ResponseEntity<ApiResponse<List<FollowResponseDTO>>> getFollowers(
+      @PathVariable Long userId) {
     List<FollowResponseDTO> followResponseDTOS = followService.getFollowers(userId);
     return ResponseEntity.ok(ApiResponse.success(followResponseDTOS));
   }
 
   @Operation(summary = "팔로잉 조회", description = "팔로우하는 유저 목록을 조회합니다")
   @GetMapping("/{userId}/following")
-  public ResponseEntity<ApiResponse<List<FollowResponseDTO>>> getFollowing(@PathVariable Long userId) {
+  public ResponseEntity<ApiResponse<List<FollowResponseDTO>>> getFollowing(
+      @PathVariable Long userId) {
     List<FollowResponseDTO> followResponseDTOS = followService.getFollowing(userId);
     return ResponseEntity.ok(ApiResponse.success(followResponseDTOS));
   }

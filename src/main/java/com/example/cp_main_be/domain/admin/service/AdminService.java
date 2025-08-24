@@ -14,9 +14,8 @@ import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
-import java.util.List;
-
 import com.example.cp_main_be.global.infra.S3Uploader;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -110,10 +109,7 @@ public class AdminService {
   }
 
   public DeliveryPlant addDeliveryPlant(MultipartFile file, DeliveryPlantRequest request) {
-     String imageUrl = s3Uploader.upload(file, "/deliveryplant");
-      return DeliveryPlant.builder()
-              .name(request.getName())
-              .imageUrl(imageUrl)
-              .build();
+    String imageUrl = s3Uploader.upload(file, "/deliveryplant");
+    return DeliveryPlant.builder().name(request.getName()).imageUrl(imageUrl).build();
   }
 }
