@@ -48,6 +48,8 @@ public class ApiResponse<T> {
     return new ApiResponse<>(true, code.getCode(), code.getMessage(), result);
   }
 
+
+
   public static <T> ApiResponse<T> onFailure(String code, String message) {
     return onFailure(code, message, null);
   }
