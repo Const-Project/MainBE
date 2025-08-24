@@ -31,7 +31,7 @@ public class AvatarPostService {
             .orElseThrow(() -> new IllegalArgumentException("해당 포스트를 찾을 수 없습니다."));
 
     // 좋아요 여부 확인
-    boolean isLiked = likeRepository.existsByUserIdAndPostId(currentUser.getId(), postId);
+    boolean isLiked = likeRepository.existsByUserIdAndTargetId(currentUser.getId(), postId);
 
 
     // 응답 형식에 맞게 comment DTO 생성
