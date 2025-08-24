@@ -3,16 +3,13 @@ package com.example.cp_main_be.domain.social.feed.service;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
-import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
-import com.example.cp_main_be.domain.social.avatarpost.dto.AvatarPostFeedItemResponse;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
-import com.example.cp_main_be.domain.social.diary.dto.response.DiaryFeedItemResponse;
+import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
-import com.example.cp_main_be.global.dto.FeedItemResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -35,8 +32,13 @@ public class FeedService {
   private final AvatarPostRepository avatarPostRepository;
   private final UserBlockRepository userBlockRepository;
 
-  public List<FeedItemResponse> getFeed(UUID currentUserUuid, String filter) {
-    Pageable pageable = PageRequest.of(0, 100, Sort.by(Sort.Direction.DESC, "createdAt"));
+  public List<FeedResponse> getFeed(UUID currentUserUuid, String filter, int page, int size) {
+    // 올바른 페이지네이션을 위해, 각 소스에서 요청된 페이지의 끝까지 데이터를 충분히 가져옵니다.
+    // 예: 2페이지(page=1) 20개(size=20) 요청 시, (1+1)*20=40개의 후보를 가져옵니다.
+    // 이는 메모리 사용량과 성능에 영향을 줄 수 있으므로, 매우 깊은 페이지네이션에는 다른 전략(커서 기반)이 더 좋습니다.
+    int limit = (page + 1) * size;
+    Pageable candidatePageable =
+        PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
 
     User currentUser =
         userRepository
@@ -46,38 +48,51 @@ public class FeedService {
     // [추가] 1. 현재 사용자가 차단한 유저 ID 목록을 먼저 조회합니다.
     List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(currentUser);
 
-    List<Diary> diaries;
-    List<AvatarPost> avatarPosts;
+    Stream<FeedResponse> diaryStream;
+    Stream<FeedResponse> avatarPostStream;
 
     if ("following".equalsIgnoreCase(filter)) {
       List<User> followingUsers =
           followRepository.findByFollower(currentUser).stream().map(Follow::getFollowing).toList();
 
       // [수정] 2. 차단된 유저를 제외하고 조회
-      diaries =
-          diaryRepository.findByUserInAndIsPublicIsTrueAndUser_IdNotIn(
-              followingUsers, blockedUserIds, pageable);
-      avatarPosts =
-          avatarPostRepository.findByUserInAndUser_IdNotIn(
-              followingUsers, blockedUserIds, pageable);
+      diaryStream =
+          diaryRepository
+              .findByUserInAndIsPublicIsTrueAndUser_IdNotIn(
+                  followingUsers, blockedUserIds, candidatePageable)
+              .stream()
+              .map(FeedResponse::from);
+      avatarPostStream =
+          avatarPostRepository
+              .findByUserInAndUser_IdNotIn(followingUsers, blockedUserIds, candidatePageable)
+              .stream()
+              .map(FeedResponse::from);
 
     } else {
       // [수정] 2. 차단된 유저를 제외하고 조회
-      diaries = diaryRepository.findByIsPublicIsTrueAndUser_IdNotIn(blockedUserIds, pageable);
-      avatarPosts = avatarPostRepository.findAllByUser_IdNotIn(blockedUserIds, pageable);
+      diaryStream =
+          diaryRepository
+              .findByIsPublicIsTrueAndUser_IdNotIn(blockedUserIds, candidatePageable)
+              .stream()
+              .map(FeedResponse::from);
+      avatarPostStream =
+          avatarPostRepository.findAllByUser_IdNotIn(blockedUserIds, candidatePageable).stream()
+              .map(FeedResponse::from);
     }
 
-    // 2. 각 게시물을 해당하는 DTO로 변환
-    Stream<DiaryFeedItemResponse> diaryStream = diaries.stream().map(DiaryFeedItemResponse::new);
-    Stream<AvatarPostFeedItemResponse> avatarPostStream =
-        avatarPosts.stream().map(AvatarPostFeedItemResponse::new);
-
-    // 3. 두 스트림을 하나로 합친 후, 생성 시간(createdAt) 기준으로 내림차순 정렬
-    List<FeedItemResponse> combinedFeed =
+    // 3. 두 스트림을 합치고, 전체 목록을 생성 시간 기준으로 다시 정렬합니다.
+    List<FeedResponse> sortedFeed =
         Stream.concat(diaryStream, avatarPostStream)
-            .sorted(Comparator.comparing(FeedItemResponse::getCreatedAt).reversed())
+            .sorted(Comparator.comparing(FeedResponse::createdAt).reversed())
             .toList();
 
-    return combinedFeed;
+    // 4. 정렬된 전체 목록에서 요청된 페이지에 해당하는 부분만 잘라내어 반환합니다.
+    int start = page * size;
+    if (start >= sortedFeed.size()) {
+      return Collections.emptyList(); // 요청된 페이지가 데이터 범위를 벗어난 경우 빈 리스트 반환
+    }
+    int end = Math.min(start + size, sortedFeed.size());
+
+    return sortedFeed.subList(start, end);
   }
 }
