@@ -7,23 +7,29 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonPropertyOrder({"isSuccess", "code", "message", "result"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-  @JsonProperty("isSuccess")
   private boolean isSuccess;
 
+  @Getter
   @JsonProperty("code")
   private String code;
 
+  @Getter
   @JsonProperty("message")
   private String message;
 
+  @Getter
   @JsonProperty("result")
   private final T result;
+
+  @JsonProperty("isSuccess")
+  public boolean isSuccess() {
+    return isSuccess;
+  }
 
   public static <T> ApiResponse<T> ok(T result) {
     return onSuccess(GeneralSuccessCode.OK, result);
