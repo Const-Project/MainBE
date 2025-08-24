@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FollowResponseDTO {
-    private Long userId;
-    private String username;
-    private String userImageUrl;
+  private Long userId;
+  private String username;
+  private String userImageUrl;
 }
