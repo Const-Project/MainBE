@@ -30,9 +30,17 @@ public class GardenController {
     return ResponseEntity.ok(ApiResponse.success(gardenResponse));
   }
 
-  @Operation(summary = "정원에 물 주기", description = "자신 또는 다른 사람의 정원에 물을 줍니다.")
-  @PostMapping("/{gardenId}/water")
-  public ResponseEntity<ApiResponse<Void>> waterGarden(
+  @Operation(summary = "내 정원에 물 주기", description = "자신의 정원에 물을 줍니다.")
+  @PostMapping("/{gardenId}/mywater")
+  public ResponseEntity<ApiResponse<Void>> waterMyGarden(
+      @AuthenticationPrincipal Long userId, @PathVariable Long gardenId) {
+    gardenService.waterGarden(userId, gardenId);
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
+  @Operation(summary = "남의 정원에 물 주기", description = "남의 정원에 물을 줍니다.")
+  @PostMapping("/{gardenId}/friendwater")
+  public ResponseEntity<ApiResponse<Void>> waterYourGarden(
       @AuthenticationPrincipal Long userId, @PathVariable Long gardenId) {
     gardenService.waterGarden(userId, gardenId);
     return ResponseEntity.ok(ApiResponse.success(null));
