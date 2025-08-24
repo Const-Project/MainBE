@@ -1,0 +1,25 @@
+# application-schema.yml
+spring:
+  # 이 프로필을 활성화하면 아래 설정이 적용됨
+  config:
+    activate:
+      on-profile: schema
+
+  # ❗️운영 RDS DB 접속 정보 입력❗️
+  datasource:
+    url: jdbc:postgresql://..... # secrets.DB_URL 과 동일한 값
+    username: ...               # secrets.DB_USERNAME 과 동일한 값
+    password: ...               # secrets.DB_PASSWORD 과 동일한 값
+
+  jpa:
+    # ❗️가장 중요한 부분❗️
+    # DB를 직접 건드리지 않고, 스키마 생성 SQL을 파일로만 저장하게 함
+    properties:
+      jakarta:
+        persistence:
+          schema-generation:
+            create-source: metadata
+            # 생성된 SQL 스크립트를 어떤 파일에 저장할지 지정
+            schema-generation-create-script-source: META-INF/sql/create-schema.sql
+    hibernate:
+      ddl-auto: create # 'create'로 설정해야 스크립트가 생성됨
