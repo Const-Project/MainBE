@@ -1,10 +1,10 @@
 package com.example.cp_main_be.domain.social.diary.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
 import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest;
+import com.example.cp_main_be.domain.social.diary.dto.response.DiaryInfoResponse;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.social.diary.service.DiaryService;
 import com.example.cp_main_be.global.common.ApiResponse;
@@ -44,11 +44,11 @@ public class DiaryController {
 
   @Operation(summary = "특정 일기 조회", description = "특정 id로 일기를 조회합니다")
   @GetMapping("/{diaryId}")
-  public ResponseEntity<ApiResponse<PostInfoResponse>> getDiaryDetail(
+  public ResponseEntity<ApiResponse<DiaryInfoResponse>> getDiaryDetail(
       @PathVariable Long diaryId, @AuthenticationPrincipal User user) {
-    PostInfoResponse diary = diaryService.getDiaryInfo(diaryId, user);
+    DiaryInfoResponse diaryInfo = diaryService.getDiaryInfo(diaryId, user);
     // TODO: 비공개 글일 경우 작성자만 볼 수 있도록 하는 로직 추가 필요
-    return ResponseEntity.ok(ApiResponse.success(diary));
+    return ResponseEntity.ok(ApiResponse.success(diaryInfo));
   }
 
   @Operation(summary = "일기 수정", description = "일기를 수정합니다")

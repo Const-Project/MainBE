@@ -4,7 +4,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
-import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
+import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;

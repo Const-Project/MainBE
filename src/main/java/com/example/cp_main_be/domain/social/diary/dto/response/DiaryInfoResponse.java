@@ -1,14 +1,15 @@
-package com.example.cp_main_be.domain.social.avatarpost.dto;
+package com.example.cp_main_be.domain.social.diary.dto.response;
 
-import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
+import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record PostInfoResponse(
+public record DiaryInfoResponse(
     Long id,
     Long writerId,
+    String title,
     String content,
     String imageUrl,
     boolean isLiked,
@@ -19,23 +20,24 @@ public record PostInfoResponse(
     LocalDateTime updatedAt,
     @JsonProperty("isPublic") boolean isPublic) {
 
-  public static PostInfoResponse from(AvatarPost post, boolean isLiked) {
+  public static DiaryInfoResponse from(Diary diary, boolean isLiked) {
     List<CommentResponseDTO> commentDTOs =
-        post.getComments().stream().map(CommentResponseDTO::from).toList();
+        diary.getComments().stream().map(CommentResponseDTO::from).toList();
+    String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
 
-    return new PostInfoResponse(
-        post.getId(),
-        post.getUser().getId(),
-        post.getCaption(),
-        post.getImageUrl(),
+    return new DiaryInfoResponse(
+        diary.getId(),
+        diary.getUser().getId(),
+        diary.getTitle(),
+        diary.getContent(),
+        imageUrl,
         isLiked,
-        post.getLikeCount(),
+        diary.getLikeCount(),
         commentDTOs.size(),
         commentDTOs,
-        post.getCreatedAt(),
-        post.getUpdatedAt(),
-        true // AvatarPost는 항상 public이라고 가정
-        );
+        diary.getCreatedAt(),
+        diary.getUpdatedAt(),
+        diary.isPublic());
   }
 
   public record CommentResponseDTO(
