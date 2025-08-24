@@ -12,7 +12,6 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
   boolean existsByUserIdAndTargetId(Long id, Long postId);
 
-
   //  long countByAvatarPost(AvatarPost post);
 
   //  Optional<Like> findByUserAndAvatarPost(User currentUser, AvatarPost post);

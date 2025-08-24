@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/avatar-posts")
@@ -33,9 +31,7 @@ public class AvatarPostController {
   @GetMapping("/{postId}")
   public ResponseEntity<ApiResponse<PostInfoResponse>> getPostInfo(@PathVariable Long postId) {
     User currentUser = userService.getCurrentUser();
-    PostInfoResponse response =
-        avatarPostService.getAvatarPostInfo(postId, currentUser);
+    PostInfoResponse response = avatarPostService.getAvatarPostInfo(postId, currentUser);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
-
 }
