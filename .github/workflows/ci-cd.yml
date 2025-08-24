@@ -194,8 +194,8 @@ jobs:
             cd /home/${{ secrets.EC2_USER }}/app
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             export ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
-            docker-compose pull
-            docker-compose up -d --remove-orphans
+            docker compose pull
+            docker compose up -d --remove-orphans
 
   summary:
     runs-on: ubuntu-latest
