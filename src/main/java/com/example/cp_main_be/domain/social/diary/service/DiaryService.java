@@ -3,6 +3,7 @@ package com.example.cp_main_be.domain.social.diary.service;
 import com.example.cp_main_be.domain.avatar.image.ImageUploader;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
@@ -10,6 +11,7 @@ import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
+import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -28,6 +30,7 @@ public class DiaryService {
   private final UserRepository userRepository;
   private final ImageUploader imageUploader; // 의존성 주입은 인터페이스로
   private final DiaryImageRepository diaryImageRepository;
+  private final LikeRepository likeRepository;
 
   public Diary createDiary(User user, CreateDiaryRequest request) {
     // 1. 먼저 Diary 객체를 생성하고 저장합니다
@@ -56,12 +59,50 @@ public class DiaryService {
     return savedDiary;
   }
 
-  // 일기 상세 조회 (읽기 전용)
+  // 일기 조회 (읽기 전용)
   @Transactional(readOnly = true)
   public Diary findDiaryById(Long diaryId) {
     return diaryRepository
         .findById(diaryId)
         .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
+  }
+
+  // 일기 상세 조회 (읽기 전용)
+  @Transactional(readOnly = true)
+  public PostInfoResponse getDiaryInfo(Long diaryId, User currentUser) {
+    Diary postById =
+        diaryRepository
+            .findById(diaryId)
+            .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
+
+    // 좋아요 여부 확인
+    boolean isLiked = likeRepository.existsByUserIdAndTargetId(currentUser.getId(), diaryId);
+
+    // 응답 형식에 맞게 comment DTO 생성
+    List<PostInfoResponse.CommentResponseDTO> comments =
+        postById.getComments().stream()
+            .map(
+                comment ->
+                    PostInfoResponse.CommentResponseDTO.builder()
+                        .commentId(comment.getId())
+                        .content(comment.getContent())
+                        .profileImageUrl(comment.getWriter().getProfileImageUrl())
+                        .writer(comment.getWriter().getNickname())
+                        .build())
+            .toList();
+
+    return PostInfoResponse.builder()
+        .id(postById.getId())
+        .title(postById.getUser().getNickname())
+        .content(postById.getContent())
+        .imageUrl(postById.getDiaryImage().getImageUrl())
+        .isLiked(isLiked)
+        .isPublic(true)
+        .commentCount(comments.size())
+        .createdAt(postById.getCreatedAt())
+        .updatedAt(postById.getUpdatedAt())
+        .comment(comments)
+        .build();
   }
 
   // 내 일기 목록 조회 (읽기 전용)
