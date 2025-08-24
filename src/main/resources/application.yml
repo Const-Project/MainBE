@@ -1,6 +1,4 @@
-# ?? ??
 spring:
-  # ?? ???? local? ??
   profiles:
     active: local
   application:
@@ -13,8 +11,9 @@ spring:
         format_sql: true
   security:
     debug: true
+  config:
+    import: "optional:dotenv:"
 
-# JWT, Cloudflare R2, FastAPI ? ??? ???? ??
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiration-milliseconds: 3600000
@@ -31,7 +30,6 @@ fastapi:
   server:
     url: ${FASTAPI_URL}
 
-# ?? ??
 logging:
   level:
     org:
@@ -39,19 +37,18 @@ logging:
         security: TRACE
 
 ---
-# "local" ???: ?? ?? ? CI/CD ?? ??
+
 spring:
   config:
     activate:
       on-profile: local
-  # ????? H2 ???? DB? ???? ?? DB ??? ??
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL
     username: sa
     password:
   jpa:
     hibernate:
-      ddl-auto: create-drop # ????? ?? ? ??? ??, ?? ? ??
+      ddl-auto: create-drop
     defer-datasource-initialization: true
   h2:
     console:
@@ -59,7 +56,7 @@ spring:
       path: /h2-console
 
 ---
-# "prod" ???: ?? ??(??) ??
+
 spring:
   config:
     activate:
@@ -70,7 +67,7 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: validate # ????? ??? ??? ???? ?? ??? ?
+      ddl-auto: validate
     show-sql: false
   security:
     debug: false
