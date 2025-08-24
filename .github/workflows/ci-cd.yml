@@ -182,7 +182,6 @@ jobs:
         run: echo "success=true" >> $GITHUB_OUTPUT
 
 
-
   # EC2 배포 작업
   deploy:
     runs-on: ubuntu-latest
@@ -235,7 +234,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd /home/${{ secrets.EC2_USER }}/app
-            
             # AWS ECR 로그인
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
