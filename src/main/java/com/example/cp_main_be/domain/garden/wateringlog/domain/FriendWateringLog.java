@@ -3,14 +3,13 @@ package com.example.cp_main_be.domain.garden.wateringlog.domain;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter

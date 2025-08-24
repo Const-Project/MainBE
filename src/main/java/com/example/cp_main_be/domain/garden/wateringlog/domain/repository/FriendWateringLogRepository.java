@@ -3,9 +3,8 @@ package com.example.cp_main_be.domain.garden.wateringlog.domain.repository;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.wateringlog.domain.FriendWateringLog;
 import com.example.cp_main_be.domain.member.user.domain.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.time.LocalDateTime;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FriendWateringLogRepository extends JpaRepository<FriendWateringLog, Long> {
 
