@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Getter
@@ -44,7 +46,12 @@ public class AvatarPost {
   private List<Comment> comments;
 
   @Column(name = "created_at", nullable = false)
+  @CreationTimestamp
   private LocalDateTime createdAt;
+
+  @Column(name = "updated_at", nullable = false)
+  @UpdateTimestamp
+  private LocalDateTime updatedAt;
 
   // Builder 및 생성자도 수정 필요
   @Builder
