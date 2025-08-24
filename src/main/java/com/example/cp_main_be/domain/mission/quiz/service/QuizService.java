@@ -8,11 +8,14 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsR
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.mission.quiz.dto.CompletedQuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
+import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserQuizMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class QuizService {
 
   private final UserDailyMissionRepository userDailyMissionRepository;
-  private final DailyMissionMasterRepository dailyMissionMasterRepository;
   private final QuizRepository quizRepository;
   private final QuizOptionsRepository quizOptionsRepository;
 
@@ -49,8 +51,7 @@ public class QuizService {
         .quizType(quiz.getQuizType())
         .quizQuestion(quiz.getQuizQuestion())
         .quizOptions(optionDTOs)
-        .missionId(dailyMissionMaster.getId())
-        .isCompleted(userDailyMission.isCompleted()) // 올바른 메서드 사용
+        .quizId(quiz.getId())
         .build();
   }
 
@@ -103,12 +104,38 @@ public class QuizService {
         .quizQuestion(quiz.getQuizQuestion())
         .quizOptions(optionDTOs)
         .missionId(dailyMissionMaster.getId())
-        .isCompleted(userDailyMission.isCompleted())
         .isCorrect(isCorrect)
         .selectedOptionId(userSelectedOptionId)
         .selectedAnswerNumber(userSelectedAnswerNumber)
         .build();
   }
+
+
+  public QuizResponseDTO getQuizByType(QuizType quizType) {
+    Quiz quiz = quizRepository.findAllByQuizType(quizType).get(0);
+    if(quiz == null) throw new QuizNotFoundException("퀴즈가 존재하지 않습니다.");
+    List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
+
+    // 정답 정보 제외하고 DTO 생성
+    List<QuizResponseDTO.QuizOptionResponseDTO> optionDTOs =
+            quizOptions.stream()
+                    .map(
+                            option ->
+                                    QuizResponseDTO.QuizOptionResponseDTO.builder()
+                                            .id(option.getId())
+                                            .text(option.getOptionText())
+                                            // isAnswer 필드 제거됨
+                                            .build())
+                    .collect(Collectors.toList());
+
+    return QuizResponseDTO.builder()
+            .quizType(quiz.getQuizType())
+            .quizQuestion(quiz.getQuizQuestion())
+            .quizOptions(optionDTOs)
+            .quizId(quiz.getId())
+            .build();
+  }
+
 
   // 공통 메서드들
   private UserDailyMission getUserDailyMission(Long userDailyMissionId) {

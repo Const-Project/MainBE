@@ -106,25 +106,25 @@ public class AdminController {
     QuizOptions quizOptions = adminService.createQuizOption(requestDTO);
     return ResponseEntity.ok(ApiResponse.success(quizOptions));
   }
-
-  @PostMapping("/avatar-master")
-  @Operation(summary = "새 아바타 마스터 등록 API")
-  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> createNewPlant(
-      AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
-    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
-
-  @PutMapping("/plants/{avatar-master-id}")
-  @Operation(summary = "아바타 마스터 정보 수정 API")
-  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> updatePlantMasters(
-      @PathVariable(name = "avatar-master-id") Long plantId,
-      AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
-    PlantMasters plantMaster = adminService.updatePlantMasters(plantId, requestDTO);
-    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
+//
+//  @PostMapping("/avatar-master")
+//  @Operation(summary = "새 아바타 마스터 등록 API")
+//  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> createNewPlant(
+//      AdminRequestDTO.CreatePlantMasterRequestDTO requestDTO) {
+//    PlantMasters plantMaster = adminService.createNewPlant(requestDTO);
+//    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
+//    return ResponseEntity.ok(ApiResponse.success(result));
+//  }
+//
+//  @PutMapping("/plants/{avatar-master-id}")
+//  @Operation(summary = "아바타 마스터 정보 수정 API")
+//  public ResponseEntity<ApiResponse<AdminResponseDTO.PlantMasterResDTO>> updatePlantMasters(
+//      @PathVariable(name = "avatar-master-id") Long plantId,
+//      AdminRequestDTO.UpdatePlantMasterRequestDTO requestDTO) {
+//    PlantMasters plantMaster = adminService.updatePlantMasters(plantId, requestDTO);
+//    AdminResponseDTO.PlantMasterResDTO result = PlantMasters.toPlantMasterResDTO(plantMaster);
+//    return ResponseEntity.ok(ApiResponse.success(result));
+//  }
 
   @GetMapping("/reports")
   @Operation(summary = "신고 목록 조회 API")
