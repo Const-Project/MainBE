@@ -1,9 +1,9 @@
 package com.example.cp_main_be.domain.social.feed.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.feed.service.FeedService;
 import com.example.cp_main_be.global.common.ApiResponse;
-import com.example.cp_main_be.global.dto.FeedItemResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -25,12 +25,14 @@ public class FeedController {
 
   @Operation(summary = "피드 조회", description = "통합 피드를 불러옵니다")
   @GetMapping
-  public ResponseEntity<ApiResponse<List<FeedItemResponse>>> getFeed(
+  public ResponseEntity<ApiResponse<List<FeedResponse>>> getFeed(
       @AuthenticationPrincipal User user, // 인증된 사용자 정보
-      @RequestParam(required = false) String filter) {
+      @RequestParam(required = false) String filter,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
 
     // 서비스 메서드에 현재 사용자의 UUID와 필터 값을 전달
-    List<FeedItemResponse> feedItems = feedService.getFeed(user.getUuid(), filter);
+    List<FeedResponse> feedItems = feedService.getFeed(user.getUuid(), filter, page, size);
 
     // List<Object>가 아닌 List<FeedItemResponse>로 응답 타입을 명확히 합니다.
     return ResponseEntity.ok(ApiResponse.success(feedItems));
