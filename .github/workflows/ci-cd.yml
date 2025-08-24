@@ -42,8 +42,8 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            # 템플릿 파일이 있는 경로를 정확히 지정해야 합니다.
-            # 예: .github/pr_templates/for_develop.md
+            // 템플릿 파일이 있는 경로를 정확히 지정해야 합니다.
+            // 예: .github/pr_templates/for_develop.md
             const template = fs.readFileSync('.github/pr_templates/for_develop.md', 'utf8');
             github.rest.issues.createComment({
               owner: context.repo.owner,
@@ -125,8 +125,7 @@ jobs:
         run: echo "success=true" >> $GITHUB_OUTPUT
 
 
-
-  # 이하 배포 관련 Job들은 'build' Job의 최종 성공 여부에 따라 실행됩니다.
+# 이하 배포 관련 Job들은 'build' Job의 최종 성공 여부에 따라 실행됩니다.
   check-ec2:
     runs-on: ubuntu-latest
     needs: build
@@ -145,7 +144,6 @@ jobs:
             echo "available=false" >> $GITHUB_OUTPUT
           fi
         continue-on-error: true
-
 
 
   # Docker 이미지 빌드 및 ECR 푸시
@@ -188,9 +186,6 @@ jobs:
     needs: [build, check-ec2, build-and-push-image]
     if: github.event_name == 'push' && needs.build-and-push-image.outputs.image-pushed == 'true'
     steps:
-      - name: Checkout Source Code
-        uses: actions/checkout@v4
-
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -200,32 +195,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # === 필요한 파일들을 EC2로 복사 (scp-action 사용) ===
-      - name: Create Firebase Service Account Key File
-        env:
-          FIREBASE_KEY_JSON: ${{ secrets.FIREBASE_KEY_JSON }}
-        run: echo "$FIREBASE_KEY_JSON" > serviceAccountKey.json
-
-      - name: Create .env File
-        run: |
-          echo "R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}" > ./.env
-          echo "R2_BUCKET=${{ secrets.R2_BUCKET }}" >> ./.env
-          echo "R2_ACCESS_KEY=${{ secrets.R2_ACCESS_KEY }}" >> ./.env
-          echo "R2_SECRET_KEY=${{ secrets.R2_SECRET_KEY }}" >> ./.env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./.env
-          echo "FASTAPI_URL=${{ secrets.FASTAPI_URL }}" >> ./.env
-          echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> ./.env
-
-      - name: Transfer necessary files to EC2
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml,.env,serviceAccountKey.json"
-          target: "/home/${{ secrets.EC2_USER }}/app"
-
-      # === EC2 배포 (ssh-action 사용) ===
       - name: Deploy to EC2 instance
         uses: appleboy/ssh-action@master
         with:
@@ -233,8 +202,28 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            mkdir -p /home/${{ secrets.EC2_USER }}/app
             cd /home/${{ secrets.EC2_USER }}/app
-            # AWS ECR 로그인
+            
+            # GitHub Actions 저장소에서 docker-compose.yml 파일 복사
+            scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ../app/docker-compose.yml .
+            
+            # === serviceAccountKey.json 파일 생성 (secrets 사용) ===
+            echo "${{ secrets.FIREBASE_KEY_JSON }}" > ./serviceAccountKey.json
+            
+            # === .env 파일 생성 (secrets 사용) ===
+            echo "R2_ENDPOINT=${{ secrets.R2_ENDPOINT }}" > ./.env
+            echo "R2_BUCKET=${{ secrets.R2_BUCKET }}" >> ./.env
+            echo "R2_ACCESS_KEY=${{ secrets.R2_ACCESS_KEY }}" >> ./.env
+            echo "R2_SECRET_KEY=${{ secrets.R2_SECRET_KEY }}" >> ./.env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ./.env
+            echo "FASTAPI_URL=${{ secrets.FASTAPI_URL }}" >> ./.env
+            echo "API_TOKEN=${{ secrets.API_TOKEN }}" >> ./.env
+            # DB 관련 secrets이 있다면 여기에 추가해야 합니다. 예:
+            # echo "DB_URL=${{ secrets.DB_URL }}" >> ./.env
+    
+
+    # AWS ECR 로그인
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
             # docker-compose로 애플리케이션 실행
