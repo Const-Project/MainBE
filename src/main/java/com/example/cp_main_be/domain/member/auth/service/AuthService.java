@@ -116,6 +116,7 @@ public class AuthService {
     return AnonymousRegistrationResponse.builder()
         .accessToken(accessToken)
         .refreshToken(refreshToken)
+            .userId(newUser.getId())
         .nickname(nickname) // 생성된 닉네임 반환
         .isNewUser(true)
         .build();

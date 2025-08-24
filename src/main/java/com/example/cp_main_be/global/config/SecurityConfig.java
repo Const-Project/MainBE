@@ -41,7 +41,8 @@ public class SecurityConfig {
                         "/swagger-ui/**", // Swagger UI 페이지
                         "/v3/api-docs/**", // OpenAPI 명세서
                         "/swagger-resources/**",
-                        "/h2-console/**")
+                        "/h2-console/**",
+                            "/error")
                     .permitAll() // 회원가입 및 토큰 재발급은 인증 없이 허용
                     .anyRequest()
                     .authenticated() // 그 외 모든 요청은 인증 필요
