@@ -1,17 +1,15 @@
 package com.example.cp_main_be.domain.social.avatarpost.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
-import jakarta.transaction.Transactional;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AvatarPostService {
 
@@ -19,50 +17,19 @@ public class AvatarPostService {
   private final LikeRepository likeRepository;
 
   public PostInfoResponse getAvatarPostInfo(Long postId, User currentUser) {
-    // 1. 포스트 정보 조회
-    AvatarPost postById =
+    // 1. N+1 문제를 해결하기 위해 연관된 엔티티(작성자, 댓글, 댓글 작성자)를 함께 조회합니다.
+    var post =
         avatarPostRepository
-            .findById(postId)
+            .findByIdWithDetails(postId)
             .orElseThrow(() -> new IllegalArgumentException("해당 포스트를 찾을 수 없습니다."));
 
-    // 좋아요 여부 확인
-    boolean isLiked = likeRepository.existsByUserIdAndTargetId(currentUser.getId(), postId);
+    // 2. 현재 사용자의 '좋아요' 여부를 확인합니다.
+    // 'targetId'가 postId와 일치하는지 확인해야 합니다. 'AVATAR_POST' 타입도 함께 확인하는 것이 더 안전합니다.
+    boolean isLiked =
+        likeRepository.existsByUserIdAndTargetIdAndTargetType(
+            currentUser.getId(), postId, "AVATAR_POST");
 
-    // 응답 형식에 맞게 comment DTO 생성
-    List<PostInfoResponse.CommentResponseDTO> comments =
-        postById.getComments().stream()
-            .map(
-                comment ->
-                    PostInfoResponse.CommentResponseDTO.builder()
-                        .commentId(comment.getId())
-                        .content(comment.getContent())
-                        .profileImageUrl(comment.getWriter().getProfileImageUrl())
-                        .writer(comment.getWriter().getNickname())
-                        .build())
-            .toList();
-
-    return PostInfoResponse.builder()
-        .id(postById.getId())
-        .title(postById.getUser().getNickname())
-        .content(postById.getCaption())
-        .imageUrl(postById.getImageUrl())
-        .isLiked(isLiked)
-        .isPublic(true)
-        .commentCount(comments.size())
-        .createdAt(postById.getCreatedAt())
-        .updatedAt(postById.getUpdatedAt())
-        .comment(comments)
-        .build();
+    // 3. 조회된 엔티티와 '좋아요' 여부를 DTO로 변환하여 반환합니다.
+    return PostInfoResponse.from(post, isLiked);
   }
-
-  //  private Long id;
-  //  private String title;
-  //  private String content;
-  //  private String imageUrl;
-  //  private boolean isLiked;
-  //  private int likeCount;
-  //  private int commentCount;
-  //  private List<PostInfoResponse.CommentResponseDTO> comment;
-  //  private LocalDateTime createdAt;
-  //  private LocalDateTime updatedAt;
 }

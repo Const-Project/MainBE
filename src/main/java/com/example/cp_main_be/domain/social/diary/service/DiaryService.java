@@ -3,11 +3,11 @@ package com.example.cp_main_be.domain.social.diary.service;
 import com.example.cp_main_be.domain.avatar.image.ImageUploader;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
 import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.diary.domain.Repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
 import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest;
+import com.example.cp_main_be.domain.social.diary.dto.response.DiaryInfoResponse;
 import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
@@ -69,40 +69,26 @@ public class DiaryService {
 
   // 일기 상세 조회 (읽기 전용)
   @Transactional(readOnly = true)
-  public PostInfoResponse getDiaryInfo(Long diaryId, User currentUser) {
-    Diary postById =
+  public DiaryInfoResponse getDiaryInfo(Long diaryId, User currentUser) {
+    // 1. N+1 문제를 해결하기 위해 연관된 엔티티(작성자, 댓글 등)를 함께 조회합니다.
+    Diary diary =
         diaryRepository
-            .findById(diaryId)
+            .findByIdWithDetails(diaryId)
             .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
 
-    // 좋아요 여부 확인
-    boolean isLiked = likeRepository.existsByUserIdAndTargetId(currentUser.getId(), diaryId);
+    // 비공개 글일 경우, 작성자 본인만 조회 가능하도록 권한을 확인합니다.
+    if (!diary.isPublic() && !diary.getUser().getId().equals(currentUser.getId())) {
+      // 실무에서는 전용 예외 클래스와 핸들러를 사용하는 것이 좋습니다.
+      throw new SecurityException("비공개 일기를 볼 권한이 없습니다.");
+    }
 
-    // 응답 형식에 맞게 comment DTO 생성
-    List<PostInfoResponse.CommentResponseDTO> comments =
-        postById.getComments().stream()
-            .map(
-                comment ->
-                    PostInfoResponse.CommentResponseDTO.builder()
-                        .commentId(comment.getId())
-                        .content(comment.getContent())
-                        .profileImageUrl(comment.getWriter().getProfileImageUrl())
-                        .writer(comment.getWriter().getNickname())
-                        .build())
-            .toList();
+    // 2. 현재 사용자의 '좋아요' 여부를 확인합니다.
+    // 'DIARY' 타입을 명시하여 다른 타입의 '좋아요'와 혼동되는 것을 방지합니다.
+    boolean isLiked =
+        likeRepository.existsByUserAndTargetIdAndTargetType(currentUser, diaryId, "DIARY");
 
-    return PostInfoResponse.builder()
-        .id(postById.getId())
-        .title(postById.getUser().getNickname())
-        .content(postById.getContent())
-        .imageUrl(postById.getDiaryImage().getImageUrl())
-        .isLiked(isLiked)
-        .isPublic(true)
-        .commentCount(comments.size())
-        .createdAt(postById.getCreatedAt())
-        .updatedAt(postById.getUpdatedAt())
-        .comment(comments)
-        .build();
+    // 3. 조회된 엔티티와 '좋아요' 여부를 DTO의 팩토리 메서드로 변환하여 반환합니다.
+    return DiaryInfoResponse.from(diary, isLiked);
   }
 
   // 내 일기 목록 조회 (읽기 전용)
