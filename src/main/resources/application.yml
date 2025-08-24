@@ -71,3 +71,9 @@ spring:
     show-sql: false
   security:
     debug: false
+
+springdoc:
+  swagger-ui:
+    servers:
+      - url: https://api.napulnapul.com
+        description: Production Server

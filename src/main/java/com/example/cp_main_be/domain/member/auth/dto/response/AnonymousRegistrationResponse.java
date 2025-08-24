@@ -9,6 +9,7 @@ public class AnonymousRegistrationResponse {
 
   private final String accessToken;
   private final String refreshToken;
+  private final Long userId;
   private final String nickname; // [추가] 생성된 닉네임
   private final boolean isNewUser;
 }
