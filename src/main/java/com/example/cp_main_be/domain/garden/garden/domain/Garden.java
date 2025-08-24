@@ -54,6 +54,9 @@ public class Garden {
   @Column(name = "last_watered_by_friend_at")
   private LocalDateTime lastWateredByFriendAt;
 
+  @Column(name = "last_sunlight_received_at")
+  private LocalDateTime lastSunlightReceivedAt;
+
   @CreatedDate
   @Column(updatable = false)
   private LocalDateTime createdAt;
@@ -84,6 +87,10 @@ public class Garden {
 
   public void recordFriendWateringTime() {
     this.lastWateredByFriendAt = LocalDateTime.now();
+  }
+
+  public void recordSunlightTime() {
+    this.lastSunlightReceivedAt = LocalDateTime.now();
   }
 
   public void updateBackgroundImage(GardenBackground gardenBackground) {
