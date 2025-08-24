@@ -238,7 +238,7 @@ jobs:
             
             # 기존 컨테이너를 중지하고 삭제합니다.
             docker-compose down
-  
+
             # AWS ECR 로그인
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
