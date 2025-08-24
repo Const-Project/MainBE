@@ -6,6 +6,8 @@ import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenBackg
 import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.garden.garden.dto.GardenResponse;
 import com.example.cp_main_be.domain.garden.garden.dto.response.GardenBackgroundCandidateResponse;
+import com.example.cp_main_be.domain.garden.wateringlog.domain.FriendWateringLog;
+import com.example.cp_main_be.domain.garden.wateringlog.domain.repository.FriendWateringLogRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.UserService;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,12 +31,14 @@ public class GardenService {
   private static final int MAX_GARDEN_COUNT = 4;
   private static final int WATERING_POINTS = 2;
   private static final int SUNLIGHT_POINTS = 3;
+  private static final int MAX_FRIEND_WATERING_PER_DAY = 3;
 
   private final GardenRepository gardenRepository;
   private final UserService userService;
   private final ApplicationEventPublisher eventPublisher;
   private final GardenBackgroundRepository gardenBackgroundRepository;
   private final UserRepository userRepository;
+  private final FriendWateringLogRepository friendWateringLogRepository;
 
   public GardenResponse findGardenById(Long gardenId) {
     Garden garden =
@@ -67,16 +72,36 @@ public class GardenService {
     }
     // Case 2: 남의 정원에 물을 주는 경우
     else {
-      // TODO: 친구가 물을 주는 경우에도 쿨타임을 적용할지 정책 결정이 필요합니다.
-      if (garden.getLastWateredByFriendAt() != null
-          && garden.getLastWateredByFriendAt().plusHours(12).isAfter(LocalDateTime.now())) {
-        throw new IllegalStateException("친구의 정원에는 12시간에 한 번만 물을 줄 수 있습니다.");
+      User actor =
+          userRepository
+              .findById(actorId)
+              .orElseThrow(() -> new IllegalArgumentException("물을 주는 사용자를 찾을 수 없습니다."));
+
+      LocalDateTime startOfWateringDay = getStartOfCurrentWateringDay();
+
+      // 1. 하루에 3회 제한 체크
+      int todayWateringCount =
+          friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(actor, startOfWateringDay);
+      if (todayWateringCount >= MAX_FRIEND_WATERING_PER_DAY) {
+        throw new IllegalStateException("오늘은 다른 사람의 정원에 더 이상 물을 줄 수 없습니다. (일일 3회 제한)");
+      }
+
+      // 2. 같은 정원에 하루 한 번 제한 체크
+      boolean alreadyWatered =
+          friendWateringLogRepository.existsByWaterGiverAndWateredGardenAndWateredAtAfter(
+              actor, garden, startOfWateringDay);
+      if (alreadyWatered) {
+        throw new IllegalStateException("이 정원에는 오늘 이미 물을 주었습니다.");
       }
 
       // 남한테 주는 경우에는 준 사람이 물 경험치를 받고 정원의 waterCount가 증가한다.
       userService.addExperience(actorId, WATERING_POINTS);
       garden.increaseWaterCount();
-      garden.recordFriendWateringTime(); // 친구가 물 준 시간 기록
+
+      // 물주기 활동 기록
+      FriendWateringLog log =
+          FriendWateringLog.builder().waterGiver(actor).wateredGarden(garden).build();
+      friendWateringLogRepository.save(log);
     }
   }
 
@@ -142,5 +167,23 @@ public class GardenService {
     return gardenBackgroundRepository.findAll().stream()
         .map(GardenBackgroundCandidateResponse::from)
         .collect(Collectors.toList());
+  }
+
+  /**
+   * 현재 시간 기준으로 물주기 횟수가 초기화되는 시간(정오)을 계산합니다. - 현재 시간이 정오 이전이면, 어제 정오를 반환합니다. - 현재 시간이 정오 이후이면, 오늘
+   * 정오를 반환합니다.
+   *
+   * @return 현재 물주기 주기의 시작 시간
+   */
+  private LocalDateTime getStartOfCurrentWateringDay() {
+    // 서버 위치와 관계없이 항상 한국 시간 기준으로 동작하도록 시간대를 명시합니다.
+    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    LocalDateTime todayNoon = now.toLocalDate().atTime(12, 0);
+
+    if (now.isBefore(todayNoon)) {
+      return todayNoon.minusDays(1);
+    } else {
+      return todayNoon;
+    }
   }
 }
