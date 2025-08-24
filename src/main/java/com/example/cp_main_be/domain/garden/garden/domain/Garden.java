@@ -48,6 +48,12 @@ public class Garden {
   @JoinColumn(name = "garden_background_id")
   private GardenBackground gardenBackground;
 
+  @Column(name = "last_watered_by_owner_at")
+  private LocalDateTime lastWateredByOwnerAt;
+
+  @Column(name = "last_watered_by_friend_at")
+  private LocalDateTime lastWateredByFriendAt;
+
   @CreatedDate
   @Column(updatable = false)
   private LocalDateTime createdAt;
@@ -70,6 +76,14 @@ public class Garden {
 
   public void increaseSunlightCount() {
     this.sunlightCount++;
+  }
+
+  public void recordOwnerWateringTime() {
+    this.lastWateredByOwnerAt = LocalDateTime.now();
+  }
+
+  public void recordFriendWateringTime() {
+    this.lastWateredByFriendAt = LocalDateTime.now();
   }
 
   public void updateBackgroundImage(GardenBackground gardenBackground) {

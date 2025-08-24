@@ -11,13 +11,14 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
-import com.example.cp_main_be.global.event.WateredByFriendEvent;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,19 +51,32 @@ public class GardenService {
             .findById(gardenId)
             .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
 
-    User owner = garden.getUser();
+    User owner = garden.getUser(); // 정원 주인
 
     // Case 1: 자신의 정원에 물을 주는 경우
     if (owner.getId().equals(actorId)) {
+      // 8시간 쿨타임 체크
+      if (garden.getLastWateredByOwnerAt() != null
+          && garden.getLastWateredByOwnerAt().plusHours(8).isAfter(LocalDateTime.now())) {
+        throw new IllegalStateException("아직 물을 줄 수 없습니다. 8시간이 지나야 가능합니다.");
+      }
+
       garden.increaseWaterCount();
       userService.addExperience(actorId, WATERING_POINTS);
+      garden.recordOwnerWateringTime(); // 주인이 물 준 시간 기록
     }
-    // Case 2: 다른 사람의 정원에 물을 주는 경우
+    // Case 2: 남의 정원에 물을 주는 경우
     else {
-      User actor = userService.findUserById(actorId);
+      // TODO: 친구가 물을 주는 경우에도 쿨타임을 적용할지 정책 결정이 필요합니다.
+      if (garden.getLastWateredByFriendAt() != null
+          && garden.getLastWateredByFriendAt().plusHours(12).isAfter(LocalDateTime.now())) {
+        throw new IllegalStateException("친구의 정원에는 12시간에 한 번만 물을 줄 수 있습니다.");
+      }
+
+      // 남한테 주는 경우에는 준 사람이 물 경험치를 받고 정원의 waterCount가 증가한다.
+      userService.addExperience(actorId, WATERING_POINTS);
       garden.increaseWaterCount();
-      userService.addExperience(actorId, WATERING_POINTS); // 물을 준 사람에게 포인트 지급
-      eventPublisher.publishEvent(new WateredByFriendEvent(owner, actor)); // 정원 주인에게 알림
+      garden.recordFriendWateringTime(); // 친구가 물 준 시간 기록
     }
   }
 
