@@ -1,12 +1,12 @@
 package com.example.cp_main_be.domain.social.avatarpost.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
-import com.example.cp_main_be.domain.social.bookmark.domain.repository.BookmarkRepository;
+import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,26 +16,53 @@ import org.springframework.stereotype.Service;
 public class AvatarPostService {
 
   private final AvatarPostRepository avatarPostRepository;
-  private final UserRepository userRepository;
-  private final BookmarkRepository bookmarkRepository;
+  private final LikeRepository likeRepository;
 
-  public PostInfoResponse getPostInfoWithBookmarkStatus(Long postId, User currentUser) {
+  public PostInfoResponse getAvatarPostInfo(Long postId, User currentUser) {
     // 1. 포스트 정보 조회
     AvatarPost postById =
         avatarPostRepository
             .findById(postId)
             .orElseThrow(() -> new IllegalArgumentException("해당 포스트를 찾을 수 없습니다."));
 
-    // 2. 현재 유저가 포스트를 북마크했는지 확인
-    boolean isBookmarked =
-        bookmarkRepository.findByUserAndAvatarPost(currentUser, postById).isPresent();
+    // 좋아요 여부 확인
+    boolean isLiked = likeRepository.existsByUserIdAndTargetId(currentUser.getId(), postId);
 
-    // 3. PostInfoResponse DTO 생성 및 반환
+    // 응답 형식에 맞게 comment DTO 생성
+    List<PostInfoResponse.CommentResponseDTO> comments =
+        postById.getComments().stream()
+            .map(
+                comment ->
+                    PostInfoResponse.CommentResponseDTO.builder()
+                        .commentId(comment.getId())
+                        .content(comment.getContent())
+                        .profileImageUrl(comment.getWriter().getProfileImageUrl())
+                        .writer(comment.getWriter().getNickname())
+                        .build())
+            .toList();
+
     return PostInfoResponse.builder()
+        .id(postById.getId())
+        .title(postById.getUser().getNickname())
+        .content(postById.getCaption())
         .imageUrl(postById.getImageUrl())
-        .likeCount(postById.getLikeCount())
-        .comments(postById.getComments())
-        .isBookmarked(isBookmarked)
+        .isLiked(isLiked)
+        .isPublic(true)
+        .commentCount(comments.size())
+        .createdAt(postById.getCreatedAt())
+        .updatedAt(postById.getUpdatedAt())
+        .comment(comments)
         .build();
   }
+
+  //  private Long id;
+  //  private String title;
+  //  private String content;
+  //  private String imageUrl;
+  //  private boolean isLiked;
+  //  private int likeCount;
+  //  private int commentCount;
+  //  private List<PostInfoResponse.CommentResponseDTO> comment;
+  //  private LocalDateTime createdAt;
+  //  private LocalDateTime updatedAt;
 }
