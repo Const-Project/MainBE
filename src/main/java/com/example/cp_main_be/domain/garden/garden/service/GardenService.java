@@ -116,8 +116,16 @@ public class GardenService {
       throw new IllegalStateException("자신의 정원에만 햇빛을 줄 수 있습니다.");
     }
 
+    // 하루에 한 번만 햇빛을 줄 수 있도록 체크 (초기화 시간: 오전 6시)
+    LocalDateTime startOfSunlightDay = getStartOfCurrentSunlightDay();
+    if (garden.getLastSunlightReceivedAt() != null
+        && garden.getLastSunlightReceivedAt().isAfter(startOfSunlightDay)) {
+      throw new IllegalStateException("오늘은 이미 햇빛을 주었습니다. 내일 오전 6시 이후에 다시 시도해주세요.");
+    }
+
     garden.increaseSunlightCount();
     userService.addExperience(actorId, SUNLIGHT_POINTS);
+    garden.recordSunlightTime(); // 햇빛 준 시간 기록
   }
 
   @Transactional
@@ -183,6 +191,24 @@ public class GardenService {
       return todayNoon.minusDays(1);
     } else {
       return todayNoon;
+    }
+  }
+
+  /**
+   * 현재 시간 기준으로 햇빛 주기 횟수가 초기화되는 시간(오전 6시)을 계산합니다. - 현재 시간이 오전 6시 이전이면, 어제 오전 6시를 반환합니다. - 현재 시간이 오전
+   * 6시 이후이면, 오늘 오전 6시를 반환합니다.
+   *
+   * @return 현재 햇빛 주기의 시작 시간
+   */
+  private LocalDateTime getStartOfCurrentSunlightDay() {
+    // 서버 위치와 관계없이 항상 한국 시간 기준으로 동작하도록 시간대를 명시합니다.
+    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    LocalDateTime todaySixAM = now.toLocalDate().atTime(6, 0);
+
+    if (now.isBefore(todaySixAM)) {
+      return todaySixAM.minusDays(1);
+    } else {
+      return todaySixAM;
     }
   }
 }
