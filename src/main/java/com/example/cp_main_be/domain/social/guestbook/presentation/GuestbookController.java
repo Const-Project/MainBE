@@ -3,11 +3,13 @@ package com.example.cp_main_be.domain.social.guestbook.presentation;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
+import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookResponse;
 import com.example.cp_main_be.domain.social.guestbook.service.GuestbookService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -30,5 +32,13 @@ public class GuestbookController {
       @RequestBody @Valid GuestbookRequest request) {
     guestbookService.createGuestbook(writer.getId(), userId, request);
     return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
+  @Operation(summary = "방명록 불러오기", description = "방명록의 글을 불러옵니다.")
+  @GetMapping("/guestbook/list")
+  public ResponseEntity<ApiResponse<List<GuestbookResponse>>> getMyGuestbookList(
+      @AuthenticationPrincipal User user) {
+    List<GuestbookResponse> guestbookResponse = guestbookService.getGuestbookList(user);
+    return ResponseEntity.ok(ApiResponse.success(guestbookResponse));
   }
 }

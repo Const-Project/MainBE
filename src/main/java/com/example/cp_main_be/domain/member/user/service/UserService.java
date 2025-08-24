@@ -1,9 +1,13 @@
 package com.example.cp_main_be.domain.member.user.service;
 
+import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
 import com.example.cp_main_be.domain.member.level.service.LevelService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
 import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterResponse;
+import com.example.cp_main_be.global.exception.AvatarNotFoundException;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +24,7 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final LevelService levelService;
+  private final AvatarRepository avatarRepository;
 
   public void addExperience(Long actorId, int points) {
     User user = userRepository.findById(actorId).get();
@@ -27,20 +32,24 @@ public class UserService {
     levelService.checkLevelUp(user);
   }
 
-  public void updateAvatar(Long userId, String newAvatarUrl) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-    user.updateProfile(null, newAvatarUrl);
-    userRepository.save(user);
+  public void updateAvatar(User user, AvatarChangeRequest request, Long avatarId) {
+    if (user == null) return;
+    Avatar avatar =
+        avatarRepository
+            .findById(avatarId)
+            .orElseThrow(() -> new AvatarNotFoundException("아바타를 찾을 수 없습니다."));
+    if (avatar == null) return;
+    if (request.getNewAvatarUrl() != null) {
+      avatar.getAvatarMaster().setDefaultImageUrl(request.getNewAvatarUrl());
+    }
+    if (request.getNewAvatarName() != null) {
+      avatar.setNickname(request.getNewAvatarName());
+    }
+    avatarRepository.save(avatar);
   }
 
-  public void updateNickname(Long userId, String newNickname) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+  public void updateNickname(User user, String newNickname) {
+
     user.updateProfile(newNickname, null);
     userRepository.save(user);
   }

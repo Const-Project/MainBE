@@ -8,12 +8,10 @@ import lombok.Getter;
 @Getter
 @Builder
 public class QuizResponseDTO {
+  private final Long quizId;
   private final String quizQuestion;
   private final QuizType quizType;
-  private final Long missionId;
   private final List<QuizOptionResponseDTO> quizOptions;
-  private final Boolean isCompleted;
-
   @Getter
   @Builder
   public static class QuizOptionResponseDTO {
