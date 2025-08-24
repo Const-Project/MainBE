@@ -7,7 +7,6 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @JsonPropertyOrder({"isSuccess", "code", "message", "result"})
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -47,8 +46,6 @@ public class ApiResponse<T> {
   public static <T> ApiResponse<T> onSuccess(BaseSuccessCode code, T result) {
     return new ApiResponse<>(true, code.getCode(), code.getMessage(), result);
   }
-
-
 
   public static <T> ApiResponse<T> onFailure(String code, String message) {
     return onFailure(code, message, null);
