@@ -31,8 +31,7 @@ public class AvatarPostController {
   @GetMapping("/{postId}")
   public ResponseEntity<ApiResponse<PostInfoResponse>> getPostInfo(@PathVariable Long postId) {
     User currentUser = userService.getCurrentUser();
-    PostInfoResponse response =
-        avatarPostService.getPostInfoWithBookmarkStatus(postId, currentUser);
+    PostInfoResponse response = avatarPostService.getAvatarPostInfo(postId, currentUser);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 }
