@@ -6,6 +6,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
+import com.example.cp_main_be.domain.social.follow.dto.FollowResponseDTO;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,24 +64,42 @@ public class FollowService {
   }
 
   @Transactional(readOnly = true)
-  public List<User> getFollowers(Long userId) {
+  public List<FollowResponseDTO> getFollowers(Long userId) {
     User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-    return followRepository.findByFollowing(user).stream()
-        .map(Follow::getFollower)
-        .collect(Collectors.toList());
+
+    List<User> userList = followRepository.findByFollowing(user).stream()
+            .map(Follow::getFollower)
+            .toList();
+
+
+    return userList.stream()
+            .map(member -> FollowResponseDTO.builder()
+                    .username(member.getUsername())
+                    .userImageUrl(member.getProfileImageUrl())
+                    .userId(member.getId())
+                    .build())
+            .toList();
   }
 
   @Transactional(readOnly = true)
-  public List<User> getFollowing(Long userId) {
+  public List<FollowResponseDTO> getFollowing(Long userId) {
     User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-    return followRepository.findByFollower(user).stream()
+    List<User> userList = followRepository.findByFollower(user).stream()
         .map(Follow::getFollowing)
-        .collect(Collectors.toList());
+        .toList();
+
+    return userList.stream()
+            .map(member -> FollowResponseDTO.builder()
+                    .username(member.getUsername())
+                    .userImageUrl(member.getProfileImageUrl())
+                    .userId(member.getId())
+                    .build())
+            .toList();
   }
 }
