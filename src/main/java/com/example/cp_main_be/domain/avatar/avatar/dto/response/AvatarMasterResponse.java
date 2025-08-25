@@ -15,7 +15,6 @@ public class AvatarMasterResponse {
   public static AvatarMasterResponse from(AvatarMaster master) {
     return AvatarMasterResponse.builder()
         .id(master.getId())
-        .typeName(master.getTypeName())
         .defaultImageUrl(master.getDefaultImageUrl())
         .description(master.getDescription())
         .build();
