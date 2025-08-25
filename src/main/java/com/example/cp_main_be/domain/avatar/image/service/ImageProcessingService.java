@@ -2,11 +2,11 @@ package com.example.cp_main_be.domain.avatar.image.service;
 
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,6 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageProcessingService {
@@ -88,7 +87,12 @@ public class ImageProcessingService {
       String fallbackUrl = FALLBACK_IMAGE_URLS.get(random.nextInt(FALLBACK_IMAGE_URLS.size()));
       log.info("Selected fallback image URL: {}", fallbackUrl);
       try {
-        return webClient.get().uri(fallbackUrl).retrieve().bodyToMono(byte[].class).block();
+        return webClient
+            .get()
+            .uri(URI.create(fallbackUrl))
+            .retrieve()
+            .bodyToMono(byte[].class)
+            .block();
       } catch (Exception webClientException) {
         log.error("R2 이미지 가져오기 실패", fallbackUrl, webClientException);
         throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
