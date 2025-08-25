@@ -38,11 +38,14 @@ public class AdminService {
   private final QuizRepository quizRepository;
 
   @Transactional
-  public AdminResponseDTO.CreateQuizResponseDTO createQuiz(AdminRequestDTO.CreateQuizRequestDTO createQuizRequestDTO) {
+  public AdminResponseDTO.CreateQuizResponseDTO createQuiz(
+      AdminRequestDTO.CreateQuizRequestDTO createQuizRequestDTO) {
     // 1. DailyMissionMaster 엔티티 생성
-    DailyMissionMaster dailyMissionMaster = createDailyMissionMasters(createQuizRequestDTO.getForCreateMission());
+    DailyMissionMaster dailyMissionMaster =
+        createDailyMissionMasters(createQuizRequestDTO.getForCreateMission());
     // 2. Quiz 엔티티 생성
-    Quiz quiz = Quiz.builder()
+    Quiz quiz =
+        Quiz.builder()
             .answerNumber(createQuizRequestDTO.getAnswerNumber())
             .quizType(createQuizRequestDTO.getQuizType())
             .quizQuestion(createQuizRequestDTO.getQuizQuestion())
@@ -50,37 +53,43 @@ public class AdminService {
             .build();
     quizRepository.save(quiz);
     // 3. QuizOption 엔티티 생성
-    List<QuizOptions> quizOptionsList = createQuizRequestDTO.getQuizOptions().stream()
-            .map(quizOption -> QuizOptions.builder()
-                    .quiz(quiz)
-                    .optionText(quizOption.getOptionText())
-                    .optionOrder(quizOption.getOptionOrder())
-                    .build())
+    List<QuizOptions> quizOptionsList =
+        createQuizRequestDTO.getQuizOptions().stream()
+            .map(
+                quizOption ->
+                    QuizOptions.builder()
+                        .quiz(quiz)
+                        .optionText(quizOption.getOptionText())
+                        .optionOrder(quizOption.getOptionOrder())
+                        .build())
             .toList();
-    List<AdminResponseDTO.QuizOptionsResponseDTO> quizOptionsResponseDTOS = quizOptionsList.stream()
-            .map(quizOptions -> AdminResponseDTO.QuizOptionsResponseDTO.builder()
-                    .optionId(quizOptions.getId())
-                    .optionText(quizOptions.getOptionText())
-                    .optionOrder(quizOptions.getOptionOrder())
-                    .build())
+    List<AdminResponseDTO.QuizOptionsResponseDTO> quizOptionsResponseDTOS =
+        quizOptionsList.stream()
+            .map(
+                quizOptions ->
+                    AdminResponseDTO.QuizOptionsResponseDTO.builder()
+                        .optionId(quizOptions.getId())
+                        .optionText(quizOptions.getOptionText())
+                        .optionOrder(quizOptions.getOptionOrder())
+                        .build())
             .toList();
     // 4. 응답 DTO 생성
     return AdminResponseDTO.CreateQuizResponseDTO.builder()
-            .quizId(quiz.getId())
-            .quizQuestion(quiz.getQuizQuestion())
-            .answerNumber(quiz.getAnswerNumber())
-            .dailyMissionMaster(AdminResponseDTO.DailyMissionMastersResDTO.builder()
-                    .createdAt(dailyMissionMaster.getCreatedAt())
-                    .title(dailyMissionMaster.getTitle())
-                    .rewardPoints(dailyMissionMaster.getRewardPoints())
-                    .content(dailyMissionMaster.getContent())
-                    .description(dailyMissionMaster.getDescription())
-                    .missionType(dailyMissionMaster.getMissionType())
-                    .build())
-            .quizOptions(quizOptionsResponseDTOS)
-            .build();
+        .quizId(quiz.getId())
+        .quizQuestion(quiz.getQuizQuestion())
+        .answerNumber(quiz.getAnswerNumber())
+        .dailyMissionMaster(
+            AdminResponseDTO.DailyMissionMastersResDTO.builder()
+                .createdAt(dailyMissionMaster.getCreatedAt())
+                .title(dailyMissionMaster.getTitle())
+                .rewardPoints(dailyMissionMaster.getRewardPoints())
+                .content(dailyMissionMaster.getContent())
+                .description(dailyMissionMaster.getDescription())
+                .missionType(dailyMissionMaster.getMissionType())
+                .build())
+        .quizOptions(quizOptionsResponseDTOS)
+        .build();
   }
-
 
   // DailyMissionMasters 생성
   @Transactional
@@ -97,6 +106,7 @@ public class AdminService {
 
     return dailyMissionMastersRepository.save(dailyMissionMaster);
   }
+
   @Transactional
   public DailyMissionMaster updateDailyMissionMasters(
       AdminRequestDTO.UpdateMissionRequestDTO requestDTO, Long id) {
@@ -110,6 +120,7 @@ public class AdminService {
     dailyMissionMaster.update(requestDTO);
     return dailyMissionMaster;
   }
+
   @Transactional
   public DailyKeywords createDailyKeywords(AdminRequestDTO.CreateKeywordRequestDTO requestDTO) {
 
@@ -130,8 +141,11 @@ public class AdminService {
   }
 
   @Transactional
-  public QuizOptions createQuizOption(AdminRequestDTO.CreateQuizOptionRequestDTO requestDTO,Long quizId) {
-    Quiz quiz = quizRepository.findById(quizId)
+  public QuizOptions createQuizOption(
+      AdminRequestDTO.CreateQuizOptionRequestDTO requestDTO, Long quizId) {
+    Quiz quiz =
+        quizRepository
+            .findById(quizId)
             .orElseThrow(() -> new RuntimeException("해당 ID를 가진 퀴즈가 존재하지 않습니다."));
 
     if (quiz.getDailyMissionMaster().getMissionType() != MissionType.QUIZ) {
@@ -139,10 +153,10 @@ public class AdminService {
     }
 
     return QuizOptions.builder() // QuizOptions 퀴즈의 선지
-            .optionText(requestDTO.getOptionText())
-            .optionOrder(requestDTO.getOptionOrder())
-            .quiz(quiz)
-            .build();
+        .optionText(requestDTO.getOptionText())
+        .optionOrder(requestDTO.getOptionOrder())
+        .quiz(quiz)
+        .build();
   }
 
   public List<Reports> getAllReports() {
