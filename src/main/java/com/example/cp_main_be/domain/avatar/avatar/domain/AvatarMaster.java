@@ -15,9 +15,6 @@ public class AvatarMaster {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String typeName; // 예: "스킨답서스", "산세베리아" (고유 식별값)
-
   @Column(nullable = false)
   private String defaultImageUrl; // 기본 이미지 URL
 
