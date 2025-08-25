@@ -94,11 +94,14 @@ public class AdminService {
 
   @Transactional
   public boolean deleteQuiz(Long quizId) {
-    Quiz quiz = quizRepository.findById(quizId)
+    Quiz quiz =
+        quizRepository
+            .findById(quizId)
             .orElseThrow(() -> new QuizNotFoundException("퀴즈가 존재하지 않습니다."));
     quizRepository.delete(quiz);
     return true;
   }
+
   // DailyMissionMasters 생성
   @Transactional
   public DailyMissionMaster createDailyMissionMasters(
