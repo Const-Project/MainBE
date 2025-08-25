@@ -72,14 +72,14 @@ public class UserDailyMissionController {
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
-//  // 새로운 엔드포인트 - 완료된 퀴즈 결과 조회
-//  @GetMapping("/quiz/{userDailyMissionId}/result")
-//  @Operation(summary = "완료된 퀴즈 결과 조회 API (정답 정보 포함)")
-//  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> getQuizResult(
-//      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId) {
-//    CompletedQuizResponseDTO result = quizService.getCompletedQuizResult(userDailyMissionId);
-//    return ResponseEntity.ok(ApiResponse.success(result));
-//  }
+  //  // 새로운 엔드포인트 - 완료된 퀴즈 결과 조회
+  //  @GetMapping("/quiz/{userDailyMissionId}/result")
+  //  @Operation(summary = "완료된 퀴즈 결과 조회 API (정답 정보 포함)")
+  //  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> getQuizResult(
+  //      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId) {
+  //    CompletedQuizResponseDTO result = quizService.getCompletedQuizResult(userDailyMissionId);
+  //    return ResponseEntity.ok(ApiResponse.success(result));
+  //  }
 
   @PostMapping(
       value = "/photo/{userDailyMissionId}/upload",
@@ -101,5 +101,4 @@ public class UserDailyMissionController {
     CompletedQuizResponseDTO result = quizService.summitQuizAnswer(request, userDailyMissionId);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
-
 }
