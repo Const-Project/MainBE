@@ -63,6 +63,16 @@ public class AdminController {
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
+  @PostMapping("/quiz/create")
+  @Operation(summary = "퀴즈 생성 API")
+  public ApiResponse<AdminResponseDTO.CreateQuizResponseDTO> createQuiz (
+          @RequestBody AdminRequestDTO.CreateQuizRequestDTO requestDTO
+  )
+  {
+    AdminResponseDTO.CreateQuizResponseDTO result = adminService.createQuiz(requestDTO);
+    return ApiResponse.ok(result);
+  }
+
   @PostMapping("/keywords")
   @Operation(summary = "일일 키워드 등록 API")
   public ResponseEntity<ApiResponse<DailyKeywords>> createKeyword(
@@ -98,11 +108,13 @@ public class AdminController {
     return ResponseEntity.ok(ApiResponse.success(user));
   }
 
-  @PostMapping("/quiz")
+  @PostMapping("/{quizId}/options")
   @Operation(summary = "퀴즈 선지 등록 API")
   public ResponseEntity<ApiResponse<QuizOptions>> createQuizOption(
-      AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
-    QuizOptions quizOptions = adminService.createQuizOption(requestDTO);
+      @RequestBody AdminRequestDTO.CreateQuizOptionRequestDTO requestDTO,
+      @PathVariable(name = "quizId") Long quizId
+  ) {
+    QuizOptions quizOptions = adminService.createQuizOption(requestDTO,quizId);
     return ResponseEntity.ok(ApiResponse.success(quizOptions));
   }
 

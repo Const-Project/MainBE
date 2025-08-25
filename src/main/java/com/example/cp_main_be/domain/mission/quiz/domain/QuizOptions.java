@@ -19,9 +19,6 @@ public class QuizOptions {
   @Column(name = "option_text")
   private String optionText;
 
-  @Column(name = "is_correct")
-  private boolean isCorrect;
-
   @Column(name = "option_order")
   private int optionOrder;
 

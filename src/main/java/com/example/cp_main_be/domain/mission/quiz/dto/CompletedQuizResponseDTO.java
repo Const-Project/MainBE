@@ -13,8 +13,7 @@ public class CompletedQuizResponseDTO {
   private final Long missionId;
   private final List<CompletedQuizOptionResponseDTO> quizOptions;
   private final Boolean isCorrect; // 사용자 답안 정답 여부
-  private final Long selectedOptionId; // 사용자가 선택한 옵션 ID 추가
-  private final Integer selectedAnswerNumber; // 사용자가 선택한 답안 번호 추가 (옵션)
+  private final Integer selectedAnswerNumber; // 사용자가 선택한 답안 번호 추가
 
   @Getter
   @Builder
