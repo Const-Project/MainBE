@@ -68,55 +68,6 @@ public class UserDailyMissionService {
     return imageUrl;
   }
 
-  public Boolean summitAnswer(QuizRequestDTO request, Long userDailyMissionId) {
-    UserQuizMission userDailyMission =
-        (UserQuizMission)
-            userDailyMissionRepository
-                .findById(userDailyMissionId)
-                .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
-
-    Quiz quiz =
-        quizRepository
-            .findByDailyMissionMaster_Id(userDailyMission.getDailyMissionMaster().getId())
-            .orElseThrow(() -> new RuntimeException("퀴즈가 존재하지 않습니다."));
-
-    List<QuizOptions> quizOptionsList = quizOptionsRepository.findAllByQuizId(quiz.getId());
-
-    // 사용자가 선택한 옵션 찾기
-    QuizOptions selectedOption = null;
-    boolean isCorrect = false;
-
-    for (QuizOptions quizOptions : quizOptionsList) {
-      if (quizOptions.getOptionOrder() == request.getSelectedOptionId()) {
-        selectedOption = quizOptions;
-        isCorrect = quizOptions.isCorrect();
-        break;
-      }
-    }
-
-    if (selectedOption == null) {
-      throw new RuntimeException("선택한 답안이 유효하지 않습니다.");
-    }
-
-    // UserDailyMission에 답안 정보 저장 (엔티티 필드에 맞춰서)
-    userDailyMission.setSelectedOptionId(selectedOption.getId());
-    userDailyMission.setSelectedAnswerNumber(selectedOption.getOptionOrder());
-    userDailyMission.setIsQuizCorrect(isCorrect);
-    userDailyMission.setQuizAnsweredAt(LocalDateTime.now());
-
-    // 정답이면 미션 완료 처리
-    if (isCorrect) {
-      userDailyMission.setCompleted(true); // isCompleted -> setCompleted
-      userDailyMission.setCompletedAt(LocalDateTime.now()); // 완료 시간 설정
-      // 점수 부여 로직 (필요에 따라)
-      userDailyMission.setScore(10L); // 예시 점수
-    }
-
-    userDailyMissionRepository.save(userDailyMission);
-
-    return isCorrect;
-  }
-
   // 미션 완료 처리
   public void completeDailyMission(Long userDailyMissionId) {
     UserDailyMission userDailyMission = getUserDailyMission(userDailyMissionId);
