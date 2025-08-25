@@ -13,7 +13,7 @@ public class AvatarMaster {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private Long id; // 생성 말고 선택시 주어지는 전형적 선택지(아바타)는 10개 -> 스킨답서스,몬스테라 등 id는 0~9중 하나, db에 10개만 넣을거임
 
   @Column(nullable = false)
   private String defaultImageUrl; // 기본 이미지 URL
