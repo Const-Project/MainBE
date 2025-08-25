@@ -72,14 +72,14 @@ public class UserDailyMissionController {
     return ResponseEntity.ok(ApiResponse.success(result));
   }
 
-  // 새로운 엔드포인트 - 완료된 퀴즈 결과 조회
-  @GetMapping("/quiz/{userDailyMissionId}/result")
-  @Operation(summary = "완료된 퀴즈 결과 조회 API (정답 정보 포함)")
-  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> getQuizResult(
-      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId) {
-    CompletedQuizResponseDTO result = quizService.getCompletedQuizResult(userDailyMissionId);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
+//  // 새로운 엔드포인트 - 완료된 퀴즈 결과 조회
+//  @GetMapping("/quiz/{userDailyMissionId}/result")
+//  @Operation(summary = "완료된 퀴즈 결과 조회 API (정답 정보 포함)")
+//  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> getQuizResult(
+//      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId) {
+//    CompletedQuizResponseDTO result = quizService.getCompletedQuizResult(userDailyMissionId);
+//    return ResponseEntity.ok(ApiResponse.success(result));
+//  }
 
   @PostMapping(
       value = "/photo/{userDailyMissionId}/upload",
@@ -95,10 +95,11 @@ public class UserDailyMissionController {
 
   @PostMapping("/quiz/{userDailyMissionId}/answer")
   @Operation(summary = "퀴즈 답변 제출 API")
-  public ResponseEntity<ApiResponse<Boolean>> answerQuiz(
+  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> summitAnswerToQuiz(
       @PathVariable(name = "userDailyMissionId") Long userDailyMissionId,
       @RequestBody QuizRequestDTO request) {
-    Boolean result = userDailyMissionService.summitAnswer(request, userDailyMissionId);
+    CompletedQuizResponseDTO result = quizService.summitQuizAnswer(request, userDailyMissionId);
     return ResponseEntity.ok(ApiResponse.success(result));
   }
+
 }

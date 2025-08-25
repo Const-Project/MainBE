@@ -22,6 +22,9 @@ public class Quiz {
   @Column(name = "quiz_type")
   private QuizType quizType;
 
+  @Column(name = "answer_number")
+  private Long answerNumber;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "mission_master_id")
   private DailyMissionMaster dailyMissionMaster;
