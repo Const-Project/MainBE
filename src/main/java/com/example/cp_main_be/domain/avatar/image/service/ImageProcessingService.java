@@ -3,8 +3,12 @@ package com.example.cp_main_be.domain.avatar.image.service;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import java.time.Duration;
+import java.util.List;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -12,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -20,10 +23,25 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class ImageProcessingService {
 
+  private static final Logger log = LoggerFactory.getLogger(ImageProcessingService.class);
+
   private final WebClient webClient;
 
   @Value("${fastapi.server.url}")
   private String fastapiServerUrl;
+
+  private static final Random random = new Random();
+
+  private static final List<String> FALLBACK_IMAGE_URLS =
+      List.of(
+          "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%86%E1%85%A9%E1%86%AB%E1%84%89%E1%85%B3%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%201.png",
+          "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%87%E1%85%A2%E1%86%A8%E1%84%83%E1%85%A9%E1%84%89%E1%85%A5%E1%86%AB%201.png",
+          "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%87%E1%85%A2%E1%86%A8%E1%84%83%E1%85%A9%E1%84%89%E1%85%A5%E1%86%AB%201.png",
+          "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%89%E1%85%A1%E1%86%AB%E1%84%89%E1%85%A6%E1%84%87%E1%85%A6%E1%84%85%E1%85%B5%E1%84%8B%E1%85%A1%201.png",
+          "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%89%E1%85%A5%E1%84%8B%E1%85%A3%E1%86%BC%E1%84%85%E1%85%A1%E1%86%AB%201.png",
+          "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B5%E1%86%AB%E1%84%83%E1%85%A1%E1%86%B8%E1%84%89%E1%85%A5%E1%84%89%E1%85%B3%201.png",
+          "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%91%E1%85%A1%E1%84%8F%E1%85%B5%E1%84%85%E1%85%A1%201.png",
+          "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%92%E1%85%A2%E1%86%BC%E1%84%8B%E1%85%AE%E1%86%AB%E1%84%86%E1%85%A9%E1%86%A8%201.png");
 
   /**
    * 이미지를 AI 서버로 보내 아바타를 생성합니다.
@@ -66,13 +84,15 @@ public class ImageProcessingService {
         throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
       }
       return result;
-    } catch (WebClientException e) {
-      // 네트워크 연결 실패 등 WebClient 자체의 예외 처리
-      log.error("WebClient request failed", e);
-      throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
-    } catch (RuntimeException e) {
-      log.error("이미지 생성이 timeout 혹은 예상하지 못한 런타임에러로 인해 실패하였습니다.", e);
-      throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
+    } catch (Exception e) {
+      String fallbackUrl = FALLBACK_IMAGE_URLS.get(random.nextInt(FALLBACK_IMAGE_URLS.size()));
+      log.info("Selected fallback image URL: {}", fallbackUrl);
+      try {
+        return webClient.get().uri(fallbackUrl).retrieve().bodyToMono(byte[].class).block();
+      } catch (Exception webClientException) {
+        log.error("R2 이미지 가져오기 실패", fallbackUrl, webClientException);
+        throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
+      }
     }
   }
 }
