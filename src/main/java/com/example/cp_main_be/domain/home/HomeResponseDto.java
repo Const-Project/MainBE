@@ -40,14 +40,6 @@ public class HomeResponseDto {
   @Builder
   public static class AvatarInfo {
     private String characterImageUrl;
-    private List<ItemInfo> equippedItems;
-  }
-
-  @Getter
-  @Builder
-  public static class ItemInfo {
-    private String itemType; // "HAT", "GLASSES" 등
-    private String itemImageUrl;
   }
 
   @Getter
