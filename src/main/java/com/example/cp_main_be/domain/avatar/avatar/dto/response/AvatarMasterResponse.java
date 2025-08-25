@@ -8,7 +8,6 @@ import lombok.Getter;
 @Builder
 public class AvatarMasterResponse {
   private final Long id;
-  private final String typeName;
   private final String defaultImageUrl;
   private final String description;
 
