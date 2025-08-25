@@ -71,6 +71,13 @@ public class AdminController {
     return ApiResponse.ok(result);
   }
 
+  @DeleteMapping("/quiz/{quizId}")
+  @Operation(summary = "퀴즈 삭제 API")
+  public ApiResponse<Boolean> deleteQuiz(@PathVariable Long quizId) {
+    Boolean success = adminService.deleteQuiz(quizId);
+    return ApiResponse.ok(success);
+  }
+
   @PostMapping("/keywords")
   @Operation(summary = "일일 키워드 등록 API")
   public ResponseEntity<ApiResponse<DailyKeywords>> createKeyword(

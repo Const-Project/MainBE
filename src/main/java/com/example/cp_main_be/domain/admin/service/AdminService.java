@@ -17,6 +17,7 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizReposito
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
+import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import com.example.cp_main_be.global.infra.S3Uploader;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -91,6 +92,13 @@ public class AdminService {
         .build();
   }
 
+  @Transactional
+  public boolean deleteQuiz(Long quizId) {
+    Quiz quiz = quizRepository.findById(quizId)
+            .orElseThrow(() -> new QuizNotFoundException("퀴즈가 존재하지 않습니다."));
+    quizRepository.delete(quiz);
+    return true;
+  }
   // DailyMissionMasters 생성
   @Transactional
   public DailyMissionMaster createDailyMissionMasters(
