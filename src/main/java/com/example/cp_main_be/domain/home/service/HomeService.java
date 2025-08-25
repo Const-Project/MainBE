@@ -71,39 +71,9 @@ public class HomeService {
             .unreadNotificationCount(unreadNotificationCount)
             .build();
 
-    List<HomeResponseDto.ItemInfo> equippedItems =
-        avatar.getEquippedItems().stream()
-            .map(
-                item ->
-                    HomeResponseDto.ItemInfo.builder()
-                        .itemType(item.getType().getDisplayName())
-                        .itemImageUrl(item.getImageUrl())
-                        .build())
-            .collect(Collectors.toList());
-
-    // 또는 각각 개별적으로 가져올 수도 있습니다
-    HomeResponseDto.ItemInfo hatInfo = null;
-    if (avatar.getEquippedHat() != null) {
-      hatInfo =
-          HomeResponseDto.ItemInfo.builder()
-              .itemType("HAT")
-              .itemImageUrl(avatar.getEquippedHat().getImageUrl())
-              .build();
-    }
-
-    HomeResponseDto.ItemInfo clothesInfo = null;
-    if (avatar.getEquippedClothes() != null) {
-      clothesInfo =
-          HomeResponseDto.ItemInfo.builder()
-              .itemType("CLOTHES")
-              .itemImageUrl(avatar.getEquippedClothes().getImageUrl())
-              .build();
-    }
-
     HomeResponseDto.AvatarInfo avatarInfo =
         HomeResponseDto.AvatarInfo.builder()
             .characterImageUrl(avatar.getAvatarMaster().getDefaultImageUrl())
-            .equippedItems(equippedItems)
             .build();
 
     HomeResponseDto.GardenInfo gardenInfo =
