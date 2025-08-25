@@ -9,6 +9,8 @@ import java.util.List;
 public record PostInfoResponse(
     Long id,
     Long writerId,
+    String writerName,
+    String profileImageUrl,
     String content,
     String imageUrl,
     boolean isLiked,
@@ -22,12 +24,15 @@ public record PostInfoResponse(
   public static PostInfoResponse from(AvatarPost post, boolean isLiked) {
     List<CommentResponseDTO> commentDTOs =
         post.getComments().stream().map(CommentResponseDTO::from).toList();
-
+    String writerName = post.getUser().getNickname();
+    String profileImageUrl = post.getUser().getProfileImageUrl();
     return new PostInfoResponse(
         post.getId(),
         post.getUser().getId(),
         post.getCaption(),
         post.getImageUrl(),
+        writerName,
+        profileImageUrl,
         isLiked,
         post.getLikeCount(),
         commentDTOs.size(),

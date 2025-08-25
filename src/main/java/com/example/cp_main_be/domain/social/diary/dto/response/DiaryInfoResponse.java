@@ -9,6 +9,8 @@ import java.util.List;
 public record DiaryInfoResponse(
     Long id,
     Long writerId,
+    String writerName,
+    String profileImageUrl,
     String title,
     String content,
     String imageUrl,
@@ -24,6 +26,8 @@ public record DiaryInfoResponse(
     List<CommentResponseDTO> commentDTOs =
         diary.getComments().stream().map(CommentResponseDTO::from).toList();
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
+    String writerName = diary.getUser().getNickname();
+    String profileImageUrl = diary.getUser().getProfileImageUrl();
 
     return new DiaryInfoResponse(
         diary.getId(),
@@ -31,6 +35,8 @@ public record DiaryInfoResponse(
         diary.getTitle(),
         diary.getContent(),
         imageUrl,
+        writerName,
+        profileImageUrl,
         isLiked,
         diary.getLikeCount(),
         commentDTOs.size(),
