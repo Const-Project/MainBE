@@ -2,13 +2,11 @@ package com.example.cp_main_be.domain.admin.dto;
 
 import com.example.cp_main_be.domain.member.user.domain.UserStatus;
 import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import lombok.*;
 
 public class AdminRequestDTO {
@@ -70,13 +68,12 @@ public class AdminRequestDTO {
   @Setter
   @Builder
   public static class CreateQuizRequestDTO {
-      private CreateMissionRequestDTO forCreateMission; //미션 마스터 생성을 위한 요청
-      private String quizQuestion;
-      private QuizType quizType;
-      private Long answerNumber;
-      private List<CreateQuizOptionRequestDTO> quizOptions;
-    }
-
+    private CreateMissionRequestDTO forCreateMission; // 미션 마스터 생성을 위한 요청
+    private String quizQuestion;
+    private QuizType quizType;
+    private Long answerNumber;
+    private List<CreateQuizOptionRequestDTO> quizOptions;
+  }
 
   @Getter
   @Setter
