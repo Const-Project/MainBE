@@ -9,51 +9,56 @@ import lombok.Getter;
 public class HomeResponseDto {
 
   private final UserInfo userInfo;
-  private final GardenInfo gardenInfo;
+  private final List<GardenSummaryInfo> gardenSummaries; // 본인의 모든 정원 목록
   private final List<MissionInfo> todayMissions;
-  private final ActivityInfo activityInfo;
+
+  //  private final ActivityInfo activityInfo; // 주간 미션 상태
+
+  // --- 내부 DTO 클래스들 ---
 
   @Getter
   @Builder
   public static class UserInfo {
-    private String username; // [수정] nickname -> username
+    private Long id;
+    private String username;
     private int level;
-    private long currentExp; // [수정] int -> long (User 엔티티의 experience 타입과 일치)
-    private long requiredExpForNextLevel; // [수정] int -> long
-    private int unreadNotificationCount;
+    private long currentExp;
+    private long requiredExpForNextLevel;
+    private int unreadNotificationCount; // 읽지 않은 알림 수 (새 메시지 1)
   }
 
+  // 각 정원의 요약 정보 (홈 화면 슬라이드에 사용)
   @Getter
   @Builder
-  public static class GardenInfo {
-    private String plantName;
-    private String plantImageUrl;
-    private int waterCount;
-    private int maxWaterCount;
-    private int sunlightCount;
-    private int maxSunlightCount;
-    private String backgroundImageUrl;
-    private AvatarInfo avatar; // 아바타 정보를 정원 정보의 일부로 포함
+  public static class GardenSummaryInfo {
+    private Long gardenId; // 정원 ID 추가
+    private Integer gardenSlotNumber;
+    private AvatarInfo avatar; // 각 정원에 배치된 아바타 정보
+    private boolean isOwnerWateringAble; // 본인 정원에 물주기 가능한지 여부
+    private boolean isOwnerSunlightAble; // 본인 정원에 햇빛 주기 가능한지 여부
   }
 
   @Getter
   @Builder
   public static class AvatarInfo {
-    private String characterImageUrl;
+    private Long avatarId;
+    private String avatarName; // 아바타 마스터 이름 (식물 이름)
+    private String avatarImageUrl;
   }
 
   @Getter
   @Builder
   public static class MissionInfo {
+    private Long missionId; // 미션 ID 추가 (프론트엔드에서 미션 클릭 시 사용)
     private String missionTitle;
-    private String missionType; // "QUIZ", "IMAGE_DIARY" 등
+    private String missionType;
     private boolean isCompleted;
+    // private String description; // 필요시 미션 상세 설명 추가 가능
   }
 
-  @Getter
-  @Builder
-  public static class ActivityInfo {
-    // 최근 7일간의 활동 기록 (true: 완료, false: 미완료)
-    private List<Boolean> weeklyMissionStatus;
-  }
+  //  @Getter
+  //  @Builder
+  //  public static class ActivityInfo {
+  //    private List<Boolean> weeklyMissionStatus; // 최근 7일간의 미션 완료 여부
+  //  }
 }

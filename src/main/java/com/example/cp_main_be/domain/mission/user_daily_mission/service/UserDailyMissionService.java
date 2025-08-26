@@ -120,6 +120,10 @@ public class UserDailyMissionService {
                         .isCompleted(mission.isCompleted())
                         .build())
             .collect(Collectors.toList());
+    Integer count = 0;
+    for (MissionPanelResponse.DailyMissionStatusDto mission : missionDtos) {
+      if (mission.isCompleted()) count++;
+    }
 
     // 2. 소망 나무 정보 조회
     // TODO: WishTree 엔티티 및 Repository 구현 후 실제 데이터 조회 로직 필요
@@ -131,6 +135,10 @@ public class UserDailyMissionService {
             .build();
 
     // 3. 최종 응답 조립
-    return MissionPanelResponse.builder().dailyMissions(missionDtos).wishTree(wishTreeDto).build();
+    return MissionPanelResponse.builder()
+        .todayMissionCount(count)
+        .dailyMissions(missionDtos)
+        .wishTree(wishTreeDto)
+        .build();
   }
 }

@@ -3,7 +3,7 @@ package com.example.cp_main_be.domain.social.guestbook.presentation;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
-import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookResponse;
+import com.example.cp_main_be.domain.social.guestbook.dto.response.GuestbookResponse;
 import com.example.cp_main_be.domain.social.guestbook.service.GuestbookService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

@@ -8,7 +8,7 @@ import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
-import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookResponse;
+import com.example.cp_main_be.domain.social.guestbook.dto.response.GuestbookResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
