@@ -2,6 +2,8 @@ package com.example.cp_main_be.domain.reports.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.reports.domain.ReportReason;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportReasonRepository;
@@ -10,8 +12,6 @@ import com.example.cp_main_be.domain.reports.dto.ReportRequestDto;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

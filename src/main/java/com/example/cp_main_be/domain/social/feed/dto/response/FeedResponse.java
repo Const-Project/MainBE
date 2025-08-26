@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.social.feed.dto.response;
 
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 

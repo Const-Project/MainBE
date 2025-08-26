@@ -1,16 +1,16 @@
-package com.example.cp_main_be.domain.social.diary.service;
+package com.example.cp_main_be.domain.mission.diary.service;
 
 import com.example.cp_main_be.domain.avatar.image.ImageUploader;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.domain.repository.DiaryRepository;
-import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
-import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest;
-import com.example.cp_main_be.domain.social.diary.dto.response.DiaryInfoResponse;
-import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
-import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
-import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImageRepository;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.mission.diary.dto.request.CreateDiaryRequest;
+import com.example.cp_main_be.domain.mission.diary.dto.request.UpdateDiaryRequest;
+import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryInfoResponse;
+import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryResponse;
+import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImage;
+import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImageRepository;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import java.util.List;
 import java.util.Objects;

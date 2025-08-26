@@ -1,7 +1,7 @@
-package com.example.cp_main_be.domain.social.diary.dto.response;
+package com.example.cp_main_be.domain.mission.diary.dto.response;
 
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,6 +1,6 @@
-package com.example.cp_main_be.domain.social.diaryimage.domain;
+package com.example.cp_main_be.domain.mission.diaryimage.domain;
 
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;

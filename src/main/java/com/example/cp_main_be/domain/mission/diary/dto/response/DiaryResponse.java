@@ -1,6 +1,6 @@
-package com.example.cp_main_be.domain.social.diary.dto.response;
+package com.example.cp_main_be.domain.mission.diary.dto.response;
 
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import java.time.LocalDateTime;
 import lombok.Getter;
 
