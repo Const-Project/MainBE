@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class RealQuizAnswerRequestDTO {
-    private Integer selectedOptionOrder;
+  private Integer selectedOptionOrder;
 }
