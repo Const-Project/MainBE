@@ -17,9 +17,9 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizReposito
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
-import com.example.cp_main_be.global.exception.QuizNotFoundException;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.infra.S3Uploader;
-import jakarta.persistence.*;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -97,7 +97,7 @@ public class AdminService {
     Quiz quiz =
         quizRepository
             .findById(quizId)
-            .orElseThrow(() -> new QuizNotFoundException("퀴즈가 존재하지 않습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.QUIZ_NOT_FOUND));
     quizRepository.delete(quiz);
     return true;
   }
@@ -125,7 +125,7 @@ public class AdminService {
     DailyMissionMaster dailyMissionMaster =
         dailyMissionMastersRepository
             .findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("해당 ID의 미션을 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.MISSION_NOT_FOUND));
 
     // null 인 컬럼들은 수정 안한다.
     dailyMissionMaster.update(requestDTO);
@@ -157,10 +157,10 @@ public class AdminService {
     Quiz quiz =
         quizRepository
             .findById(quizId)
-            .orElseThrow(() -> new RuntimeException("해당 ID를 가진 퀴즈가 존재하지 않습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.QUIZ_NOT_FOUND));
 
     if (quiz.getDailyMissionMaster().getMissionType() != MissionType.QUIZ) {
-      throw new IllegalArgumentException("퀴즈 타입의 미션에만 선지를 추가할 수 있습니다.");
+      throw new CustomApiException(ErrorCode.INVALID_MISSION_TYPE_FOR_QUIZ_OPTION);
     }
 
     return QuizOptions.builder() // QuizOptions 퀴즈의 선지
@@ -180,7 +180,7 @@ public class AdminService {
     Reports report =
         reportRepository
             .findById(reportId)
-            .orElseThrow(() -> new RuntimeException("신고를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.REPORT_NOT_FOUND));
     report.setStatus(reportStatus);
     return report;
   }

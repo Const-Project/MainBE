@@ -25,4 +25,6 @@ public class CreateDiaryRequest {
   // 공개 여부는 선택사항으로, 값을 보내지 않으면 엔티티의 기본값(true)을 따릅니다.
   @NotNull(message = "공개 여부는 필수값입니다. (true/false)")
   private Boolean isPublic;
+
+  private Long imageId; // 있으면 받고 없으면 안받음
 }
