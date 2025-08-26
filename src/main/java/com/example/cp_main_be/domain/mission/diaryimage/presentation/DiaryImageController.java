@@ -39,8 +39,8 @@ public class DiaryImageController {
   @Operation(summary = "일기 이미지 삭제", description = "일기 이미지를 삭제합니다")
   @DeleteMapping("/diaries/{diaryId}/images/{imageId}")
   public ResponseEntity<ApiResponse<Void>> deleteDiaryImage(
-      @PathVariable Long diaryId, @PathVariable Long imageId) {
-    diaryImageService.deleteDiaryImage(diaryId, imageId);
+      @PathVariable Long diaryId, @PathVariable Long imageId, @AuthenticationPrincipal User user) {
+    diaryImageService.deleteDiaryImage(diaryId, imageId, user.getId());
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 }
