@@ -3,6 +3,9 @@ package com.example.cp_main_be.domain.realquiz;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,4 +25,12 @@ public class UserQuiz {
   @JoinColumn(name = "real_quiz_id")
   @ManyToOne(fetch = FetchType.LAZY)
   private RealQuiz realQuiz;
+
+  @Column
+  @Builder.Default
+  private Boolean isCompleted = false;
+
+  @Column
+  @CreationTimestamp
+  private LocalDateTime createdAt;
 }
