@@ -16,14 +16,11 @@ import com.example.cp_main_be.domain.realquiz.repository.RealQuizRepostitory;
 import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
 import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,7 +99,8 @@ public class RealQuizService {
 
     LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
     LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
-    UserQuiz userQuiz = userQuizRepository.findAllTodayUserQuizByUser(user,startOfDay,endOfDay).get(0);
+    UserQuiz userQuiz =
+        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).get(0);
 
     // 퀴즈가 할당되지 않은 경우
     if (userQuiz == null) {
@@ -136,7 +134,10 @@ public class RealQuizService {
             .findById(quizId)
             .orElseThrow(() -> new QuizNotFoundException("퀴즈를 찾을 수 없습니다."));
 
-    UserQuiz userQuiz = userQuizRepository.findByUser(user).orElseThrow(()->new RuntimeException("할당 된 퀴즈가 없습니다."));
+    UserQuiz userQuiz =
+        userQuizRepository
+            .findByUser(user)
+            .orElseThrow(() -> new RuntimeException("할당 된 퀴즈가 없습니다."));
     userQuiz.setIsCompleted(true);
 
     return RealQuizAnswerResponseDTO.builder()
