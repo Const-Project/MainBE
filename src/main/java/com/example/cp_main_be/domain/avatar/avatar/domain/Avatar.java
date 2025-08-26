@@ -27,4 +27,7 @@ public class Avatar {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "master_id", nullable = false)
   private AvatarMaster avatarMaster;
+
+  @Column(name = "image_url")
+  private String imageUrl;
 }

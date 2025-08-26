@@ -24,21 +24,37 @@ public class AvatarService {
   private final AvatarMasterRepository avatarMasterRepository; // [추가] AvatarMaster 조회 위해 주입
   private final NotificationService notificationService;
 
+  private static final Long AI_AVATAR_MASTER_ID = 9999L;
+
   // [수정] 새로운 아바타 생성 로직 구현
-  public void createAvatar(Long userId, Long masterId, String nickname) {
+  public void createAvatar(Long userId, String nickname, String imageUrl, Long masterId) {
     User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
-    AvatarMaster master =
-        avatarMasterRepository
-            .findById(masterId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+    AvatarMaster master;
+    if (masterId != null) {
+      // 1. 기존 목록에서 선택한 경우: 전달받은 masterId로 AvatarMaster를 찾습니다.
+      master =
+          avatarMasterRepository
+              .findById(masterId)
+              .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND)); // 예외 유형 구체화
+    } else {
+      // 2. AI로 생성한 경우: 약속된 AI_AVATAR_MASTER_ID로 AvatarMaster를 찾습니다.
+      master =
+          avatarMasterRepository
+              .findById(AI_AVATAR_MASTER_ID)
+              .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+    }
 
-    // TODO: 사용자가 이미 해당 종류의 아바타를 가지고 있는지 확인하는 로직 추가 가능
-
-    Avatar newAvatar = Avatar.builder().user(user).avatarMaster(master).nickname(nickname).build();
+    Avatar newAvatar =
+        Avatar.builder()
+            .user(user)
+            .nickname(nickname)
+            .imageUrl(imageUrl)
+            .avatarMaster(master) // 찾은 master를 설정합니다.
+            .build();
 
     avatarRepository.save(newAvatar);
   }

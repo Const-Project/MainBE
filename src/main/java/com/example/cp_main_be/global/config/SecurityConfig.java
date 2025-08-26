@@ -44,6 +44,8 @@ public class SecurityConfig {
                         "/h2-console/**",
                         "/error")
                     .permitAll() // 회원가입 및 토큰 재발급은 인증 없이 허용
+                    .requestMatchers("/api/v1/admin/**")
+                    .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated() // 그 외 모든 요청은 인증 필요
             )

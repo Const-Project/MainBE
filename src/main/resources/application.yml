@@ -28,6 +28,7 @@ cloudflare:
     bucket: ${R2_BUCKET}
     access-key: ${R2_ACCESS_KEY}
     secret-key: ${R2_SECRET_KEY}
+    account-id: ${R2_ACCOUNT_ID}
 
 fastapi:
   server:

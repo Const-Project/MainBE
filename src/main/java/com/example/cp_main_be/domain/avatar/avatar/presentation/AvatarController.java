@@ -2,13 +2,11 @@ package com.example.cp_main_be.domain.avatar.avatar.presentation;
 
 import com.example.cp_main_be.domain.avatar.avatar.domain.AvatarMaster;
 import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarMasterRepository;
-import com.example.cp_main_be.domain.avatar.avatar.dto.request.CreateAvatarRequest;
 import com.example.cp_main_be.domain.avatar.avatar.dto.response.AvatarMasterResponse;
 import com.example.cp_main_be.domain.avatar.avatar.service.AvatarService;
 import com.example.cp_main_be.domain.avatar.image.service.ImageProcessingService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.global.common.ApiResponse;
-import com.example.cp_main_be.global.common.CustomApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -39,32 +37,20 @@ public class AvatarController {
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 
-  public record FallbackImageResponse(String imageUrl) {}
+  // [수정] 최종 아바타 등록을 위한 통합 DTO
+  // AI 생성 시 masterId는 null, 기존 선택 시 masterId에 해당 ID를 담아 요청
+  public record CreateAvatarFinalRequest(String nickname, String imageUrl, Long masterId) {}
 
-  @Operation(summary = "내 아바타 생성")
-  @PostMapping
-  public ResponseEntity<ApiResponse<?>> createMyAvatar(
-      @AuthenticationPrincipal User user, @RequestBody CreateAvatarRequest request) {
-    try {
-      // 2. [성공 로직] 기존과 동일하게 서비스 호출
-      avatarService.createAvatar(user.getId(), request.getMasterId(), request.getNickname());
+  @Operation(summary = "아바타 최종 등록", description = "AI로 생성했거나 기존 목록에서 선택한 아바타를 최종 등록합니다.")
+  @PostMapping // [수정] 엔드포인트를 /api/v1/avatars 로 단순화
+  public ResponseEntity<ApiResponse<Void>> createAvatar(
+      @AuthenticationPrincipal User user, @RequestBody CreateAvatarFinalRequest request) {
 
-      // 성공 시, 데이터가 없는 성공 응답 반환
-      return ResponseEntity.ok(ApiResponse.success(null));
+    // [수정] 통합된 서비스 메서드 호출
+    avatarService.createAvatar(
+        user.getId(), request.nickname(), request.imageUrl(), request.masterId());
 
-    } catch (CustomApiException e) {
-      // 3. [실패 로직] 예외를 catch하여 폴백 처리
-      log.warn("아바타 생성 실패. 기본 이미지 URL을 반환합니다. 원인: {}", e.getMessage());
-
-      // ImageProcessingService에서 랜덤 URL 가져오기
-      String fallbackImageUrl = imageProcessingService.getDefaultImageUrl();
-
-      // 가져온 URL을 응답 DTO에 담기
-      FallbackImageResponse responseDto = new FallbackImageResponse(fallbackImageUrl);
-
-      // DTO를 ApiResponse로 감싸서 성공 응답으로 반환 (HTTP 요청 자체는 성공했으므로)
-      return ResponseEntity.ok(ApiResponse.success(responseDto));
-    }
+    return ResponseEntity.ok(ApiResponse.success(null));
   }
 
   @Operation(summary = "꽃가루 주기", description = "남의 아바타에게 꽃가루를 줍니다")
