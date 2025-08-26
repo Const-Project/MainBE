@@ -32,6 +32,7 @@ public class AvatarController {
   public ResponseEntity<ApiResponse<List<AvatarMasterResponse>>> getSelectableAvatarMasters() {
     // AvatarMaster 목록을 조회
     List<AvatarMaster> masters = avatarMasterRepository.findAll();
+    masters.removeIf(master -> master.getId() == 9999);
     // DTO로 변환하여 반환
     List<AvatarMasterResponse> response = masters.stream().map(AvatarMasterResponse::from).toList();
     return ResponseEntity.ok(ApiResponse.success(response));

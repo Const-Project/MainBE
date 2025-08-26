@@ -38,7 +38,7 @@ public class AvatarService {
       // 1. 기존 목록에서 선택한 경우: 전달받은 masterId로 AvatarMaster를 찾습니다.
       master =
           avatarMasterRepository
-              .findById(masterId)
+              .findById(masterId + 2)
               .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND)); // 예외 유형 구체화
     } else {
       // 2. AI로 생성한 경우: 약속된 AI_AVATAR_MASTER_ID로 AvatarMaster를 찾습니다.
