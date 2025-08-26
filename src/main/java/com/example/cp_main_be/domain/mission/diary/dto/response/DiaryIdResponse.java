@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.social.diary.dto.response;
+package com.example.cp_main_be.domain.mission.diary.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

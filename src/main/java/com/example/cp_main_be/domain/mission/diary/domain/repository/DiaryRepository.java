@@ -1,7 +1,7 @@
-package com.example.cp_main_be.domain.social.diary.domain.repository;
+package com.example.cp_main_be.domain.mission.diary.domain.repository;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
