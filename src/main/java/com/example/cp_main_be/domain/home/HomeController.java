@@ -27,4 +27,10 @@ public class HomeController {
     HomeResponseDto response = homeService.getHomeScreenData(user.getId());
     return ResponseEntity.ok(ApiResponse.success(response));
   }
+
+  @GetMapping("/panel")
+  public ApiResponse<PannelResponseDTO> getPannelData(@AuthenticationPrincipal User user) {
+    PannelResponseDTO responseDTO = homeService.getPannelData(user);
+    return ApiResponse.success(responseDTO);
+  }
 }
