@@ -43,7 +43,8 @@ public class SecurityConfig {
                         "/swagger-resources/**",
                         "/h2-console/**",
                         "/error",
-                            "/api/v1/realQuiz/*")
+                            "/api/v1/realQuiz/**",
+                            "/api/v1/realQuiz")
                     .permitAll() // 회원가입 및 토큰 재발급은 인증 없이 허용
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")
