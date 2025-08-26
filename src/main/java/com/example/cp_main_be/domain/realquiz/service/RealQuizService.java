@@ -17,6 +17,7 @@ import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
 import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
+import java.util.Random;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class RealQuizService {
     // 퀴즈 생성
     RealQuiz realQuiz =
         RealQuiz.builder()
+            .isCompleted(false)
             .quizQuestion(requestDTO.getQuizQuestion())
             .quizType(requestDTO.getQuizType())
             .answerDescription(requestDTO.getAnswerDescription())
@@ -60,6 +62,7 @@ public class RealQuizService {
     List<RealQuizResponseDTO.RealQuizOptionResponseDTO> result =
         transformToRealQuizOptionResponseDTO(realQuizOptionList);
     return RealQuizResponseDTO.builder()
+        .isCompleted(realQuiz.getIsCompleted())
         .quizId(realQuiz.getId())
         .quizQuestion(realQuiz.getQuizQuestion())
         .quizType(realQuiz.getQuizType())
@@ -100,7 +103,9 @@ public class RealQuizService {
     if (userQuiz == null) {
       List<RealQuiz> realQuizList = realQuizRepostitory.findAllByQuizType(quizType);
       if (realQuizList == null) throw new QuizNotFoundException("불러올 퀴즈가 존재하지 않습니다");
-      RealQuiz realQuiz = realQuizList.get(0);
+      Random random = new Random();
+      int rand = random.nextInt(realQuizList.size());
+      RealQuiz realQuiz = realQuizList.get(rand);
 
       // 할당한다.
       userQuiz = UserQuiz.builder().realQuiz(realQuiz).user(user).build();
@@ -128,13 +133,16 @@ public class RealQuizService {
 
     List<RealQuizOption> realQuizOptionList = realQuizOptionRepository.findAllByRealQuiz(realQuiz);
 
+    realQuiz.setIsCompleted(true);
+
     return RealQuizAnswerResponseDTO.builder()
         .answerDescription(realQuiz.getAnswerDescription())
         .selectedOptionNumber(requestDTO.getSelectedOptionOrder())
         .isCorrect(realQuiz.getAnswerNumber().equals(requestDTO.getSelectedOptionOrder()))
+        .isCompleted(true)
+        .answerNumber(realQuiz.getAnswerNumber())
         .quizType(realQuiz.getQuizType())
         .quizQuestion(realQuiz.getQuizQuestion())
-        .quizOptions(realQuizOptionList)
         .build();
   }
 
@@ -150,6 +158,7 @@ public class RealQuizService {
         .quizQuestion(realQuiz.getQuizQuestion())
         .answerDescription(realQuiz.getAnswerDescription())
         .quizOptions(result)
+        .isCompleted(realQuiz.getIsCompleted())
         .build();
   }
 

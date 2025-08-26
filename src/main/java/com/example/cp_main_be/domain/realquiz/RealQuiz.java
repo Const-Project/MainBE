@@ -2,7 +2,10 @@ package com.example.cp_main_be.domain.realquiz;
 
 import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 
 @Entity
 @Getter
@@ -29,4 +32,9 @@ public class RealQuiz {
 
   @Column(name = "reward_point")
   private Long rewardPoints;
+
+  @Column private Boolean isCompleted;
+
+  @Column @CreationTimestamp private LocalDateTime createdAt;
+
 }
