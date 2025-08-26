@@ -18,16 +18,19 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class GardenService {
 
-  private static final int MAX_GARDEN_COUNT = 4;
+  private static final int MAX_GARDEN_COUNT = 3;
   private static final int WATERING_POINTS = 2;
   private static final int SUNLIGHT_POINTS = 3;
   private static final int MAX_FRIEND_WATERING_PER_DAY = 3;
@@ -50,57 +53,81 @@ public class GardenService {
 
   @Transactional
   public void waterGarden(Long actorId, Long gardenId) {
+    // N+1 문제를 방지하기 위해 Garden과 User를 함께 조회하는 것을 권장합니다.
+    // 예: gardenRepository.findByIdWithUser(gardenId)
     Garden garden =
         gardenRepository
             .findById(gardenId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.GARDEN_NOT_FOUND));
 
-    User owner = garden.getUser(); // 정원 주인
+    User owner = garden.getUser();
 
-    // Case 1: 자신의 정원에 물을 주는 경우
     if (owner.getId().equals(actorId)) {
-      // 8시간 쿨타임 체크
-      if (garden.getLastWateredByOwnerAt() != null
-          && garden.getLastWateredByOwnerAt().plusHours(8).isAfter(LocalDateTime.now())) {
-        throw new IllegalStateException("아직 물을 줄 수 없습니다. 8시간이 지나야 가능합니다.");
-      }
-
-      garden.increaseWaterCount();
-      userService.addExperience(actorId, WATERING_POINTS);
-      garden.recordOwnerWateringTime(); // 주인이 물 준 시간 기록
+      waterOwnGarden(actorId, garden);
+    } else {
+      waterFriendGarden(actorId, garden);
     }
-    // Case 2: 남의 정원에 물을 주는 경우
-    else {
-      User actor =
-          userRepository
-              .findById(actorId)
-              .orElseThrow(() -> new IllegalArgumentException("물을 주는 사용자를 찾을 수 없습니다."));
+  }
 
-      LocalDateTime startOfWateringDay = getStartOfCurrentWateringDay();
+  /** 자신의 정원에 물을 주는 로직을 처리합니다. */
+  private void waterOwnGarden(Long ownerId, Garden garden) {
+    // 8시간 쿨타임 체크
+    if (garden.getLastWateredByOwnerAt() != null
+        && garden.getLastWateredByOwnerAt().plusHours(8).isAfter(LocalDateTime.now())) {
+      throw new CustomApiException(ErrorCode.WATERING_COOL_DOWN);
+    }
 
-      // 1. 하루에 3회 제한 체크
-      int todayWateringCount =
-          friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(actor, startOfWateringDay);
-      if (todayWateringCount >= MAX_FRIEND_WATERING_PER_DAY) {
-        throw new IllegalStateException("오늘은 다른 사람의 정원에 더 이상 물을 줄 수 없습니다. (일일 3회 제한)");
-      }
+    garden.increaseWaterCount();
+    userService.addExperience(ownerId, WATERING_POINTS);
+    garden.recordOwnerWateringTime(); // 주인이 물 준 시간 기록
+  }
 
-      // 2. 같은 정원에 하루 한 번 제한 체크
-      boolean alreadyWatered =
-          friendWateringLogRepository.existsByWaterGiverAndWateredGardenAndWateredAtAfter(
-              actor, garden, startOfWateringDay);
-      if (alreadyWatered) {
-        throw new IllegalStateException("이 정원에는 오늘 이미 물을 주었습니다.");
-      }
+  /** 친구의 정원에 물을 주는 로직을 처리합니다. */
+  private void waterFriendGarden(Long actorId, Garden garden) {
+    User actor =
+        userRepository
+            .findById(actorId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
-      // 남한테 주는 경우에는 준 사람이 물 경험치를 받고 정원의 waterCount가 증가한다.
-      userService.addExperience(actorId, WATERING_POINTS);
-      garden.increaseWaterCount();
+    // 낮 12시 이후 -> 그날의 12시 날짜 반환, 이전 -> 전날의 12시 날짜 반환
+    LocalDateTime startOfWateringDay = getStartOfCurrentWateringDay();
 
-      // 물주기 활동 기록
-      FriendWateringLog log =
-          FriendWateringLog.builder().waterGiver(actor).wateredGarden(garden).build();
-      friendWateringLogRepository.save(log);
+    // 1. 하루에 3회 제한 체크
+    checkFriendWateringLimit(actor, startOfWateringDay);
+
+    // 2. 같은 정원에 하루 한 번 제한 체크
+    checkAlreadyWateredToday(actor, garden, startOfWateringDay);
+
+    // 남한테 주는 경우에는 준 사람이 물 경험치를 받고 정원의 waterCount가 증가한다.
+    userService.addExperience(actorId, WATERING_POINTS);
+    garden.increaseWaterCount();
+
+    // 물주기 활동 기록
+    FriendWateringLog log =
+        FriendWateringLog.builder()
+            .waterGiver(actor)
+            .wateredGarden(garden) // wateredAt은 @CreatedDate가 자동으로 설정합니다.
+            .build();
+    friendWateringLogRepository.save(log);
+  }
+
+  // 물주기 남은 횟수 확인
+  private void checkFriendWateringLimit(User actor, LocalDateTime startOfWateringDay) {
+    int todayWateringCount =
+        friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(actor, startOfWateringDay);
+    if (todayWateringCount >= MAX_FRIEND_WATERING_PER_DAY) {
+      throw new CustomApiException(ErrorCode.FRIEND_WATERING_LIMIT_EXCEEDED);
+    }
+  }
+
+  // 당일에 해당 정원에 이미 물을 주었는지 확인
+  private void checkAlreadyWateredToday(
+      User actor, Garden garden, LocalDateTime startOfWateringDay) {
+    boolean alreadyWatered =
+        friendWateringLogRepository.existsByWaterGiverAndWateredGardenAndWateredAtAfter(
+            actor, garden, startOfWateringDay);
+    if (alreadyWatered) {
+      throw new CustomApiException(ErrorCode.ALREADY_WATERED_GARDEN);
     }
   }
 
@@ -141,7 +168,7 @@ public class GardenService {
     if (currentGardens >= MAX_GARDEN_COUNT) {
       // 이미 최대치이므로 조용히 종료하거나 예외를 던질 수 있습니다.
       // 여기서는 추가 생성을 막고 그냥 리턴합니다.
-      return;
+      throw new CustomApiException(ErrorCode.GARDEN_SLOT_MAXED_OUT);
     }
 
     // [기존 레벨 체크 로직 삭제!]
@@ -210,5 +237,17 @@ public class GardenService {
     } else {
       return todaySixAM;
     }
+  }
+
+  /** 오래된 친구 물주기 로그를 주기적으로 삭제하는 스케줄링 작업입니다. cron = "0 0 4 * * *" : 매일 새벽 4시에 실행됩니다. */
+  @Scheduled(cron = "0 0 4 * * *")
+  @Transactional // 쓰기 작업이므로 클래스 레벨의 readOnly 설정을 오버라이드합니다.
+  public void cleanupOldWateringLogs() {
+    // 7일 이상된 기록을 삭제하도록 설정. 이 값은 application.yml에서 관리하는 것이 더 좋습니다.
+    final int RETENTION_DAYS = 7;
+    LocalDateTime cutoffDate = LocalDateTime.now().minusDays(RETENTION_DAYS);
+    log.info("Starting cleanup of friend watering logs older than {} days...", RETENTION_DAYS);
+    int deletedCount = friendWateringLogRepository.deleteByWateredAtBefore(cutoffDate);
+    log.info("Finished cleanup. Deleted {} old friend watering logs.", deletedCount);
   }
 }
