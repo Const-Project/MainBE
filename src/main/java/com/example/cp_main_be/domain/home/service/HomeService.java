@@ -159,7 +159,7 @@ public class HomeService {
         .collect(Collectors.toList());
   }
 
-  public PannelResponseDTO getPannelData(User user){
+  public PannelResponseDTO getPannelData(User user) {
     boolean isDiaryCompleted = false;
     boolean isQuizCompleted = false;
     boolean isCheckingCompleted = false;
@@ -167,17 +167,18 @@ public class HomeService {
     LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
 
     Diary diary = diaryService.findMyDiaries(user).get(0);
-    if(diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())){
-        isDiaryCompleted = true;
+    if (diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())) {
+      isDiaryCompleted = true;
     }
-    UserQuiz userQuiz = userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).get(0);
-    if(userQuiz != null && userQuiz.getIsCompleted()){ // 오늘의 퀴즈 성공시
-        isQuizCompleted = true;
+    UserQuiz userQuiz =
+        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).get(0);
+    if (userQuiz != null && userQuiz.getIsCompleted()) { // 오늘의 퀴즈 성공시
+      isQuizCompleted = true;
     }
     return PannelResponseDTO.builder()
-            .isDairyCompleted(isDiaryCompleted)
-            .isQuizCompleted(isQuizCompleted)
-            .isCheckingCompleted(isCheckingCompleted)
-            .build();
+        .isDairyCompleted(isDiaryCompleted)
+        .isQuizCompleted(isQuizCompleted)
+        .isCheckingCompleted(isCheckingCompleted)
+        .build();
   }
 }
