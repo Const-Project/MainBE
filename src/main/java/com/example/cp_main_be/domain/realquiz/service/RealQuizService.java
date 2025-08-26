@@ -57,9 +57,11 @@ public class RealQuizService {
 
         List<RealQuizResponseDTO.RealQuizOptionResponseDTO> result = transformToRealQuizOptionResponseDTO(realQuizOptionList);
         return RealQuizResponseDTO.builder()
+                .quizId(realQuiz.getId())
                 .quizQuestion(realQuiz.getQuizQuestion())
                 .quizType(realQuiz.getQuizType())
                 .answerNumber(realQuiz.getAnswerNumber())
+                .answerDescription(realQuiz.getAnswerDescription())
                 .quizOptions(result)
                 .build();
     }
@@ -134,6 +136,7 @@ public class RealQuizService {
         List<RealQuizOption> quizOptions = realQuizOptionRepository.findAllByRealQuiz(realQuiz);
         List<RealQuizResponseDTO.RealQuizOptionResponseDTO> result = transformToRealQuizOptionResponseDTO(quizOptions);
         return RealQuizResponseDTO.builder()
+                .quizId(realQuiz.getId())
                 .quizType(realQuiz.getQuizType())
                 .answerNumber(realQuiz.getAnswerNumber())
                 .quizQuestion(realQuiz.getQuizQuestion())
