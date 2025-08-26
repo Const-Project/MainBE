@@ -7,7 +7,6 @@ import com.example.cp_main_be.domain.avatar.avatar.service.AvatarService;
 import com.example.cp_main_be.domain.avatar.image.service.ImageProcessingService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.global.common.ApiResponse;
-import com.example.cp_main_be.global.common.CustomApiException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
