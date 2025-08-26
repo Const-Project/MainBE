@@ -4,12 +4,18 @@ import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.avatar.avatar.domain.AvatarMaster;
 import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarMasterRepository;
 import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
+import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTree;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +31,8 @@ public class AvatarService {
   private final NotificationService notificationService;
 
   private static final Long AI_AVATAR_MASTER_ID = 9999L;
+  private final WishTreeRepository wishTreeRepository;
+  private final GardenRepository gardenRepository;
 
   // [수정] 새로운 아바타 생성 로직 구현
   public void createAvatar(Long userId, String nickname, String imageUrl, Long masterId) {
@@ -57,6 +65,23 @@ public class AvatarService {
             .build();
 
     avatarRepository.save(newAvatar);
+
+    WishTree wishTree =
+        wishTreeRepository
+            .findByUserId(userId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+
+    WishTreeStage stage = wishTree.getStage();
+    int maxGardens = stage.getMaxGardens();
+
+    List<Garden> userGardens = user.getGardens();
+    if (userGardens.size() < maxGardens) {
+      Garden newGarden =
+          Garden.builder().user(user).slotNumber(userGardens.size() + 1).avatar(newAvatar).build();
+      gardenRepository.save(newGarden);
+    } else {
+      throw new CustomApiException(ErrorCode.MAX_GARDENS_REACHED);
+    }
   }
 
   @Transactional(readOnly = true)
