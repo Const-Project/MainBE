@@ -25,12 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AvatarService {
 
+  private static final Long AI_AVATAR_MASTER_ID = 9999L;
   private final AvatarRepository avatarRepository;
   private final UserRepository userRepository;
   private final AvatarMasterRepository avatarMasterRepository; // [추가] AvatarMaster 조회 위해 주입
   private final NotificationService notificationService;
-
-  private static final Long AI_AVATAR_MASTER_ID = 9999L;
   private final WishTreeRepository wishTreeRepository;
   private final GardenRepository gardenRepository;
 
@@ -39,21 +38,27 @@ public class AvatarService {
     User user =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
     AvatarMaster master;
     if (masterId != null) {
       // 1. 기존 목록에서 선택한 경우: 전달받은 masterId로 AvatarMaster를 찾습니다.
+      // TODO: 'masterId + 2'와 같은 매직 넘버 로직은 위험합니다.
+      // 프론트엔드에서 전달하는 ID와 DB의 ID가 일치하도록 데이터 정합성을 맞추거나,
+      // 이 로직에 대한 명확한 주석과 문서화가 필요합니다.
       master =
           avatarMasterRepository
               .findById(masterId + 2)
-              .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND)); // 예외 유형 구체화
+              .orElseThrow(() -> new CustomApiException(ErrorCode.AVATAR_MASTER_NOT_FOUND));
     } else {
       // 2. AI로 생성한 경우: 약속된 AI_AVATAR_MASTER_ID로 AvatarMaster를 찾습니다.
       master =
           avatarMasterRepository
               .findById(AI_AVATAR_MASTER_ID)
-              .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+              .orElseThrow(
+                  () ->
+                      new CustomApiException(
+                          ErrorCode.AVATAR_MASTER_NOT_FOUND, "AI 아바타 원본을 찾을 수 없습니다."));
     }
 
     Avatar newAvatar =
@@ -69,7 +74,8 @@ public class AvatarService {
     WishTree wishTree =
         wishTreeRepository
             .findByUserId(userId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.NOT_FOUND, "사용자의 소원나무를 찾을 수 없습니다."));
 
     WishTreeStage stage = wishTree.getStage();
     int maxGardens = stage.getMaxGardens();
@@ -80,7 +86,8 @@ public class AvatarService {
           Garden.builder().user(user).slotNumber(userGardens.size() + 1).avatar(newAvatar).build();
       gardenRepository.save(newGarden);
     } else {
-      throw new CustomApiException(ErrorCode.MAX_GARDENS_REACHED);
+      // 이미 존재하는 'GARDEN_SLOT_MAXED_OUT' 에러 코드를 재사용하여 일관성을 유지합니다.
+      throw new CustomApiException(ErrorCode.GARDEN_SLOT_MAXED_OUT);
     }
   }
 
@@ -88,14 +95,14 @@ public class AvatarService {
   public Avatar findAvatarById(Long avatarId) {
     return avatarRepository
         .findById(avatarId)
-        .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+        .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND, "해당 아바타를 찾을 수 없습니다."));
   }
 
   public void givePollen(Long senderId, Long avatarId) {
     User sender =
         userRepository
             .findById(senderId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
     Avatar avatar = findAvatarById(avatarId);
     User receiver = avatar.getUser();

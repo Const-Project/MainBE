@@ -7,17 +7,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
-  // ... 다른 에러 코드들 ...
-  AI_AVATAR_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "E-50002", "아바타 생성에 실패했습니다."),
-  INVALID_FILE(HttpStatus.BAD_REQUEST, "E-50003", "적절하지 않은 파일 내용/포맷입니다."),
-  INVALID_TOKEN(HttpStatus.BAD_REQUEST, "E-50004", "부적절한 토큰입니다."),
-  FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "E-50005", "파일 크기 제한을 넘었습니다."),
-  NOT_FOUND(HttpStatus.NOT_FOUND, "E-50006", "Resource를 찾을 수 없습니다."),
-  UPLOAD_FAILED(HttpStatus.EXPECTATION_FAILED, "E-50007", "파일 업로드에 실패했습니다."),
-  MAX_GARDENS_REACHED(HttpStatus.BAD_REQUEST, "E-50008", "현재 레벨의 최대 정원수에 도달했습니다.");
   // === 4xx Client Errors ===
   // 400 Bad Request
-  INVALID_TOKEN(HttpStatus.BAD_REQUEST, "E40001", "부적절한 토큰입니다."),
+  INVALID_TOKEN(HttpStatus.BAD_REQUEST, "E40001", "유효하지 않은 토큰입니다."),
   WATERING_COOL_DOWN(HttpStatus.BAD_REQUEST, "E40002", "아직 물을 줄 수 없습니다. 8시간이 지나야 가능합니다."),
   FRIEND_WATERING_LIMIT_EXCEEDED(
       HttpStatus.BAD_REQUEST, "E40003", "오늘은 다른 사람의 정원에 더 이상 물을 줄 수 없습니다."),
@@ -41,6 +33,7 @@ public enum ErrorCode {
   MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "E40405", "해당 미션을 찾을 수 없습니다."),
   QUIZ_NOT_FOUND(HttpStatus.NOT_FOUND, "E40406", "해당 퀴즈를 찾을 수 없습니다."),
   REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "E40407", "해당 신고를 찾을 수 없습니다."),
+  AVATAR_MASTER_NOT_FOUND(HttpStatus.NOT_FOUND, "E40408", "해당 아바타 원본을 찾을 수 없습니다."),
 
   // 417 Expectation Failed
   UPLOAD_FAILED(HttpStatus.EXPECTATION_FAILED, "E41701", "파일 업로드에 실패했습니다."),
