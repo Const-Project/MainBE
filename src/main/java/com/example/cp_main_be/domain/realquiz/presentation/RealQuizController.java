@@ -42,14 +42,14 @@ public class RealQuizController {
         return ApiResponse.success(responseDTO);
     }
 
-    @GetMapping("/list")
-    @Operation(summary = "자신의 퀴즈 목록 조회 API")
+    @GetMapping
+    @Operation(summary = "자신의 퀴즈 조회 API")
     public ApiResponse<RealQuizResponseDTO> getRealQuiz(@AuthenticationPrincipal User user, @RequestParam QuizType quizType) {
         RealQuizResponseDTO responseDTO = realQuizService.getRealQuiz(user,quizType);
         return ApiResponse.success(responseDTO);
     }
 
-    @GetMapping("/{quizId}/answer")
+    @PostMapping("/{quizId}/answer")
     @Operation(summary = "퀴즈 정답 제출 API")
     public ApiResponse<RealQuizAnswerResponseDTO> getRealQuizAnswer(@PathVariable Long quizId, @RequestBody RealQuizAnswerRequestDTO requestDTO)
     {

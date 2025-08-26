@@ -4,6 +4,9 @@ import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMi
 import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -31,4 +34,10 @@ public class RealQuiz {
     @Column(name = "reward_point")
     private Long rewardPoints;
 
+    @Column
+    private Boolean isCompleted;
+
+    @Column
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 }
