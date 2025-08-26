@@ -42,7 +42,8 @@ public class SecurityConfig {
                         "/v3/api-docs/**", // OpenAPI 명세서
                         "/swagger-resources/**",
                         "/h2-console/**",
-                        "/error")
+                        "/error",
+                            "/api/v1/realQuiz/*")
                     .permitAll() // 회원가입 및 토큰 재발급은 인증 없이 허용
                     .requestMatchers("/api/v1/admin/**")
                     .hasRole("ADMIN")
