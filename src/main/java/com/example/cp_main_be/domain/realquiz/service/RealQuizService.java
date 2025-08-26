@@ -16,6 +16,8 @@ import com.example.cp_main_be.domain.realquiz.repository.RealQuizRepostitory;
 import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
 import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,6 @@ public class RealQuizService {
     // 퀴즈 생성
     RealQuiz realQuiz =
         RealQuiz.builder()
-            .isCompleted(false)
             .quizQuestion(requestDTO.getQuizQuestion())
             .quizType(requestDTO.getQuizType())
             .answerDescription(requestDTO.getAnswerDescription())
@@ -62,7 +63,6 @@ public class RealQuizService {
     List<RealQuizResponseDTO.RealQuizOptionResponseDTO> result =
         transformToRealQuizOptionResponseDTO(realQuizOptionList);
     return RealQuizResponseDTO.builder()
-        .isCompleted(realQuiz.getIsCompleted())
         .quizId(realQuiz.getId())
         .quizQuestion(realQuiz.getQuizQuestion())
         .quizType(realQuiz.getQuizType())
@@ -83,7 +83,7 @@ public class RealQuizService {
             .findById(realQuizId)
             .orElseThrow(() -> new RuntimeException("퀴즈를 찾을 수 없습니다"));
 
-    UserQuiz userQuiz = UserQuiz.builder().realQuiz(realQuiz).user(user).build();
+    UserQuiz userQuiz = UserQuiz.builder().realQuiz(realQuiz).user(user).isCompleted(false).build();
     UserQuiz savedUserQuiz = userQuizRepository.save(userQuiz);
 
     return UserQuizCreateResponseDTO.builder()
@@ -97,7 +97,10 @@ public class RealQuizService {
 
   public RealQuizResponseDTO getRealQuiz(User user, QuizType quizType) {
 
-    UserQuiz userQuiz = userQuizRepository.findByUser(user).orElse(null);
+    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+    LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
+    UserQuiz userQuiz =
+        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).get(0);
 
     // 퀴즈가 할당되지 않은 경우
     if (userQuiz == null) {
@@ -108,7 +111,7 @@ public class RealQuizService {
       RealQuiz realQuiz = realQuizList.get(rand);
 
       // 할당한다.
-      userQuiz = UserQuiz.builder().realQuiz(realQuiz).user(user).build();
+      userQuiz = UserQuiz.builder().realQuiz(realQuiz).user(user).isCompleted(false).build();
       userQuizRepository.save(userQuiz);
 
       return transformToRealQuizResponseDTO(realQuiz);
@@ -125,15 +128,17 @@ public class RealQuizService {
   }
 
   public RealQuizAnswerResponseDTO getRealQuizAnswer(
-      Long quizId, RealQuizAnswerRequestDTO requestDTO) {
+      Long quizId, RealQuizAnswerRequestDTO requestDTO, User user) {
     RealQuiz realQuiz =
         realQuizRepostitory
             .findById(quizId)
             .orElseThrow(() -> new QuizNotFoundException("퀴즈를 찾을 수 없습니다."));
 
-    List<RealQuizOption> realQuizOptionList = realQuizOptionRepository.findAllByRealQuiz(realQuiz);
-
-    realQuiz.setIsCompleted(true);
+    UserQuiz userQuiz =
+        userQuizRepository
+            .findByUser(user)
+            .orElseThrow(() -> new RuntimeException("할당 된 퀴즈가 없습니다."));
+    userQuiz.setIsCompleted(true);
 
     return RealQuizAnswerResponseDTO.builder()
         .answerDescription(realQuiz.getAnswerDescription())
@@ -158,7 +163,6 @@ public class RealQuizService {
         .quizQuestion(realQuiz.getQuizQuestion())
         .answerDescription(realQuiz.getAnswerDescription())
         .quizOptions(result)
-        .isCompleted(realQuiz.getIsCompleted())
         .build();
   }
 

@@ -52,8 +52,11 @@ public class RealQuizController {
   @PostMapping("/{quizId}/answer")
   @Operation(summary = "퀴즈 정답 제출 API")
   public ApiResponse<RealQuizAnswerResponseDTO> getRealQuizAnswer(
-      @PathVariable Long quizId, @RequestBody RealQuizAnswerRequestDTO requestDTO) {
-    RealQuizAnswerResponseDTO responseDTO = realQuizService.getRealQuizAnswer(quizId, requestDTO);
+      @PathVariable Long quizId,
+      @RequestBody RealQuizAnswerRequestDTO requestDTO,
+      @AuthenticationPrincipal User user) {
+    RealQuizAnswerResponseDTO responseDTO =
+        realQuizService.getRealQuizAnswer(quizId, requestDTO, user);
     return ApiResponse.success(responseDTO);
   }
 }

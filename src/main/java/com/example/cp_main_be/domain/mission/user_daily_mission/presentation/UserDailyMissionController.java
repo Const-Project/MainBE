@@ -2,10 +2,6 @@ package com.example.cp_main_be.domain.mission.user_daily_mission.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
-import com.example.cp_main_be.domain.mission.quiz.dto.CompletedQuizResponseDTO;
-import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
-import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
-import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
 import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionPanelResponse;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
@@ -54,23 +50,24 @@ public class UserDailyMissionController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  @GetMapping("/quiz/{userDailyMissionId}")
-  @Operation(summary = "퀴즈 문제 조회 API")
-  public ResponseEntity<ApiResponse<QuizResponseDTO>> getQuiz(
-      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId) {
+  //
+  //  @GetMapping("/quiz/{userDailyMissionId}")
+  //  @Operation(summary = "퀴즈 문제 조회 API")
+  //  public ResponseEntity<ApiResponse<QuizResponseDTO>> getQuiz(
+  //      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId) {
+  //
+  //    QuizResponseDTO result = quizService.getQuiz(userDailyMissionId);
+  //    return ResponseEntity.ok(ApiResponse.success(result));
+  //  }
 
-    QuizResponseDTO result = quizService.getQuiz(userDailyMissionId);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
-
-  @GetMapping("/quiz/")
-  @Operation(summary = "퀴즈 타입에 맞는 퀴즈 문제 랜덤 조회 API")
-  public ResponseEntity<ApiResponse<QuizResponseDTO>> getQuizByQuizType(
-      @RequestParam QuizType quizType) {
-
-    QuizResponseDTO result = quizService.getQuizByType(quizType);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
+  //  @GetMapping("/quiz/")
+  //  @Operation(summary = "퀴즈 타입에 맞는 퀴즈 문제 랜덤 조회 API")
+  //  public ResponseEntity<ApiResponse<QuizResponseDTO>> getQuizByQuizType(
+  //      @RequestParam QuizType quizType) {
+  //
+  //    QuizResponseDTO result = quizService.getQuizByType(quizType);
+  //    return ResponseEntity.ok(ApiResponse.success(result));
+  //  }
 
   //  // 새로운 엔드포인트 - 완료된 퀴즈 결과 조회
   //  @GetMapping("/quiz/{userDailyMissionId}/result")
@@ -93,12 +90,12 @@ public class UserDailyMissionController {
     return ResponseEntity.ok(ApiResponse.success(imageUrl));
   }
 
-  @PostMapping("/quiz/{userDailyMissionId}/answer")
-  @Operation(summary = "퀴즈 답변 제출 API")
-  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> summitAnswerToQuiz(
-      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId,
-      @RequestBody QuizRequestDTO request) {
-    CompletedQuizResponseDTO result = quizService.summitQuizAnswer(request, userDailyMissionId);
-    return ResponseEntity.ok(ApiResponse.success(result));
-  }
+  //  @PostMapping("/quiz/{userDailyMissionId}/answer")
+  //  @Operation(summary = "퀴즈 답변 제출 API")
+  //  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> summitAnswerToQuiz(
+  //      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId,
+  //      @RequestBody QuizRequestDTO request) {
+  //    CompletedQuizResponseDTO result = quizService.summitQuizAnswer(request, userDailyMissionId);
+  //    return ResponseEntity.ok(ApiResponse.success(result));
+  //  }
 }
