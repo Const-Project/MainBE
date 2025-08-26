@@ -19,8 +19,13 @@ import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import com.example.cp_main_be.global.infra.S3Uploader;
+
+import java.time.LocalDateTime;
 import java.util.List;
+
+import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,7 +74,6 @@ public class AdminService {
             .map(
                 quizOptions ->
                     AdminResponseDTO.QuizOptionsResponseDTO.builder()
-                        .optionId(quizOptions.getId())
                         .optionText(quizOptions.getOptionText())
                         .optionOrder(quizOptions.getOptionOrder())
                         .build())
@@ -108,12 +112,12 @@ public class AdminService {
       AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
     DailyMissionMaster dailyMissionMaster =
         DailyMissionMaster.builder()
-            .title(requestDTO.getTitle())
-            .description(requestDTO.getDescription())
-            .content(requestDTO.getContent())
-            .missionType(requestDTO.getMissionType())
-            .rewardPoints(requestDTO.getRewardPoints())
-            .build();
+              .title(requestDTO.getTitle())
+              .description(requestDTO.getDescription())
+              .content(requestDTO.getContent())
+              .missionType(requestDTO.getMissionType())
+              .rewardPoints(requestDTO.getRewardPoints())
+              .build();
 
     return dailyMissionMastersRepository.save(dailyMissionMaster);
   }
