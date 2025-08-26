@@ -1,44 +1,41 @@
-package com.example.cp_main_be.global.config; // AwsConfig.java
+// AwsConfig.java 또는 R2Config.java
+package com.example.cp_main_be.global.config;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import java.net.URI;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
-public class AwsConfig {
+public class AwsConfig { // 파일 이름은 그대로 두셔도 됩니다.
 
-  // ✅ application.properties의 키 이름과 동일하게 변경
-  @Value("${cloudflare.r2.access-key}")
+  @Value("${r2.account-id}")
+  private String accountId;
+
+  @Value("${r2.access-key}")
   private String accessKey;
 
-  // ✅ application.properties의 키 이름과 동일하게 변경
-  @Value("${cloudflare.r2.secret-key}")
+  @Value("${r2.secret-key}")
   private String secretKey;
 
-  // ✅ application.properties의 키 이름과 동일하게 변경
-  @Value("${cloudflare.r2.endpoint}")
-  private String endpoint;
-
   @Bean
-  @Primary
-  public AmazonS3 amazonS3() {
-    AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+  public S3Client s3Client() {
+    // R2 접속을 위한 엔드포인트 URL 생성
+    String endpoint = String.format("https://%s.r2.cloudflarestorage.com", accountId);
 
-    // R2는 리전 개념이 약하므로 "auto"로 하드코딩하거나,
-    // properties에 cloudflare.r2.region 키를 추가한 뒤 @Value로 주입받아도 됩니다.
-    String region = "auto";
+    // R2 인증 정보 설정 (SDK v2 방식)
+    AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+    StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
 
-    return AmazonS3ClientBuilder.standard()
-        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region))
-        .withCredentials(new AWSStaticCredentialsProvider(credentials))
-        .withPathStyleAccessEnabled(true)
+    // S3 클라이언트 빌드 (SDK v2 방식)
+    return S3Client.builder()
+        .endpointOverride(URI.create(endpoint)) // R2 엔드포인트 지정
+        .region(Region.of("auto")) // R2는 리전이 없으므로 'auto'
+        .credentialsProvider(credentialsProvider)
         .build();
   }
 }

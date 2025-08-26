@@ -5,5 +5,6 @@ import lombok.Getter;
 @Getter
 public class CreateAvatarRequest {
   private Long masterId;
+  private String imageUrl;
   private String nickname;
 }

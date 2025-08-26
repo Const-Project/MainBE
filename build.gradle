@@ -41,6 +41,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-security' // Spring Security 추가
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9' // 버전을 삭제!
+	implementation 'software.amazon.awssdk:s3:2.25.43' // 최신 안정 버전 사용을 권장합니다.
 
 	implementation 'com.google.firebase:firebase-admin:9.2.0'
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.75' // amazonaws 사용
