@@ -42,4 +42,10 @@ public class DailyQuestionAnswer {
     this.answer = answer;
     this.answeredDate = answeredDate;
   }
+
+  public void setAnswer(Integer answer) {
+    if (answer == 1) this.answer = AnswerType.YES;
+    else if (answer == 2) this.answer = AnswerType.NEUTRAL;
+    else this.answer = AnswerType.NO;
+  }
 }

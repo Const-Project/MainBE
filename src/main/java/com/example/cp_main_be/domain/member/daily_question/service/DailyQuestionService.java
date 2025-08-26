@@ -36,4 +36,8 @@ public class DailyQuestionService {
     int questionIndex = (dayOfYear - 1) % QUESTIONS.size();
     return QUESTIONS.get(questionIndex);
   }
+
+  public String getQuestionById(Long id) {
+    return QUESTIONS.get(id.intValue());
+  }
 }
