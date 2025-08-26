@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RealQuizResponseDTO {
+    private Long quizId;
     private String quizQuestion;
     private QuizType quizType;
     private Integer answerNumber;
