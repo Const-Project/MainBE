@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.avatar.image.presentation;
 
+import com.example.cp_main_be.domain.avatar.image.AvatarGenerationResponse;
 import com.example.cp_main_be.domain.avatar.image.service.ImageProcessingService;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
@@ -21,7 +22,8 @@ public class ImageController {
 
   @Operation(summary = "사진 업로드, 아바타 생성", description = "업로드된 사진을 바탕으로 아바타를 png로 생성 후 반환합니다.")
   @PostMapping(value = "/register/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<byte[]> generateAvatar(@RequestParam("image") MultipartFile imageFile) {
+  public ResponseEntity<AvatarGenerationResponse> generateAvatar(
+      @RequestParam("image") MultipartFile imageFile) {
     // 파일 null 체크
     if (imageFile == null || imageFile.isEmpty()) {
       throw new CustomApiException(ErrorCode.INVALID_FILE);
@@ -39,9 +41,9 @@ public class ImageController {
     }
 
     // 성공 시 서비스가 byte[]를 반환. 실패 시 서비스가 예외를 던짐(아래 핸들러가 처리).
-    byte[] avatarImage = imageProcessingService.processImageWithAi(imageFile);
+    String avatarImageUrl = imageProcessingService.processImageWithAi(imageFile);
 
     // 성공 응답만 처리
-    return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(avatarImage);
+    return ResponseEntity.ok(new AvatarGenerationResponse(avatarImageUrl));
   }
 }
