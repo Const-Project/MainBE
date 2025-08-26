@@ -1,8 +1,8 @@
-package com.example.cp_main_be.domain.social.diary.domain;
+package com.example.cp_main_be.domain.mission.diary.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
-import com.example.cp_main_be.domain.social.diaryimage.domain.DiaryImage;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

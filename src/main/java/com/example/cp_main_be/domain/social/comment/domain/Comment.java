@@ -1,16 +1,12 @@
 package com.example.cp_main_be.domain.social.comment.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "comments")

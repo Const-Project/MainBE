@@ -1,12 +1,12 @@
-package com.example.cp_main_be.domain.social.diary.presentation;
+package com.example.cp_main_be.domain.mission.diary.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.social.diary.domain.Diary;
-import com.example.cp_main_be.domain.social.diary.dto.request.CreateDiaryRequest;
-import com.example.cp_main_be.domain.social.diary.dto.request.UpdateDiaryRequest;
-import com.example.cp_main_be.domain.social.diary.dto.response.DiaryInfoResponse;
-import com.example.cp_main_be.domain.social.diary.dto.response.DiaryResponse;
-import com.example.cp_main_be.domain.social.diary.service.DiaryService;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.diary.dto.request.CreateDiaryRequest;
+import com.example.cp_main_be.domain.mission.diary.dto.request.UpdateDiaryRequest;
+import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryInfoResponse;
+import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryResponse;
+import com.example.cp_main_be.domain.mission.diary.service.DiaryService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

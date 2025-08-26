@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.social.diaryimage.domain;
+package com.example.cp_main_be.domain.mission.diaryimage.domain;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
