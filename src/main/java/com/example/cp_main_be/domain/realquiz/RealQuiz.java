@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-
 @Entity
 @Getter
 @Setter
@@ -36,5 +35,4 @@ public class RealQuiz {
   @Column private Boolean isCompleted;
 
   @Column @CreationTimestamp private LocalDateTime createdAt;
-
 }

@@ -19,5 +19,4 @@ public class RealQuizAnswerResponseDTO {
   private String answerDescription;
   private Boolean isCorrect; // 사용자 답안 정답 여부
   private Boolean isCompleted;
-
 }
