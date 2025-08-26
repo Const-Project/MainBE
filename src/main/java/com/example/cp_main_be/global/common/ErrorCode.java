@@ -26,6 +26,8 @@ public enum ErrorCode {
   GARDEN_SLOT_MAXED_OUT(HttpStatus.BAD_REQUEST, "E40006", "더 이상 텃밭을 추가할 수 없습니다."),
   INVALID_FILE(HttpStatus.BAD_REQUEST, "E40007", "적절하지 않은 파일 내용/포맷입니다."),
   FILE_SIZE_EXCEEDED(HttpStatus.BAD_REQUEST, "E40008", "파일 크기 제한을 넘었습니다."),
+  INVALID_MISSION_TYPE_FOR_QUIZ_OPTION(
+      HttpStatus.BAD_REQUEST, "E40009", "퀴즈 타입의 미션에만 선지를 추가할 수 있습니다."),
 
   // 403 Forbidden
   ACCESS_DENIED(HttpStatus.FORBIDDEN, "E40301", "요청에 대한 권한이 없습니다."),
@@ -34,6 +36,11 @@ public enum ErrorCode {
   NOT_FOUND(HttpStatus.NOT_FOUND, "E40400", "리소스를 찾을 수 없습니다."),
   USER_NOT_FOUND(HttpStatus.NOT_FOUND, "E40401", "해당 사용자를 찾을 수 없습니다."),
   GARDEN_NOT_FOUND(HttpStatus.NOT_FOUND, "E40402", "해당 텃밭을 찾을 수 없습니다."),
+  IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "E40403", "해당 이미지를 찾을 수 없습니다."),
+  DIARY_NOT_FOUND(HttpStatus.NOT_FOUND, "E40404", "해당 일기를 찾을 수 없습니다."),
+  MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "E40405", "해당 미션을 찾을 수 없습니다."),
+  QUIZ_NOT_FOUND(HttpStatus.NOT_FOUND, "E40406", "해당 퀴즈를 찾을 수 없습니다."),
+  REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "E40407", "해당 신고를 찾을 수 없습니다."),
 
   // 417 Expectation Failed
   UPLOAD_FAILED(HttpStatus.EXPECTATION_FAILED, "E41701", "파일 업로드에 실패했습니다."),

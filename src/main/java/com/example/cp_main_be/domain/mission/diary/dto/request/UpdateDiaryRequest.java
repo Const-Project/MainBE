@@ -23,4 +23,6 @@ public class UpdateDiaryRequest {
 
   @NotNull(message = "공개 여부는 필수값입니다. (true/false)")
   private Boolean isPublic;
+
+  private Long imageId;
 }

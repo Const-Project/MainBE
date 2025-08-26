@@ -29,8 +29,9 @@ public class DiaryController {
   @PostMapping
   public ResponseEntity<ApiResponse<DiaryResponse>> createDiary(
       @AuthenticationPrincipal User user, @RequestBody @Valid CreateDiaryRequest request) {
-    Diary createdDiary = diaryService.createDiary(user, request);
-    return ResponseEntity.ok(ApiResponse.success(DiaryResponse.from(createdDiary)));
+    Long diaryId = diaryService.createDiary(user, request);
+    Diary diary = diaryService.findDiaryById(diaryId);
+    return ResponseEntity.ok(ApiResponse.success(DiaryResponse.from(diary)));
   }
 
   @Operation(summary = "내 일기 목록 조회", description = "내 일기 목록을 조회합니다")

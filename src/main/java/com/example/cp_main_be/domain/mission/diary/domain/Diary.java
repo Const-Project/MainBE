@@ -97,4 +97,8 @@ public class Diary {
     this.comments.add(comment);
     comment.setDiary(this); // Comment 엔티티에 setDiary 메서드가 있다고 가정
   }
+
+  public void setDiaryImage(DiaryImage diaryImage) {
+    this.diaryImage = diaryImage;
+  }
 }
