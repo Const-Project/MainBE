@@ -2,11 +2,17 @@ package com.example.cp_main_be.domain.home.service;
 
 import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.home.HomeResponseDto;
+import com.example.cp_main_be.domain.home.PannelResponseDTO;
 import com.example.cp_main_be.domain.member.notification.domain.repository.NotificationRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.mission.diary.service.DiaryService;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.realquiz.UserQuiz;
+import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import java.time.LocalDate;
@@ -30,6 +36,9 @@ public class HomeService {
   private final GardenRepository gardenRepository;
   private final UserDailyMissionRepository userDailyMissionRepository;
   private final NotificationRepository notificationRepository;
+  private final DiaryRepository diaryRepository;
+  private final DiaryService diaryService;
+  private final UserQuizRepository userQuizRepository;
 
   // GardenService에서 가져오거나, 공통 유틸리티로 분리하면 더 좋습니다.
   private LocalDateTime getStartOfCurrentWateringDay() {
@@ -148,5 +157,27 @@ public class HomeService {
         .limit(7)
         .map(completedDates::contains)
         .collect(Collectors.toList());
+  }
+
+  public PannelResponseDTO getPannelData(User user){
+    boolean isDiaryCompleted = false;
+    boolean isQuizCompleted = false;
+    boolean isCheckingCompleted = false;
+    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+    LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
+
+    Diary diary = diaryService.findMyDiaries(user).get(0);
+    if(diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())){
+        isDiaryCompleted = true;
+    }
+    UserQuiz userQuiz = userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).get(0);
+    if(userQuiz != null && userQuiz.getIsCompleted()){ // 오늘의 퀴즈 성공시
+        isQuizCompleted = true;
+    }
+    return PannelResponseDTO.builder()
+            .isDairyCompleted(isDiaryCompleted)
+            .isQuizCompleted(isQuizCompleted)
+            .isCheckingCompleted(isCheckingCompleted)
+            .build();
   }
 }

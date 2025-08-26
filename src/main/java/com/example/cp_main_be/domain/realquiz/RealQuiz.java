@@ -32,7 +32,5 @@ public class RealQuiz {
   @Column(name = "reward_point")
   private Long rewardPoints;
 
-  @Column private Boolean isCompleted;
-
   @Column @CreationTimestamp private LocalDateTime createdAt;
 }

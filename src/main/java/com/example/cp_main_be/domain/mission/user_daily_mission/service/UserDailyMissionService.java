@@ -120,6 +120,7 @@ public class UserDailyMissionService {
                         .isCompleted(mission.isCompleted())
                         .build())
             .collect(Collectors.toList());
+
     Integer count = 0;
     for (MissionPanelResponse.DailyMissionStatusDto mission : missionDtos) {
       if (mission.isCompleted()) count++;
