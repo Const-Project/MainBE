@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DailyQuestionAnswerService {
 
   private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
+  private final DailyQuestionService dailyQuestionService;
 
   // [핵심] Long userId 대신 User user 객체를 직접 받도록 변경
   public void saveAnswer(User user, DailyQuestionAnswerRequest requestDto) {
@@ -32,10 +33,11 @@ public class DailyQuestionAnswerService {
     DailyQuestionAnswer answer =
         DailyQuestionAnswer.builder()
             .user(user) // 매개변수로 받은 user 객체를 바로 사용
-            .question(requestDto.getQuestion())
-            .answer(requestDto.getAnswer())
+            .question(dailyQuestionService.getQuestionById(requestDto.getQuestionId()))
             .answeredDate(today)
             .build();
+
+    answer.setAnswer(requestDto.getAnswer());
 
     dailyQuestionAnswerRepository.save(answer);
   }
