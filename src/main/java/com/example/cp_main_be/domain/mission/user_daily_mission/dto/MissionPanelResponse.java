@@ -8,6 +8,7 @@ import lombok.Getter;
 @Builder
 public class MissionPanelResponse {
 
+  private final Integer todayMissionCount;
   private final List<DailyMissionStatusDto> dailyMissions;
   private final WishTreeDto wishTree;
 

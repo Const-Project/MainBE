@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
 import com.example.cp_main_be.domain.member.user.dto.request.NicknameChangeRequest;
+import com.example.cp_main_be.domain.member.user.dto.response.UserProfileResponse;
 import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterResponse;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.global.common.ApiResponse;
@@ -81,16 +82,13 @@ public class UserController {
 
   @Operation(summary = "유저 정보 조회", description = "유저 정보를 조회합니다")
   @GetMapping("/{userId}")
-  public ResponseEntity<ApiResponse<UserRegisterResponse>> getUserInfo(
+  public ResponseEntity<ApiResponse<UserProfileResponse>> getUserInfo(
       @PathParam("userId") Long userId) {
     // SecurityContextHolder에서 현재 인증된 사용자(UUID)를 가져옴
     User user =
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("해당 유저를 찾을 수 없습니다."));
-    UserRegisterResponse userRegisterResponse =
-        new UserRegisterResponse(
-            user.getId(), user.getNickname(), user.getUuid(), null, null); // 토큰은 응답에 포함하지 않음
-    return ResponseEntity.ok(ApiResponse.success(userRegisterResponse));
+    return ResponseEntity.ok(ApiResponse.success(userService.getUserProfile(user.getId(), userId)));
   }
 }

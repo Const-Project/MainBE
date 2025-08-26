@@ -1,4 +1,4 @@
-package com.example.cp_main_be.domain.social.guestbook.dto.request;
+package com.example.cp_main_be.domain.social.guestbook.dto.response;
 
 import java.time.LocalDateTime;
 import lombok.*;

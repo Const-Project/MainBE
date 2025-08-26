@@ -41,7 +41,6 @@ public class RealQuizController {
     return ApiResponse.success(responseDTO);
   }
 
-
   @GetMapping
   @Operation(summary = "자신의 퀴즈 조회 API")
   public ApiResponse<RealQuizResponseDTO> getRealQuiz(

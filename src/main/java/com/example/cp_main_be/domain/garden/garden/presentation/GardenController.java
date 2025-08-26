@@ -1,7 +1,7 @@
 package com.example.cp_main_be.domain.garden.garden.presentation;
 
-import com.example.cp_main_be.domain.garden.garden.dto.GardenResponse;
 import com.example.cp_main_be.domain.garden.garden.dto.response.GardenBackgroundCandidateResponse;
+import com.example.cp_main_be.domain.garden.garden.dto.response.GardenResponse;
 import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;

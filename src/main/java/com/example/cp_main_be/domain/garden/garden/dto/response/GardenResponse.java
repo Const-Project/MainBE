@@ -1,5 +1,6 @@
-package com.example.cp_main_be.domain.garden.garden.dto;
+package com.example.cp_main_be.domain.garden.garden.dto.response;
 
+import com.example.cp_main_be.domain.avatar.avatar.dto.response.AvatarSimpleResponse;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -13,6 +14,7 @@ public class GardenResponse {
   private final Integer slotNumber;
   private final Integer waterCount;
   private final Integer sunlightCount;
+  private final AvatarSimpleResponse avatar;
   private final LocalDateTime createdAt;
   private final LocalDateTime updatedAt;
 
@@ -23,6 +25,7 @@ public class GardenResponse {
       Integer slotNumber,
       Integer waterCount,
       Integer sunlightCount,
+      AvatarSimpleResponse avatar,
       LocalDateTime createdAt,
       LocalDateTime updatedAt) {
     this.id = id;
@@ -30,6 +33,7 @@ public class GardenResponse {
     this.slotNumber = slotNumber;
     this.waterCount = waterCount;
     this.sunlightCount = sunlightCount;
+    this.avatar = avatar;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
   }
@@ -41,6 +45,7 @@ public class GardenResponse {
         .slotNumber(garden.getSlotNumber())
         .waterCount(garden.getWaterCount())
         .sunlightCount(garden.getSunlightCount())
+        .avatar(AvatarSimpleResponse.from(garden.getAvatar()))
         .createdAt(garden.getCreatedAt())
         .updatedAt(garden.getUpdatedAt())
         .build();
