@@ -1,25 +1,26 @@
-//package com.example.cp_main_be.domain.mission.user_daily_mission.presentation;
+// package com.example.cp_main_be.domain.mission.user_daily_mission.presentation;
 //
-//import com.example.cp_main_be.domain.member.user.domain.User;
-//import com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
-//import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
-//import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionPanelResponse;
-//import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
-//import com.example.cp_main_be.global.common.ApiResponse;
-//import io.swagger.v3.oas.annotations.Operation;
-//import io.swagger.v3.oas.annotations.tags.Tag;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.multipart.MultipartFile;
+// import com.example.cp_main_be.domain.member.user.domain.User;
+// import
+// com.example.cp_main_be.domain.mission.daily_mission_master.dto.response.DailyMissionResponseDTO;
+// import com.example.cp_main_be.domain.mission.quiz.service.QuizService;
+// import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionPanelResponse;
+// import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
+// import com.example.cp_main_be.global.common.ApiResponse;
+// import io.swagger.v3.oas.annotations.Operation;
+// import io.swagger.v3.oas.annotations.tags.Tag;
+// import lombok.RequiredArgsConstructor;
+// import org.springframework.http.MediaType;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.security.core.annotation.AuthenticationPrincipal;
+// import org.springframework.web.bind.annotation.*;
+// import org.springframework.web.multipart.MultipartFile;
 //
-//@RestController
-//@RequestMapping("/api/v1/mission")
-//@RequiredArgsConstructor
-//@Tag(name = "일일미션 API", description = "일일미션 관련 기능을 제공합니다.")
-//public class UserDailyMissionController {
+// @RestController
+// @RequestMapping("/api/v1/mission")
+// @RequiredArgsConstructor
+// @Tag(name = "일일미션 API", description = "일일미션 관련 기능을 제공합니다.")
+// public class UserDailyMissionController {
 //
 //  private final UserDailyMissionService userDailyMissionService;
 //  private final QuizService quizService;
@@ -95,7 +96,8 @@
 //  //  public ResponseEntity<ApiResponse<CompletedQuizResponseDTO>> summitAnswerToQuiz(
 //  //      @PathVariable(name = "userDailyMissionId") Long userDailyMissionId,
 //  //      @RequestBody QuizRequestDTO request) {
-//  //    CompletedQuizResponseDTO result = quizService.summitQuizAnswer(request, userDailyMissionId);
+//  //    CompletedQuizResponseDTO result = quizService.summitQuizAnswer(request,
+// userDailyMissionId);
 //  //    return ResponseEntity.ok(ApiResponse.success(result));
 //  //  }
-//}
+// }
