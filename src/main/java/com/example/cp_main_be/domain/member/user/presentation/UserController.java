@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.member.user.presentation;
 
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
@@ -13,6 +14,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -78,6 +82,21 @@ public class UserController {
       @AuthenticationPrincipal User user) {
     UserRegisterResponse.LevelStatusResponseDTO levelStatusResponseDTO = userService.getLevel(user);
     return ResponseEntity.ok(ApiResponse.success(levelStatusResponseDTO));
+  }
+
+  @Operation(
+      summary = "내 텃밭 ID 목록 조회",
+      description = "현재 로그인한 유저와 연결된 모든 텃밭의 ID 목록을 조회합니다. 텃밭 슬롯 번호 순으로 정렬됩니다.")
+  @GetMapping("/me/gardens")
+  public ResponseEntity<ApiResponse<List<Long>>> getMyGardenIds(
+      @AuthenticationPrincipal User user) {
+    List<Long> gardenIds =
+        user.getGardens().stream()
+            .sorted(Comparator.comparing(Garden::getSlotNumber))
+            .map(Garden::getId)
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(ApiResponse.success(gardenIds));
   }
 
   @Operation(summary = "유저 정보 조회", description = "유저 정보를 조회합니다")
