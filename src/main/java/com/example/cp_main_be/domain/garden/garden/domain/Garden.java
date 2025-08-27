@@ -103,4 +103,8 @@ public class Garden {
   public void updateAvatar(Avatar avatar) {
     this.avatar = avatar;
   }
+
+  public void setUser(User user) {
+    this.user = user;
+  }
 }
