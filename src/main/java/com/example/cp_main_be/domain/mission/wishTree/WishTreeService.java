@@ -1,10 +1,11 @@
 package com.example.cp_main_be.domain.mission.wishTree;
 
-import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.global.event.WishTreeEvolvedEvent;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,8 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class WishTreeService {
 
   private final WishTreeRepository wishTreeRepository;
-  private final GardenService gardenService; // Garden 해금을 위해 의존
   private final UserRepository userRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   // private final NotificationService notificationService; // 알림 발송을 위해 의존
 
@@ -28,12 +29,9 @@ public class WishTreeService {
 
     // 3. 만약 나무가 성장했다면, 추가 로직 실행
     if (hasEvolved) {
-      // notificationService.send(userId, "소망 나무가 " + wishTree.getStage().getKoreanName() + "으로
-      // 자랐어요!");
-
       // 4. 만약 '나무' 단계로 성장했다면, 새로운 Garden 해금
       if (wishTree.getStage() == WishTreeStage.TREE) {
-        gardenService.unlockNewGardenSlot(userId);
+        eventPublisher.publishEvent(new WishTreeEvolvedEvent(userId));
         // notificationService.send(userId, "새로운 텃밭이 열렸어요!");
       }
     }

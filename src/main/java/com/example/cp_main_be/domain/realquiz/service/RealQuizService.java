@@ -3,6 +3,7 @@ package com.example.cp_main_be.domain.realquiz.service;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.realquiz.RealQuiz;
 import com.example.cp_main_be.domain.realquiz.RealQuizOption;
 import com.example.cp_main_be.domain.realquiz.UserQuiz;
@@ -33,6 +34,7 @@ public class RealQuizService {
   private final RealQuizOptionRepository realQuizOptionRepository;
   private final UserRepository userRepository;
   private final UserQuizRepository userQuizRepository;
+  private final WishTreeService wishTreeService;
 
   public RealQuizResponseDTO createRealQuiz(RealQuizCreateRequestDTO requestDTO) {
     // 퀴즈 생성
@@ -141,6 +143,12 @@ public class RealQuizService {
             .findByUser(user)
             .orElseThrow(() -> new RuntimeException("할당 된 퀴즈가 없습니다."));
     userQuiz.setIsCompleted(true);
+
+    boolean isCorrect = realQuiz.getAnswerNumber().equals(requestDTO.getSelectedOptionOrder());
+
+    if (isCorrect) {
+      wishTreeService.addPointsToWishTree(user.getId(), 15L);
+    }
 
     return RealQuizAnswerResponseDTO.builder()
         .answerDescription(realQuiz.getAnswerDescription())
