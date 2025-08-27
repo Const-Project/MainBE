@@ -129,6 +129,26 @@ public class UserService {
   }
 
   /**
+   * 사용자의 모든 텃밭 ID 목록을 슬롯 번호 순으로 정렬하여 반환합니다.
+   *
+   * @param user 현재 로그인한 사용자
+   * @return 정렬된 텃밭 ID 목록
+   */
+  @Transactional(readOnly = true)
+  public List<Long> getMyGardenIds(User user) {
+    // LazyInitializationException을 방지하기 위해 Fetch Join으로 User와 gardens를 함께 조회
+    User managedUser =
+        userRepository
+            .findByIdWithGardens(user.getId())
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
+    return managedUser.getGardens().stream()
+        .sorted(Comparator.comparing(Garden::getSlotNumber))
+        .map(Garden::getId)
+        .collect(Collectors.toList());
+  }
+
+  /**
    * 특정 유저의 프로필 정보를 조회합니다.
    *
    * @param currentUserId 현재 로그인한 유저(프로필을 보고 있는 사람)의 ID
