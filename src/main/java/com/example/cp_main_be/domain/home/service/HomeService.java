@@ -167,7 +167,7 @@ public class HomeService {
     LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
 
     Diary diary = diaryService.findMyDiaries(user).get(0);
-    if (diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())) {
+    if (diary != null && diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())) {
       isDiaryCompleted = true;
     }
     UserQuiz userQuiz =
