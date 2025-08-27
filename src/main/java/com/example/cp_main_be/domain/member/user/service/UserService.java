@@ -42,7 +42,10 @@ public class UserService {
   private final FollowRepository followRepository;
 
   public void addExperience(Long actorId, int points) {
-    User user = userRepository.findById(actorId).get();
+    User user =
+        userRepository
+            .findById(actorId)
+            .orElseThrow(() -> new UserNotFoundException(ErrorCode.USER_NOT_FOUND.getMessage()));
     user.addExperience(points);
     levelService.checkLevelUp(user);
   }
@@ -115,8 +118,7 @@ public class UserService {
     }
 
     // Principal이 String(UUID)인 경우 (백업 처리)
-    if (principal instanceof String) {
-      String uuidString = (String) principal;
+    if (principal instanceof String uuidString) {
       UUID userUuid = UUID.fromString(uuidString);
       return userRepository
           .findByUuid(userUuid)
