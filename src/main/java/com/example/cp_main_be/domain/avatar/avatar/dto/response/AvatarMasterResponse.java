@@ -13,7 +13,7 @@ public class AvatarMasterResponse {
 
   public static AvatarMasterResponse from(AvatarMaster master) {
     return AvatarMasterResponse.builder()
-        .id(master.getId() - 2)
+        .id(master.getId())
         .defaultImageUrl(master.getDefaultImageUrl())
         .description(master.getDescription())
         .build();
