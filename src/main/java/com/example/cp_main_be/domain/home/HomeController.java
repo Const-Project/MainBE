@@ -29,6 +29,7 @@ public class HomeController {
   }
 
   @GetMapping("/panel")
+  @Operation(summary = "패널 조회 API")
   public ApiResponse<PannelResponseDTO> getPannelData(@AuthenticationPrincipal User user) {
     PannelResponseDTO responseDTO = homeService.getPannelData(user);
     return ApiResponse.success(responseDTO);
