@@ -32,7 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 @Slf4j
 public class GardenService {
 
@@ -171,8 +171,14 @@ public class GardenService {
 
   public void unlockNextGarden(Long userId) {
     // 1. 유저와 소원나무 정보 가져오기
-    User user = userRepository.findById(userId).orElseThrow(/* ... */ );
-    WishTree wishTree = wishTreeRepository.findByUserId(user.getId()).orElseThrow(/* ... */ );
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+    WishTree wishTree =
+        wishTreeRepository
+            .findByUserId(user.getId())
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
     // 2. 해금 가능한 상태인지 확인
     if (!wishTree.isUnlockable()) {
