@@ -1,5 +1,7 @@
 package com.example.cp_main_be.domain.member.auth.service;
 
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
+import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.member.auth.domain.RefreshToken;
 import com.example.cp_main_be.domain.member.auth.domain.repository.RefreshTokenRepository;
 import com.example.cp_main_be.domain.member.auth.dto.request.RegistrationRequest;
@@ -13,6 +15,7 @@ import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -29,6 +32,7 @@ public class AuthService {
   private final RefreshTokenRepository refreshTokenRepository;
   private final Logger logger = LoggerFactory.getLogger(AuthService.class);
   private final WishTreeService wishTreeService;
+  private final GardenRepository gardenRepository;
 
   /** 리프레시 토큰으로 액세스 토큰 재발급 + (권장) 리프레시 토큰 롤링 */
   @Transactional
@@ -78,6 +82,17 @@ public class AuthService {
 
     // 1. 사용자를 먼저 저장합니다.
     User savedUser = userRepository.save(newUser);
+
+    Garden firstGarden =
+        Garden.builder().user(savedUser).slotNumber(1).isLocked(false).build(); // 1번은 기본 해금
+    Garden secondGarden =
+        Garden.builder().user(savedUser).slotNumber(2).isLocked(true).build(); // 2번은 잠김
+    Garden thirdGarden =
+        Garden.builder().user(savedUser).slotNumber(3).isLocked(true).build(); // 3번은 잠김
+    Garden fourthGarden =
+        Garden.builder().user(savedUser).slotNumber(4).isLocked(true).build(); // 4번은 잠김
+
+    gardenRepository.saveAll(List.of(firstGarden, secondGarden, thirdGarden, fourthGarden));
 
     // 2. 위시트리 관련 로직을 수행합니다.
     // 만약 여기서 예외가 발생하면, 위에서 저장한 newUser까지 모두 롤백됩니다.

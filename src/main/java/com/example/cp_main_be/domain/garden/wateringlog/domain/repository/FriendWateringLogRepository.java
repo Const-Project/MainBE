@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.wateringlog.domain.FriendWateringLog;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import java.time.LocalDateTime;
+import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,4 +25,9 @@ public interface FriendWateringLogRepository extends JpaRepository<FriendWaterin
   @Modifying
   @Query("DELETE FROM FriendWateringLog fwl WHERE fwl.wateredAt < :cutoffDate")
   int deleteByWateredAtBefore(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+  @Query(
+      "SELECT fwl.wateredGarden.id FROM FriendWateringLog fwl WHERE fwl.waterGiver.id = :giverId AND fwl.wateredAt > :startDate")
+  Set<Long> findWateredGardenIdsByGiverAndDate(
+      @Param("giverId") Long giverId, @Param("startDate") LocalDateTime startDate);
 }
