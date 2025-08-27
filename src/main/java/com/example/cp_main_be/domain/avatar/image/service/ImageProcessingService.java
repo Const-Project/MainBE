@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -52,16 +54,17 @@ public class ImageProcessingService {
    */
   public String processImageWithAi(MultipartFile imageFile) {
     try {
-      // 1. MultipartFile을 byte 배열로 변환
-      byte[] imageBytes = imageFile.getBytes();
+      // 1. MultipartFile을 MultiValueMap으로 변환하여 multipart-form-data 생성
+      MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+      body.add("image_file", imageFile.getResource()); // FastAPI의 인자명과 동일하게 설정
 
-      // 2. WebClient를 사용하여 바이너리 데이터로 FastAPI 서버에 전송
+      // 2. WebClient를 사용하여 multipart/form-data 형식으로 전송
       byte[] result =
           webClient
               .post()
               .uri(fastapiServerUrl + "/process-image")
-              .contentType(MediaType.APPLICATION_OCTET_STREAM) // 바이너리 데이터로 설정
-              .body(BodyInserters.fromValue(imageBytes)) // 바이트 배열 직접 전송
+              .contentType(MediaType.MULTIPART_FORM_DATA) // multipart/form-data로 설정
+              .body(BodyInserters.fromMultipartData(body)) // MultiValueMap 전송
               .retrieve()
               .onStatus(
                   HttpStatusCode::isError,
