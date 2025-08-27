@@ -131,8 +131,8 @@ public class ImageProcessingService {
                                     new CustomApiException(ErrorCode.AI_AVATAR_FAILED));
                               }))
               .bodyToMono(byte[].class)
-              .timeout(Duration.ofSeconds(30))
-              .block(Duration.ofSeconds(30));
+              .timeout(Duration.ofSeconds(300))
+              .block(Duration.ofSeconds(300));
 
       if (result == null || result.length == 0) {
         log.error("AI 서버에서 유효한 이미지 바이트를 받지 못했습니다 (null/empty).");
