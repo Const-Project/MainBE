@@ -7,10 +7,12 @@ import com.example.cp_main_be.domain.member.auth.dto.response.AnonymousRegistrat
 import com.example.cp_main_be.domain.member.auth.dto.response.TokenRefreshResponse;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -27,6 +29,7 @@ public class AuthService {
   private final UserRepository userRepository;
   private final RefreshTokenRepository refreshTokenRepository;
   private final Logger logger = LoggerFactory.getLogger(AuthService.class);
+  private final WishTreeService wishTreeService;
 
   /** 리프레시 토큰으로 액세스 토큰 재발급 + (권장) 리프레시 토큰 롤링 */
   public TokenRefreshResponse refreshAccessToken(String incomingRefreshToken, String deviceId) {
@@ -97,8 +100,11 @@ public class AuthService {
         User.builder()
             .uuid(newUuid)
             .nickname(nickname) // 사용자가 입력한 닉네임으로 설정
+            .avatarList(new ArrayList<>())
+            .diaries(new ArrayList<>())
+            .gardens(new ArrayList<>())
             .build();
-    userRepository.save(newUser);
+    wishTreeService.addPointsToWishTree(userRepository.save(newUser).getId(), 0);
 
     String accessToken = jwtTokenProvider.generateAccessToken(newUuid.toString());
     String refreshToken = jwtTokenProvider.generateRefreshToken(newUuid.toString());

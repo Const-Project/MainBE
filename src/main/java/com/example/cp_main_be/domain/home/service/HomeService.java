@@ -170,7 +170,7 @@ public class HomeService {
         diaryRepository.findTodayDiaryByUser(user, startOfDay, endOfDay).stream()
             .findFirst()
             .orElse(null);
-    
+
     if (diary != null && diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())) {
       isDiaryCompleted = true;
     }
