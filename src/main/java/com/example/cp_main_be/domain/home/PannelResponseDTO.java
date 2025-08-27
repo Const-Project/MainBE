@@ -10,7 +10,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PannelResponseDTO {
-  private boolean isDairyCompleted;
-  private boolean isCheckingCompleted;
-  private boolean isQuizCompleted;
+  Boolean isDairyCompleted;
+  Boolean isCheckingCompleted;
+  Boolean isQuizCompleted;
+  WishTreeDto wishTree;
+
+  @Getter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @Builder
+  public static class WishTreeDto {
+    String currentStage;
+    int currentPoints;
+    int requiredPointsForNextStage;
+  }
 }
