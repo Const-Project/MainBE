@@ -7,14 +7,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record DiaryInfoResponse(
-    Long id,  // 일기 id
-    Long writerId,  // 작성자 id
-    String writerName,  // 작성자 이름
-    String profileImageUrl,   // 작성자 프로필 이미지 url
+    Long id, // 일기 id
+    Long writerId, // 작성자 id
+    String writerName, // 작성자 이름
+    String profileImageUrl, // 작성자 프로필 이미지 url
     String title, // 일기 제목
-    String content,   // 일기 내용
-    String imageUrl,  // 일기 이미지
-    boolean isLiked,  //
+    String content, // 일기 내용
+    String imageUrl, // 일기 이미지
+    boolean isLiked, //
     int likeCount,
     int commentCount,
     List<CommentResponseDTO> comments,
