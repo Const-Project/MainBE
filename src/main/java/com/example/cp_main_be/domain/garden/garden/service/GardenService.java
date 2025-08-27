@@ -113,11 +113,15 @@ public class GardenService {
     wishTreeService.addPointsToWishTree(actor.getId(), WATERING_POINTS);
     garden.increaseWaterCount();
 
+    // [수정] 시간대(Timezone) 문제를 방지하기 위해, 물 준 시간을 명시적으로 기록합니다.
+    LocalDateTime nowInSeoul = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
     // 물주기 활동 기록
     FriendWateringLog log =
         FriendWateringLog.builder()
             .waterGiver(actor)
-            .wateredGarden(garden) // wateredAt은 @CreatedDate가 자동으로 설정합니다.
+            .wateredGarden(garden)
+            .wateredAt(nowInSeoul) // @CreatedDate 대신 직접 시간을 설정합니다.
             .build();
     friendWateringLogRepository.save(log);
   }
