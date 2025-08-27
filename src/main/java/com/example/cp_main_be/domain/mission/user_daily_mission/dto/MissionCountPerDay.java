@@ -1,8 +1,10 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.dto;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class MissionCountPerDay {
   private final int day;
   private final long count;

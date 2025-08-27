@@ -31,7 +31,16 @@ public class MissionAggregationService {
 
     // 1. 각 Repository에서 날짜별 완료 미션 개수 조회
     List<MissionCountPerDay> diaryCounts =
-        diaryRepository.findCompletedCountsPerDay(user, startDate, endDate);
+        diaryRepository.findCompletedCountsPerDay(user, startDate, endDate).stream()
+            .peek(
+                mission -> {
+                  long currentCount = mission.getCount();
+                  if (currentCount >= 3) {
+                    mission.setCount(3L);
+                  }
+                })
+            .toList();
+
     // userQuizRepository의 메서드 호출로 변경
     List<MissionCountPerDay> quizCounts =
         userQuizRepository.findCompletedCountsPerDay(user, startDate, endDate);

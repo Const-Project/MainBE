@@ -20,6 +20,8 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
           + "WHERE ap.id = :postId")
   Optional<AvatarPost> findByIdWithDetails(@Param("postId") Long postId);
 
+  List<AvatarPost> findAllBy(Pageable pageable);
+
   List<AvatarPost> findByUserInAndUser_IdNotIn(
       List<User> users, List<Long> blockedUserIds, Pageable pageable);
 
