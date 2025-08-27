@@ -5,6 +5,7 @@ import com.example.cp_main_be.domain.member.notification.service.NotificationSer
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
@@ -32,6 +33,7 @@ public class NotificationEventListener {
   private final LikeRepository likeRepository;
   private final DiaryRepository diaryRepository;
   private final AvatarPostRepository avatarPostRepository;
+  private final WishTreeService wishTreeService;
 
   @EventListener
   @Transactional
@@ -127,6 +129,8 @@ public class NotificationEventListener {
     User sender = event.getSender();
     User receiver = event.getReceiver();
     String url = "/garden";
+
+    wishTreeService.addPointsToWishTree(sender.getId(), 2L);
 
     notificationService.send(receiver, sender, NotificationType.WATERING_BY_FRIEND, url);
   }

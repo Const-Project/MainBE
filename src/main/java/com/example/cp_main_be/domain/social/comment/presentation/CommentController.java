@@ -24,7 +24,9 @@ public class CommentController {
   private final CommentService commentService;
   private final UserService userService;
 
-  @Operation(summary = "댓글 달기", description = "targetId에 해당하는 Id를 가진 객체에 댓글을 답니다")
+  @Operation(
+      summary = "댓글 달기",
+      description = "targetId에 해당하는 Id를 가진 객체에 댓글을 답니다,targetType은 DIARY 혹은 AVATAR_POST입니다")
   @PostMapping
   public ResponseEntity<ApiResponse<CommentResponse>> createComment(
       @AuthenticationPrincipal User writer, @RequestBody @Valid CommentRequest request) {
