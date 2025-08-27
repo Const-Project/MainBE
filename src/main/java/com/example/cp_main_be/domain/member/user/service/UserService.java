@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.member.user.service;
 
 import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.wateringlog.domain.repository.FriendWateringLogRepository;
 import com.example.cp_main_be.domain.home.HomeResponseDto;
 import com.example.cp_main_be.domain.member.level.service.LevelService;
@@ -18,7 +19,9 @@ import com.example.cp_main_be.global.exception.AvatarNotFoundException;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -140,6 +143,15 @@ public class UserService {
             .findById(profileUserId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
+    // [추가] 프로필 이미지 URL을 첫 번째 텃밭의 아바타 이미지로 설정
+    String profileImageUrl =
+        profileUser.getGardens().stream()
+            .min(Comparator.comparing(Garden::getSlotNumber)) // 슬롯 번호가 가장 낮은 텃밭 찾기
+            .map(Garden::getAvatar) // 해당 텃밭의 아바타 가져오기
+            .filter(Objects::nonNull) // 아바타가 null이 아닌 경우 필터링
+            .map(avatar -> avatar.getAvatarMaster().getDefaultImageUrl()) // 아바타의 이미지 URL 가져오기
+            .orElse(profileUser.getProfileImageUrl()); // 텃밭/아바타가 없으면 기존 프로필 이미지 사용
+
     // 1. 팔로우 상태 확인
     // currentUserId -> profileUserId 팔로우 여부
     boolean isFollowing = followRepository.existsByFollowerAndFollowing(currentUser, profileUser);
@@ -202,7 +214,7 @@ public class UserService {
     return UserProfileResponse.builder()
         .id(profileUser.getId())
         .userNickname(profileUser.getNickname())
-        .profileImageUrl(profileUser.getProfileImageUrl())
+        .profileImageUrl(profileImageUrl)
         .followStatus(followStatus)
         .profileUserLevel(profileUser.getLevel())
         .leftWaterCountForOthers(leftWaterCountForOthers)
