@@ -6,8 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MissionCountPerDay {
-  private final int day;
-  private final long count;
+  private int day;
+  private long count;
 
   public MissionCountPerDay(int day, long count) {
     this.day = day;
