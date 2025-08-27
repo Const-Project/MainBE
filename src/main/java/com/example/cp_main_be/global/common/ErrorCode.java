@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
   // === 4xx Client Errors ===
   // 400 Bad Request
-  INVALID_TOKEN(HttpStatus.BAD_REQUEST, "E40001", "유효하지 않은 토큰입니다."),
+  INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "E40001", "유효하지 않은 토큰입니다."),
   WATERING_COOL_DOWN(HttpStatus.BAD_REQUEST, "E40002", "아직 물을 줄 수 없습니다. 8시간이 지나야 가능합니다."),
   FRIEND_WATERING_LIMIT_EXCEEDED(
       HttpStatus.BAD_REQUEST, "E40003", "오늘은 다른 사람의 정원에 더 이상 물을 줄 수 없습니다."),
