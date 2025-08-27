@@ -108,7 +108,14 @@ public class User implements UserDetails {
 
   // == 연관관계 편의 메서드 ==//
   public void addGarden(Garden garden) {
+    // 양방향 연관관계에서 양쪽 모두의 상태를 동기화합니다.
     this.gardens.add(garden);
+    garden.setUser(this);
+  }
+
+  public void addAvatar(Avatar avatar) {
+    this.avatarList.add(avatar);
+    avatar.setUser(this);
   }
 
   // == 비즈니스 로직 메서드 (향후 확장용) ==//
