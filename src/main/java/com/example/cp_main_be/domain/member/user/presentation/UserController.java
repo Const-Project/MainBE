@@ -88,7 +88,8 @@ public class UserController {
       summary = "내 텃밭 ID 목록 조회",
       description = "현재 로그인한 유저와 연결된 모든 텃밭의 ID 목록을 조회합니다. 텃밭 슬롯 번호 순으로 정렬됩니다.")
   @GetMapping("/me/gardens")
-  public ResponseEntity<ApiResponse<List<Long>>> getMyGardenIds(@AuthenticationPrincipal User user) {
+  public ResponseEntity<ApiResponse<List<Long>>> getMyGardenIds(
+      @AuthenticationPrincipal User user) {
     List<Long> gardenIds =
         user.getGardens().stream()
             .sorted(Comparator.comparing(Garden::getSlotNumber))

@@ -15,7 +15,8 @@ public enum ErrorCode {
       HttpStatus.BAD_REQUEST, "E40003", "오늘은 다른 사람의 정원에 더 이상 물을 줄 수 없습니다."),
   ALREADY_WATERED_GARDEN(HttpStatus.BAD_REQUEST, "E40004", "이 정원에는 오늘 이미 물을 주었습니다."),
   SUNLIGHT_COOL_DOWN(HttpStatus.BAD_REQUEST, "E40005", "오늘은 이미 햇빛을 주었습니다."),
-  GARDEN_SLOT_MAXED_OUT(HttpStatus.BAD_REQUEST, "E40006", "더 이상 텃밭을 추가할 수 없습니다."), // 최종 3개 도달 시 사용 가능
+  GARDEN_SLOT_MAXED_OUT(
+      HttpStatus.BAD_REQUEST, "E40006", "더 이상 텃밭을 추가할 수 없습니다."), // 최종 3개 도달 시 사용 가능
   INVALID_FILE(HttpStatus.BAD_REQUEST, "E40007", "적절하지 않은 파일 내용/포맷입니다."),
   GARDEN_SLOT_LOCKED(
       HttpStatus.BAD_REQUEST, "E40008", "현재 단계에서는 더 이상 텃밭을 만들 수 없습니다. 소원나무를 성장시켜주세요."),
