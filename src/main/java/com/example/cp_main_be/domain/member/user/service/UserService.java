@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -162,13 +163,15 @@ public class UserService {
             .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
     User profileUser =
         userRepository
-            .findById(profileUserId)
+            .findByIdWithGardensAndAvatars(profileUserId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
     // [수정] 프로필 이미지 URL을 사용자의 첫 번째 아바타 이미지로 설정
     String profileImageUrl =
-        profileUser.getAvatarList().stream()
-            .findFirst() // 리스트의 첫 번째 아바타를 가져옵니다.
+        profileUser.getGardens().stream()
+            .min(Comparator.comparing(Garden::getSlotNumber)) // 슬롯 번호가 가장 낮은 텃밭 찾기
+            .map(Garden::getAvatar) // 해당 텃밭의 아바타 가져오기
+            .filter(Objects::nonNull) // 아바타가 null이 아닌 경우 필터링
             .map(
                 avatar -> {
                   // AI 아바타처럼 Avatar에 직접 저장된 고유 imageUrl이 있다면 그것을 우선 사용합니다.
@@ -178,7 +181,7 @@ public class UserService {
                   // 없다면, AvatarMaster에 정의된 기본 이미지를 사용합니다.
                   return avatar.getAvatarMaster().getDefaultImageUrl();
                 })
-            .orElse(profileUser.getProfileImageUrl()); // 아바타가 하나도 없으면 기존 프로필 이미지를 사용합니다.
+            .orElse(profileUser.getProfileImageUrl()); // 텃밭/아바타가 없으면 기존 프로필 이미지 사용
 
     // 1. 팔로우 상태 확인
     // currentUserId -> profileUserId 팔로우 여부
