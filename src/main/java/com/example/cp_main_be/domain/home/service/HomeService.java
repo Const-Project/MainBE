@@ -1,20 +1,18 @@
 package com.example.cp_main_be.domain.home.service;
 
-import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.home.HomeResponseDto;
 import com.example.cp_main_be.domain.home.PannelResponseDTO;
+import com.example.cp_main_be.domain.member.daily_question.domain.repository.DailyQuestionAnswerRepository;
 import com.example.cp_main_be.domain.member.notification.domain.repository.NotificationRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
-import com.example.cp_main_be.domain.mission.diary.service.DiaryService;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
-import com.example.cp_main_be.domain.realquiz.UserQuiz;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
 import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
@@ -36,14 +34,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class HomeService {
 
   private final UserRepository userRepository;
-  private final GardenRepository gardenRepository;
   private final UserDailyMissionRepository userDailyMissionRepository;
   private final NotificationRepository notificationRepository;
   private final DiaryRepository diaryRepository;
-  private final DiaryService diaryService;
   private final UserQuizRepository userQuizRepository;
-  private final WishTreeRepository wishTreeRepository;
   private final WishTreeService wishTreeService;
+  private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository; // <-- 추가
+  private final WishTreeRepository wishTreeRepository;
+
+  // ...
 
   // GardenService에서 가져오거나, 공통 유틸리티로 분리하면 더 좋습니다.
   private LocalDateTime getStartOfCurrentWateringDay() {
@@ -111,23 +110,45 @@ public class HomeService {
                 })
             .collect(Collectors.toList());
 
-    // 3. TodayMissions 구성
-    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-    LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
+    // 3. TodayMissions 구성 (수정된 로직)
+    LocalDate today = LocalDate.now();
+    LocalDateTime startOfDay = today.atStartOfDay();
+    LocalDateTime endOfDay = today.atTime(23, 59, 59);
+
+    // 미션 1: 일기 쓰기 완료 여부 확인
+    boolean isDiaryCompleted =
+        diaryRepository.existsByUserAndCreatedAtBetween(user, startOfDay, endOfDay);
+
+    // 미션 2: 퀴즈 풀기 완료 여부 확인
+    boolean isQuizCompleted =
+        userQuizRepository.existsByUserAndIsCompletedIsTrueAndCreatedAtBetween(
+            user, startOfDay, endOfDay);
+
+    // 미션 3: 오늘의 질문 답변 완료 여부 확인
+    boolean isCheckingCompleted =
+        dailyQuestionAnswerRepository.existsByUserAndAnsweredDate(user, today);
+
+    // 각 미션의 완료 상태를 바탕으로 MissionInfo DTO 리스트 생성
     List<HomeResponseDto.MissionInfo> todayMissions =
-        userDailyMissionRepository
-            .findTodayMissionsWithMasterByUser(user, startOfDay, endOfDay)
-            .stream()
-            .map(
-                userDailyMission ->
-                    HomeResponseDto.MissionInfo.builder()
-                        .missionId(userDailyMission.getDailyMissionMaster().getId()) // 마스터 미션 ID
-                        .missionTitle(userDailyMission.getDailyMissionMaster().getTitle())
-                        .missionType(
-                            userDailyMission.getDailyMissionMaster().getMissionType().toString())
-                        .isCompleted(userDailyMission.isCompleted())
-                        .build())
-            .collect(Collectors.toList());
+        List.of(
+            HomeResponseDto.MissionInfo.builder()
+                .missionId(1L) // 임의의 ID 부여
+                .missionTitle("오늘의 일기 쓰기")
+                .missionType("DIARY")
+                .isCompleted(isDiaryCompleted)
+                .build(),
+            HomeResponseDto.MissionInfo.builder()
+                .missionId(2L) // 임의의 ID 부여
+                .missionTitle("오늘의 퀴즈 풀기")
+                .missionType("QUIZ")
+                .isCompleted(isQuizCompleted)
+                .build(),
+            HomeResponseDto.MissionInfo.builder()
+                .missionId(3L) // 임의의 ID 부여
+                .missionTitle("오늘의 질문 답변하기")
+                .missionType("CHECKING") // 또는 적절한 타입
+                .isCompleted(isCheckingCompleted)
+                .build());
 
     //    // 4. ActivityInfo 구성
     //    List<Boolean> weeklyStatus = createWeeklyMissionStatus(userId);
@@ -165,47 +186,45 @@ public class HomeService {
   }
 
   public PannelResponseDTO getPannelData(User user) {
-    boolean isDiaryCompleted = false;
-    boolean isQuizCompleted = false;
-    boolean isCheckingCompleted = false;
+    LocalDate today = LocalDate.now();
     LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
     LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
 
-    Diary diary =
-        diaryRepository.findTodayDiaryByUser(user, startOfDay, endOfDay).stream()
-            .findFirst()
-            .orElse(null);
-
-    if (diary != null && diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())) {
-      isDiaryCompleted = true;
-    }
-    UserQuiz userQuiz =
-        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).stream()
-            .findFirst()
-            .orElse(null);
-    if (userQuiz != null && userQuiz.getIsCompleted()) { // 오늘의 퀴즈 성공시
-      isQuizCompleted = true;
-    }
+    // exists 쿼리로 간단하게 변경
+    boolean isDiaryCompleted =
+        diaryRepository.existsByUserAndCreatedAtBetween(user, startOfDay, endOfDay);
+    boolean isQuizCompleted =
+        userQuizRepository.existsByUserAndIsCompletedIsTrueAndCreatedAtBetween(
+            user, startOfDay, endOfDay);
+    // 오늘의 질문 완료 여부 확인 로직 추가
+    boolean isCheckingCompleted =
+        dailyQuestionAnswerRepository.existsByUserAndAnsweredDate(user, today);
 
     // 위시트리 찾기
     WishTree wishTree = wishTreeService.findOrCreateWishTree(user.getId());
 
-    // 위시 트리
+    WishTreeStage currentStageEnum = wishTree.getStage();
+    WishTreeStage nextStageEnum = currentStageEnum.getNextStage();
+
     PannelResponseDTO.WishTreeDto wishTreeDto =
         PannelResponseDTO.WishTreeDto.builder()
-            .currentStage(wishTree.getStage().getKoreanName())
+            .currentStage(currentStageEnum.getKoreanName())
+            // nextStage가 null이 아니면 이름을, null이면 빈 문자열("")을 설정
+            .nextStage(nextStageEnum != null ? nextStageEnum.getKoreanName() : "")
             .currentPoints(wishTree.getPoints())
             .requiredPointsForNextStage(
-                wishTree.getStage().getRequiredPointsForNextStage() - wishTree.getPoints())
+                currentStageEnum.getRequiredPointsForNextStage() - wishTree.getPoints())
             .progressPercent(
-                (Long) (wishTree.getPoints() / wishTree.getStage().getRequiredPointsForNextStage())
-                    * 100)
+                (long)
+                    ((double) wishTree.getPoints()
+                        / currentStageEnum.getRequiredPointsForNextStage()
+                        * 100))
             .build();
 
     return PannelResponseDTO.builder()
-        .isDairyCompleted(isDiaryCompleted)
+        .isDairyCompleted(isDiaryCompleted) // 변수명 오타 수정: isDiaryCompleted
         .isQuizCompleted(isQuizCompleted)
-        .isCheckingCompleted(isCheckingCompleted)
+        .isCheckingCompleted(isCheckingCompleted) // 이제 정상적으로 값이 들어감
         .wishTree(wishTreeDto)
         .build();
   }
