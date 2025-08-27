@@ -25,14 +25,13 @@ public class ImageProcessingService {
   private static final Logger log = LoggerFactory.getLogger(ImageProcessingService.class);
 
   private final WebClient webClient;
-  private final StorageService storageService; // [추가] 스토리지 서비스 주입
+  private final StorageService storageService;
 
   @Value("${fastapi.server.url}")
   private String fastapiServerUrl;
 
   private static final Random random = new Random();
 
-  // [기존과 동일] 실패 시 사용할 이미지 URL 목록
   private static final List<String> FALLBACK_IMAGE_URLS =
       List.of(
           "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%86%E1%85%A9%E1%86%AB%E1%84%89%E1%85%B3%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%201.png",
@@ -45,7 +44,7 @@ public class ImageProcessingService {
           "https://pub-5cb74645f3e1443686dd7aa7096913f1.r2.dev/%E1%84%92%E1%85%A2%E1%86%BC%E1%84%8B%E1%85%AE%E1%86%AB%E1%84%86%E1%85%A9%E1%86%A8%201.png");
 
   /**
-   * 이미지를 AI 서버로 보내 아바타를 생성하고, 결과 이미지의 URL을 반환합니다.
+   * 이미지를 바이너리 데이터로 AI 서버에 전송하여 아바타를 생성하고, 결과 이미지의 URL을 반환합니다.
    *
    * @param imageFile 원본 이미지 파일
    * @return 생성된 아바타 이미지의 최종 URL
@@ -53,13 +52,16 @@ public class ImageProcessingService {
    */
   public String processImageWithAi(MultipartFile imageFile) {
     try {
-      // 1. WebClient를 사용하여 FastAPI 서버로부터 이미지 byte 배열을 받음
+      // 1. MultipartFile을 byte 배열로 변환
+      byte[] imageBytes = imageFile.getBytes();
+
+      // 2. WebClient를 사용하여 바이너리 데이터로 FastAPI 서버에 전송
       byte[] result =
           webClient
               .post()
               .uri(fastapiServerUrl + "/process-image")
-              .contentType(MediaType.MULTIPART_FORM_DATA)
-              .body(BodyInserters.fromMultipartData("image", imageFile.getResource()))
+              .contentType(MediaType.APPLICATION_OCTET_STREAM) // 바이너리 데이터로 설정
+              .body(BodyInserters.fromValue(imageBytes)) // 바이트 배열 직접 전송
               .retrieve()
               .onStatus(
                   HttpStatusCode::isError,
@@ -84,16 +86,14 @@ public class ImageProcessingService {
         throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
       }
 
-      // 2. [변경] 성공 시, 받은 byte 배열을 스토리지에 업로드하고 URL을 받음
-      // "avatars/"는 스토리지 내 폴더 경로, 두 번째 인자는 파일 이름
+      // 3. 받은 byte 배열을 스토리지에 업로드하고 URL을 받음
       String imageUrl =
           storageService.uploadFile(result, "avatars/", imageFile.getOriginalFilename());
 
-      // 3. [변경] 스토리지로부터 받은 URL을 반환
       return imageUrl;
 
     } catch (Exception e) {
-      // [변경] 실패 시, 폴백 URL 리스트에서 랜덤으로 하나를 선택하여 바로 반환
+      // 실패 시 폴백 URL 리스트에서 랜덤으로 하나를 선택하여 반환
       log.warn("AI 아바타 생성 실패. 폴백 이미지 URL을 반환합니다. 원인: {}", e.getMessage());
       String fallbackUrl = FALLBACK_IMAGE_URLS.get(random.nextInt(FALLBACK_IMAGE_URLS.size()));
       log.info("선택된 폴백 이미지 URL: {}", fallbackUrl);
@@ -101,7 +101,77 @@ public class ImageProcessingService {
     }
   }
 
-  // 이 메서드는 이제 사용되지 않지만, 다른 곳에서 사용될 수 있으므로 유지합니다.
+  /** 대안: 특정 이미지 포맷으로 Content-Type을 설정하여 전송 */
+  public String processImageWithAiWithSpecificContentType(MultipartFile imageFile) {
+    try {
+      byte[] imageBytes = imageFile.getBytes();
+
+      // 파일 확장자에 따라 Content-Type 결정
+      String contentType = determineContentType(imageFile.getOriginalFilename());
+
+      byte[] result =
+          webClient
+              .post()
+              .uri(fastapiServerUrl + "/process-image")
+              .contentType(MediaType.parseMediaType(contentType)) // 이미지 타입에 맞는 Content-Type
+              .body(BodyInserters.fromValue(imageBytes))
+              .retrieve()
+              .onStatus(
+                  HttpStatusCode::isError,
+                  clientResponse ->
+                      clientResponse
+                          .bodyToMono(String.class)
+                          .flatMap(
+                              errorBody -> {
+                                log.error(
+                                    "FastAPI server error. Status: {}, Body: {}",
+                                    clientResponse.statusCode(),
+                                    errorBody);
+                                return Mono.error(
+                                    new CustomApiException(ErrorCode.AI_AVATAR_FAILED));
+                              }))
+              .bodyToMono(byte[].class)
+              .timeout(Duration.ofSeconds(30))
+              .block(Duration.ofSeconds(30));
+
+      if (result == null || result.length == 0) {
+        log.error("AI 서버에서 유효한 이미지 바이트를 받지 못했습니다 (null/empty).");
+        throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
+      }
+
+      String imageUrl =
+          storageService.uploadFile(result, "avatars/", imageFile.getOriginalFilename());
+
+      return imageUrl;
+
+    } catch (Exception e) {
+      log.warn("AI 아바타 생성 실패. 폴백 이미지 URL을 반환합니다. 원인: {}", e.getMessage());
+      String fallbackUrl = FALLBACK_IMAGE_URLS.get(random.nextInt(FALLBACK_IMAGE_URLS.size()));
+      log.info("선택된 폴백 이미지 URL: {}", fallbackUrl);
+      return fallbackUrl;
+    }
+  }
+
+  /** 파일 확장자에 따라 적절한 Content-Type을 반환 */
+  private String determineContentType(String filename) {
+    if (filename == null) {
+      return "application/octet-stream";
+    }
+
+    String extension = filename.toLowerCase();
+    if (extension.endsWith(".png")) {
+      return "image/png";
+    } else if (extension.endsWith(".jpg") || extension.endsWith(".jpeg")) {
+      return "image/jpeg";
+    } else if (extension.endsWith(".gif")) {
+      return "image/gif";
+    } else if (extension.endsWith(".webp")) {
+      return "image/webp";
+    } else {
+      return "application/octet-stream";
+    }
+  }
+
   public String getDefaultImageUrl() {
     return FALLBACK_IMAGE_URLS.get(random.nextInt(FALLBACK_IMAGE_URLS.size()));
   }
