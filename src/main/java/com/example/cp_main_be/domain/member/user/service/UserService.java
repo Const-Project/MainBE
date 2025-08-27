@@ -9,6 +9,7 @@ import com.example.cp_main_be.domain.member.level.service.LevelService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
+import com.example.cp_main_be.domain.member.user.dto.response.FollowStatus;
 import com.example.cp_main_be.domain.member.user.dto.response.UserGardenDetailResponse;
 import com.example.cp_main_be.domain.member.user.dto.response.UserProfileResponse;
 import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterResponse;
@@ -181,13 +182,13 @@ public class UserService {
     boolean isFollowedByProfileUser =
         followRepository.existsByFollowerAndFollowing(profileUser, currentUser);
 
-    Integer followStatus;
+    FollowStatus followStatus;
     if (isFollowing) {
-      followStatus = 1; // FOLLOWING (팔로우 중)
+      followStatus = FollowStatus.FOLLOWING;
     } else if (isFollowedByProfileUser) {
-      followStatus = 2; // FOLLOW_BACK_POSSIBLE (상대방이 나를 팔로우 중, 맞팔 가능)
+      followStatus = FollowStatus.FOLLOW_BACK_POSSIBLE;
     } else {
-      followStatus = 0; // NOT_FOLLOWING (팔로우 안 함)
+      followStatus = FollowStatus.NOT_FOLLOWING;
     }
 
     // 2. 남에게 물 줄 수 있는 남은 횟수 계산 (현재 접속 유저 기준)

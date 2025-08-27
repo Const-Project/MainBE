@@ -17,7 +17,7 @@ public class UserProfileResponse {
   // 0: 팔로우 안 함 (친구 추가 버튼 보임)
   // 1: 팔로우 중 (팔로우 취소 버튼 보임)
   // 2: 나를 팔로우 중 (맞팔로우 버튼 보임) - 이 상태는 isFriend가 false일 때만 의미
-  private Integer followStatus; // 0: NOT_FOLLOWING, 1: FOLLOWING, 2: FOLLOW_BACK_POSSIBLE
+  private FollowStatus followStatus;
 
   //  private int profileUserLevel; // 프로필 주인의 레벨 추가
   private Long leftWaterCountForOthers; // 오늘 남에게 물을 줄 수 있는 남은 횟수 (현재 접속 유저 기준)
