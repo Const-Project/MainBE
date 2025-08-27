@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.home.service;
 
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.home.HomeResponseDto;
 import com.example.cp_main_be.domain.home.PannelResponseDTO;
 import com.example.cp_main_be.domain.member.daily_question.domain.repository.DailyQuestionAnswerRepository;
@@ -20,8 +21,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -75,38 +78,58 @@ public class HomeService {
             .unreadNotificationCount(unreadNotificationCount)
             .build();
 
+    Map<Integer, Garden> userGardens =
+        user.getGardens().stream()
+            .collect(Collectors.toMap(Garden::getSlotNumber, garden -> garden));
     // 2. GardenSummaries 구성 (모든 정원 순회)
     List<HomeResponseDto.GardenSummaryInfo> gardenSummaries =
-        user.getGardens().stream()
-            .map(
-                garden -> {
-                  // 각 정원의 물주기/햇빛주기 가능 여부 계산 (주인 본인이 주는 경우)
-                  boolean isOwnerWateringAble =
-                      garden.getLastWateredByOwnerAt() == null
-                          || garden
-                              .getLastWateredByOwnerAt()
-                              .plusHours(8)
-                              .isBefore(LocalDateTime.now());
+        IntStream.rangeClosed(1, 4)
+            .mapToObj(
+                slotNumber -> {
+                  Garden garden = userGardens.get(slotNumber);
 
-                  boolean isOwnerSunlightAble =
-                      garden.getLastSunlightReceivedAt() == null
-                          || garden
-                              .getLastSunlightReceivedAt()
-                              .isBefore(getStartOfCurrentSunlightDay()); // 매일 06시 초기화
+                  if (garden != null && !garden.isLocked()) {
+                    boolean isOwnerWateringAble =
+                        garden.getLastWateredByOwnerAt() == null
+                            || garden
+                                .getLastWateredByOwnerAt()
+                                .plusHours(8)
+                                .isBefore(LocalDateTime.now());
 
-                  return HomeResponseDto.GardenSummaryInfo.builder()
-                      .gardenId(garden.getId())
-                      .gardenSlotNumber(garden.getSlotNumber())
-                      .avatar(
+                    boolean isOwnerSunlightAble =
+                        garden.getLastSunlightReceivedAt() == null
+                            || garden
+                                .getLastSunlightReceivedAt()
+                                .isBefore(getStartOfCurrentSunlightDay()); // 매일 06시 초기화
+
+                    HomeResponseDto.AvatarInfo avatarInfo = null;
+                    if (garden.getAvatar() != null) {
+                      avatarInfo =
                           HomeResponseDto.AvatarInfo.builder()
                               .avatarId(garden.getAvatar().getId())
                               .avatarName(garden.getAvatar().getNickname())
-                              .avatarImageUrl(
-                                  garden.getAvatar().getAvatarMaster().getDefaultImageUrl())
-                              .build())
-                      .isOwnerWateringAble(isOwnerWateringAble)
-                      .isOwnerSunlightAble(isOwnerSunlightAble)
-                      .build();
+                              .avatarImageUrl(garden.getAvatar().getImageUrl())
+                              .build();
+                    }
+
+                    return HomeResponseDto.GardenSummaryInfo.builder()
+                        .gardenId(garden.getId())
+                        .gardenSlotNumber(slotNumber)
+                        .avatar(avatarInfo)
+                        .isLocked(false)
+                        .isOwnerWateringAble(isOwnerWateringAble)
+                        .isOwnerSunlightAble(isOwnerSunlightAble)
+                        .build();
+                  } else {
+                    return HomeResponseDto.GardenSummaryInfo.builder()
+                        .gardenId(garden != null ? garden.getId() : null)
+                        .gardenSlotNumber(slotNumber)
+                        .avatar(null)
+                        .isLocked(true)
+                        .isOwnerWateringAble(false)
+                        .isOwnerSunlightAble(false)
+                        .build();
+                  }
                 })
             .collect(Collectors.toList());
 

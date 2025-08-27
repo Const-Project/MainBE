@@ -57,6 +57,8 @@ public class Garden {
   @Column(name = "last_sunlight_received_at")
   private LocalDateTime lastSunlightReceivedAt;
 
+  private boolean isLocked;
+
   @CreatedDate
   @Column(updatable = false)
   private LocalDateTime createdAt;
