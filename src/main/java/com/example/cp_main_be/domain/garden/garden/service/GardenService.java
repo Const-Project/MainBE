@@ -1,5 +1,7 @@
 package com.example.cp_main_be.domain.garden.garden.service;
 
+import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
+import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.garden.domain.GardenBackground;
 import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenBackgroundRepository;
@@ -11,6 +13,9 @@ import com.example.cp_main_be.domain.garden.wateringlog.domain.repository.Friend
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.mission.wishTree.WishTree;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import java.time.LocalDateTime;
@@ -39,8 +44,10 @@ public class GardenService {
   private final UserService userService;
   private final ApplicationEventPublisher eventPublisher;
   private final GardenBackgroundRepository gardenBackgroundRepository;
+  private final AvatarRepository avatarRepository;
   private final UserRepository userRepository;
   private final FriendWateringLogRepository friendWateringLogRepository;
+  private final WishTreeRepository wishTreeRepository;
 
   public GardenResponse findGardenById(Long gardenId) {
     Garden garden =
@@ -160,21 +167,45 @@ public class GardenService {
     User user =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
-    int currentGardens = user.getGardens().size();
+    WishTree wishTree =
+            wishTreeRepository
+                    .findByUserId(userId)
+                    .orElseThrow(() -> new CustomApiException(ErrorCode.WISH_TREE_NOT_FOUND));
 
-    // 최대 텃밭 개수 제한은 여전히 유효하므로 여기서 검사
-    if (currentGardens >= MAX_GARDEN_COUNT) {
-      // 이미 최대치이므로 조용히 종료하거나 예외를 던질 수 있습니다.
-      // 여기서는 추가 생성을 막고 그냥 리턴합니다.
-      throw new CustomApiException(ErrorCode.GARDEN_SLOT_MAXED_OUT);
+    // 1. 사용자의 WishTree 포인트를 기준으로 현재 단계를 결정
+    // User는 WishTree를 가지고 있고, WishTree가 포인트를 관리합니다.
+    WishTreeStage currentStage = WishTreeStage.getStageForPoints(wishTree.getPoints());
+
+// 2. 현재 단계에서 가질 수 있는 최대 텃밭 개수를 가져옴
+    long maxGardensForStage = currentStage.getMaxGardens();
+
+    // 3. 사용자가 현재 보유한 텃밭 개수 확인
+    int currentGardenCount = user.getGardens().size();
+
+    // 4. 최대 텃밭 개수에 도달했는지 확인
+    if (currentGardenCount >= maxGardensForStage) {
+      // 현재 단계에서는 더 이상 텃밭을 생성할 수 없음
+      // ErrorCode에 GARDEN_SLOT_LOCKED 추가가 필요할 수 있습니다.
+      throw new CustomApiException(
+              ErrorCode.GARDEN_SLOT_LOCKED, "현재 단계에서는 더 이상 텃밭을 만들 수 없습니다. 소원나무를 성장시켜주세요.");
     }
 
-    // [기존 레벨 체크 로직 삭제!]
+    // 5. 새로 생성될 텃밭의 기본 배경과 아바타를 설정 (ID 1L을 기본값으로 가정)
+    GardenBackground defaultBackground =
+            gardenBackgroundRepository
+                    .findById(1L)
+                    .orElseThrow(
+                            () -> new CustomApiException(ErrorCode.DEFAULT_RESOURCE_NOT_FOUND, "기본 텃밭 배경을 찾을 수 없습니다."));
+    Avatar defaultAvatar =
+            avatarRepository
+                    .findById(1L)
+                    .orElseThrow(() -> new CustomApiException(ErrorCode.DEFAULT_RESOURCE_NOT_FOUND, "기본 아바타를 찾을 수 없습니다."));
 
-    // TODO: 새로 생성된 텃밭의 기본 Avatar, Background 설정 로직 필요
-    Garden newGarden = Garden.builder().user(user).slotNumber(currentGardens + 1).build();
+    // 6. 새로운 텃밭 생성
+    Garden newGarden =
+            Garden.builder().user(user).slotNumber(currentGardenCount + 1).gardenBackground(defaultBackground).avatar(defaultAvatar).build();
 
     gardenRepository.save(newGarden);
 
