@@ -81,7 +81,7 @@ public class AuthService {
 
     // 2. 위시트리 관련 로직을 수행합니다.
     // 만약 여기서 예외가 발생하면, 위에서 저장한 newUser까지 모두 롤백됩니다.
-    wishTreeService.addPointsToWishTree(savedUser.getId(), 0);
+    wishTreeService.addPointsToWishTree(savedUser.getId(), 0L);
 
     // 3. 모든 것이 성공했을 때만 토큰을 생성하고 저장합니다.
     String accessToken = jwtTokenProvider.generateAccessToken(newUuid.toString());
