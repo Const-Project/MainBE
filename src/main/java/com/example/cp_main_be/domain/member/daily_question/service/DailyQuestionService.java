@@ -2,11 +2,12 @@ package com.example.cp_main_be.domain.member.daily_question.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DailyQuestionService {
-
   private static final List<String> QUESTIONS =
       List.of(
           "어제 하루는 즐거우셨나요?",
@@ -31,10 +32,18 @@ public class DailyQuestionService {
           "요즘 입맛이 좋고, 음식이 맛있게 느껴지시나요?",
           "평소와 같은 일상적인 일들을 꾸준히 하고 계실까요?");
 
-  public String getQuestionForToday() {
+  @Getter
+  @RequiredArgsConstructor
+  public static class QuestionInfo {
+    private final Long id;
+    private final String text;
+  }
+
+  public QuestionInfo getQuestionInfoForToday() {
     int dayOfYear = LocalDate.now().getDayOfYear();
     int questionIndex = (dayOfYear - 1) % QUESTIONS.size();
-    return QUESTIONS.get(questionIndex);
+    String question = QUESTIONS.get(questionIndex);
+    return new QuestionInfo((long) questionIndex, question);
   }
 
   public String getQuestionById(Long id) {
