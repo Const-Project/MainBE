@@ -78,7 +78,7 @@ public class AvatarService {
                 () -> new CustomApiException(ErrorCode.NOT_FOUND, "사용자의 소원나무를 찾을 수 없습니다."));
 
     WishTreeStage stage = wishTree.getStage();
-    int maxGardens = stage.getMaxGardens();
+    Long maxGardens = stage.getMaxGardens();
 
     List<Garden> userGardens = user.getGardens();
     if (userGardens.size() < maxGardens) {

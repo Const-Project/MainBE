@@ -21,7 +21,7 @@ public class WishTree {
   private User user;
 
   @Column(nullable = false)
-  private int points;
+  private Long points;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -30,7 +30,7 @@ public class WishTree {
   @Builder
   public WishTree(User user) {
     this.user = user;
-    this.points = 0;
+    this.points = user.getExperience();
     this.stage = WishTreeStage.SPROUT;
   }
 
@@ -40,7 +40,7 @@ public class WishTree {
    * @param amount 추가할 포인트
    * @return 성장을 했는지 여부
    */
-  public boolean addPoints(int amount) {
+  public boolean addPoints(Long amount) {
     WishTreeStage previousStage = this.stage;
     this.points += amount;
     WishTreeStage newStage = WishTreeStage.getStageForPoints(this.points);
