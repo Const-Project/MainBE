@@ -3,6 +3,7 @@ package com.example.cp_main_be.domain.mission.wishTree;
 import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,17 +19,9 @@ public class WishTreeService {
   // private final NotificationService notificationService; // 알림 발송을 위해 의존
 
   @Transactional
-  public void addPointsToWishTree(Long userId, int points) {
+  public WishTree addPointsToWishTree(Long userId, Long points) {
     // 1. 유저의 소망 나무를 찾거나, 없으면 새로 생성
-    WishTree wishTree =
-        wishTreeRepository
-            .findByUserId(userId)
-            .orElseGet(
-                () -> {
-                  // TODO: User 객체를 찾는 로직 필요
-                  User user = userRepository.findById(userId).orElseThrow();
-                  return wishTreeRepository.save(new WishTree(user));
-                });
+    WishTree wishTree = findOrCreateWishTree(userId);
 
     // 2. WishTree 엔티티에 포인트 추가 및 성장 여부 확인
     boolean hasEvolved = wishTree.addPoints(points);
@@ -44,5 +37,19 @@ public class WishTreeService {
         // notificationService.send(userId, "새로운 텃밭이 열렸어요!");
       }
     }
+    return wishTree;
+  }
+
+  public WishTree findOrCreateWishTree(Long userId) {
+    return wishTreeRepository
+        .findByUserId(userId)
+        .orElseGet(
+            () -> {
+              User user =
+                  userRepository
+                      .findById(userId)
+                      .orElseThrow(() -> new UserNotFoundException("존재하지 않는 유저입니다."));
+              return wishTreeRepository.save(new WishTree(user));
+            });
   }
 }

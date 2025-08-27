@@ -11,6 +11,9 @@ import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryReposi
 import com.example.cp_main_be.domain.mission.diary.service.DiaryService;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTree;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.realquiz.UserQuiz;
 import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
@@ -39,6 +42,8 @@ public class HomeService {
   private final DiaryRepository diaryRepository;
   private final DiaryService diaryService;
   private final UserQuizRepository userQuizRepository;
+  private final WishTreeRepository wishTreeRepository;
+  private final WishTreeService wishTreeService;
 
   // GardenService에서 가져오거나, 공통 유틸리티로 분리하면 더 좋습니다.
   private LocalDateTime getStartOfCurrentWateringDay() {
@@ -181,12 +186,20 @@ public class HomeService {
     if (userQuiz != null && userQuiz.getIsCompleted()) { // 오늘의 퀴즈 성공시
       isQuizCompleted = true;
     }
-    // 위시 트리 임시
+
+    // 위시트리 찾기
+    WishTree wishTree = wishTreeService.findOrCreateWishTree(user.getId());
+
+    // 위시 트리
     PannelResponseDTO.WishTreeDto wishTreeDto =
         PannelResponseDTO.WishTreeDto.builder()
-            .currentStage("꽃") // 예시 데이터
-            .currentPoints(1200) // 예시 데이터
-            .requiredPointsForNextStage(1300) // 예시 데이터
+            .currentStage(wishTree.getStage().getKoreanName())
+            .currentPoints(wishTree.getPoints())
+            .requiredPointsForNextStage(
+                wishTree.getStage().getRequiredPointsForNextStage() - wishTree.getPoints())
+            .progressPercent(
+                (Long) (wishTree.getPoints() / wishTree.getStage().getRequiredPointsForNextStage())
+                    * 100)
             .build();
 
     return PannelResponseDTO.builder()
