@@ -175,7 +175,9 @@ public class HomeService {
       isDiaryCompleted = true;
     }
     UserQuiz userQuiz =
-        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).get(0);
+        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).stream()
+            .findFirst()
+            .orElse(null);
     if (userQuiz != null && userQuiz.getIsCompleted()) { // 오늘의 퀴즈 성공시
       isQuizCompleted = true;
     }
