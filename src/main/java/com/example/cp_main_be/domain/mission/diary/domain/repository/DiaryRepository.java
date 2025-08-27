@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.mission.diary.domain.repository;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,17 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
       "SELECT d FROM Diary d "
           + "WHERE d.user = :user AND d.createdAt BETWEEN :startDate AND :endDate")
   List<Diary> findTodayDiaryByUser(
+      @Param("user") User user,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
+
+  @Query(
+      "SELECT new com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay(DAY(d.createdAt), COUNT(d.id)) "
+          + "FROM Diary d "
+          + "WHERE d.user = :user "
+          + "  AND d.createdAt BETWEEN :startDate AND :endDate "
+          + "GROUP BY DAY(d.createdAt)")
+  List<MissionCountPerDay> findCompletedCountsPerDay(
       @Param("user") User user,
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate);
