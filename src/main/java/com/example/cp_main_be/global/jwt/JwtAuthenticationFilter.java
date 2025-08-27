@@ -2,6 +2,7 @@ package com.example.cp_main_be.global.jwt;
 
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.CustomUserDetailsService;
+import com.example.cp_main_be.global.common.ErrorCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -39,22 +40,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       logger.warn("Token is null. No Authorization header or accessToken cookie found.");
     } else {
       logger.info("Token found: {}", token);
-      if (jwtTokenProvider.validateToken(token)) {
-        logger.info("Token validation successful.");
-        String uuidStr = jwtTokenProvider.getUuidFromToken(token);
 
-        // UserDetailsService를 통해 사용자 정보 로드
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(uuidStr);
+      try {
+        // validateToken에서 예외가 발생하면 바로 catch로 넘어감
+        if (jwtTokenProvider.validateToken(token)) {
+          logger.info("Token validation successful.");
+          String uuidStr = jwtTokenProvider.getUuidFromToken(token);
 
-        UsernamePasswordAuthenticationToken authentication =
-            new UsernamePasswordAuthenticationToken(
-                userDetails, // Principal로 UserDetails 객체 사용
-                null,
-                userDetails.getAuthorities()); // UserDetails에서 직접 권한 목록을 가져옴
+          // UserDetailsService를 통해 사용자 정보 로드
+          UserDetails userDetails = customUserDetailsService.loadUserByUsername(uuidStr);
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-      } else {
-        logger.warn("Token validation FAILED.");
+          UsernamePasswordAuthenticationToken authentication =
+              new UsernamePasswordAuthenticationToken(
+                  userDetails, // Principal로 UserDetails 객체 사용
+                  null,
+                  userDetails.getAuthorities()); // UserDetails에서 직접 권한 목록을 가져옴
+
+          SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+      } catch (Exception e) {
+        logger.warn("Token validation failed: {}", e.getMessage());
+        // 모든 토큰 관련 오류를 INVALID_TOKEN으로 처리
+        throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN, e);
       }
     }
 
@@ -76,5 +83,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           .orElse(null);
     }
     return null;
+  }
+
+  // 커스텀 예외 클래스
+  public static class JwtAuthenticationException extends RuntimeException {
+    private final ErrorCode errorCode;
+
+    public JwtAuthenticationException(ErrorCode errorCode, Throwable cause) {
+      super(errorCode.getMessage(), cause);
+      this.errorCode = errorCode;
+    }
+
+    public ErrorCode getErrorCode() {
+      return errorCode;
+    }
   }
 }

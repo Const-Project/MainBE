@@ -1,6 +1,8 @@
 package com.example.cp_main_be.global.jwt;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -59,13 +61,20 @@ public class JwtTokenProvider {
         .getSubject();
   }
 
+  // 예외를 그대로 던지도록 수정
   public boolean validateToken(String token) {
     try {
       Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
       return true;
+    } catch (ExpiredJwtException e) {
+      // 만료된 토큰 - 예외를 다시 던짐
+      throw e;
+    } catch (JwtException e) {
+      // 유효하지 않은 토큰 (서명 오류, 형식 오류 등) - 예외를 다시 던짐
+      throw e;
     } catch (Exception e) {
-      // TODO: Handle specific exceptions (ExpiredJwtException, UnsupportedJwtException, etc.)
-      return false;
+      // 기타 예외 - JwtException으로 래핑해서 던짐
+      throw new JwtException("Token validation failed", e);
     }
   }
 
