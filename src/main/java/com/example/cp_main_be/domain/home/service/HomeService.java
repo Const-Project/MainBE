@@ -170,11 +170,14 @@ public class HomeService {
         diaryRepository.findTodayDiaryByUser(user, startOfDay, endOfDay).stream()
             .findFirst()
             .orElse(null);
+
     if (diary != null && diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())) {
       isDiaryCompleted = true;
     }
     UserQuiz userQuiz =
-        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).get(0);
+        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).stream()
+                .findFirst()
+                .orElse(null);
     if (userQuiz != null && userQuiz.getIsCompleted()) { // 오늘의 퀴즈 성공시
       isQuizCompleted = true;
     }
