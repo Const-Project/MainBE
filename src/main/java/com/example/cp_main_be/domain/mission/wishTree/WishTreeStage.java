@@ -10,8 +10,8 @@ public enum WishTreeStage {
   SPROUT(1000L, "새싹", 1L),
   FLOWER(2150L, "꽃", 2L), // 1000 + 1150
   FRUIT(3450L, "열매", 3L), // 2150 + 1300
-  TREE(4900L, "나무", 4L), // 3450 + 1450
-  FINAL(Long.MAX_VALUE, "최종 나무", 5L); // 더 이상 성장 안함
+  TREE(4900L, "나무", 4L), // 3450 + 1450, 최대 텃밭 개수
+  FINAL(Long.MAX_VALUE, "최종 나무", 4L); // 더 이상 성장 안함, 최대 텃밭 개수
 
   private final Long requiredPointsForNextStage;
   private final String koreanName;
@@ -34,7 +34,12 @@ public enum WishTreeStage {
     return values()[this.ordinal() + 1];
   }
 
-  public Long getMaxGardens(WishTreeStage stage) {
-    return stage.maxGardens;
+  /**
+   * 현재 단계에서 가질 수 있는 최대 텃밭 개수를 반환합니다.
+   *
+   * @return 최대 텃밭 개수
+   */
+  public Long getMaxGardens() {
+    return this.maxGardens;
   }
 }

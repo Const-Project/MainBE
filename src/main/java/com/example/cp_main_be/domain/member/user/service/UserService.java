@@ -224,8 +224,6 @@ public class UserService {
                   // GardenResponse 대신 UserGardenDetailResponse를 빌드
                   return UserGardenDetailResponse.builder()
                       .gardenId(garden.getId())
-                      .waterCount(garden.getWaterCount())
-                      .maxWaterCount(100)
                       .avatarInfo(avatarInfoForGarden)
                       .isWateringAbleByMe(isWateringAbleByMe)
                       .build();
@@ -238,7 +236,6 @@ public class UserService {
         .userNickname(profileUser.getNickname())
         .profileImageUrl(profileImageUrl)
         .followStatus(followStatus)
-        .profileUserLevel(profileUser.getLevel())
         .leftWaterCountForOthers(leftWaterCountForOthers)
         .userGardens(userGardens)
         .build();

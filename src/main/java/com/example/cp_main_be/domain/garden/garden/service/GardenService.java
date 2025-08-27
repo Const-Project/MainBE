@@ -38,13 +38,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class GardenService {
 
-  private final WishTreeService wishTreeService;
-
   private static final int MAX_GARDEN_COUNT = 3;
   private static final Long WATERING_POINTS = 2L;
   private static final Long SUNLIGHT_POINTS = 3L;
   private static final Long MAX_FRIEND_WATERING_PER_DAY = 3L;
-
+  private final WishTreeService wishTreeService;
   private final GardenRepository gardenRepository;
   private final UserService userService;
   private final ApplicationEventPublisher eventPublisher;
@@ -199,6 +197,7 @@ public class GardenService {
           ErrorCode.GARDEN_SLOT_LOCKED, "현재 단계에서는 더 이상 텃밭을 만들 수 없습니다. 소원나무를 성장시켜주세요.");
     }
 
+    // TODO: 여기 뭔가 수정해야할 듯 아바타는 설정해서 가져오고 배경화면은 그냥 기본걸 씀
     // 5. 새로 생성될 텃밭의 기본 배경과 아바타를 설정 (ID 1L을 기본값으로 가정)
     GardenBackground defaultBackground =
         gardenBackgroundRepository

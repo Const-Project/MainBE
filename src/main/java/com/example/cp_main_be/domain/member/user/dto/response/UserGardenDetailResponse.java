@@ -13,8 +13,6 @@ import lombok.Setter;
 @Builder
 public class UserGardenDetailResponse {
   private Long gardenId;
-  private int waterCount;
-  private int maxWaterCount;
   private HomeResponseDto.AvatarInfo avatarInfo; // 해당 정원에 배치된 아바타의 상세 정보
 
   private Boolean isWateringAbleByMe; // 현재 접속 유저가 이 정원에 물을 줄 수 있는지 여부
