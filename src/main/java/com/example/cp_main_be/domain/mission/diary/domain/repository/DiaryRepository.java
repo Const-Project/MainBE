@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.mission.diary.domain.repository;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
@@ -29,4 +30,12 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
           + "LEFT JOIN FETCH c.writer cw " // 댓글 작성자 fetch
           + "WHERE d.id = :diaryId")
   Optional<Diary> findByIdWithDetails(@Param("diaryId") Long diaryId);
+
+  @Query(
+      "SELECT d FROM Diary d "
+          + "WHERE d.user = :user AND d.createdAt BETWEEN :startDate AND :endDate")
+  List<Diary> findTodayDiaryByUser(
+      @Param("user") User user,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 }
