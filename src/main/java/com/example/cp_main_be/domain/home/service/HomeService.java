@@ -84,6 +84,8 @@ public class HomeService {
             .findByUserId(userId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
+    long unlockedGardenCount = user.getGardens().stream().filter(g -> !g.isLocked()).count();
+
     Map<Integer, Garden> userGardens =
         user.getGardens().stream()
             .collect(Collectors.toMap(Garden::getSlotNumber, garden -> garden));
@@ -129,7 +131,9 @@ public class HomeService {
                         .build();
                   } else {
                     boolean isUnlockable =
-                        (garden != null && garden.isLocked() && wishTree.isUnlockable());
+                        garden != null
+                            && wishTree.isUnlockable()
+                            && garden.getSlotNumber() == unlockedGardenCount + 1;
 
                     return HomeResponseDto.GardenSummaryInfo.builder()
                         .gardenId(garden != null ? garden.getId() : null)
