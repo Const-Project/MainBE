@@ -40,13 +40,16 @@ public class WishTreeService {
     return wishTree;
   }
 
-  public WishTree findOrCreateWishTree(Long userId){
-      return wishTreeRepository
-              .findByUserId(userId)
-              .orElseGet(
-                      () -> {
-                        User user = userRepository.findById(userId).orElseThrow(()-> new UserNotFoundException("존재하지 않는 유저입니다."));
-                        return wishTreeRepository.save(new WishTree(user));
-                      });
+  public WishTree findOrCreateWishTree(Long userId) {
+    return wishTreeRepository
+        .findByUserId(userId)
+        .orElseGet(
+            () -> {
+              User user =
+                  userRepository
+                      .findById(userId)
+                      .orElseThrow(() -> new UserNotFoundException("존재하지 않는 유저입니다."));
+              return wishTreeRepository.save(new WishTree(user));
+            });
   }
 }

@@ -195,8 +195,11 @@ public class HomeService {
         PannelResponseDTO.WishTreeDto.builder()
             .currentStage(wishTree.getStage().getKoreanName())
             .currentPoints(wishTree.getPoints())
-            .requiredPointsForNextStage(wishTree.getStage().getRequiredPointsForNextStage()-wishTree.getPoints())
-                .progressPercent((Long)(wishTree.getPoints()/wishTree.getStage().getRequiredPointsForNextStage())*100)
+            .requiredPointsForNextStage(
+                wishTree.getStage().getRequiredPointsForNextStage() - wishTree.getPoints())
+            .progressPercent(
+                (Long) (wishTree.getPoints() / wishTree.getStage().getRequiredPointsForNextStage())
+                    * 100)
             .build();
 
     return PannelResponseDTO.builder()
