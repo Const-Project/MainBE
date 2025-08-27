@@ -4,11 +4,11 @@ import lombok.Getter;
 
 @Getter
 public class MissionCountPerDay {
-  private int day;
-  private long count;
+  private final int day;
+  private final long count;
 
   public MissionCountPerDay(int day, long count) {
     this.day = day;
-    this.count = (int) count;
+    this.count = count;
   }
 }
