@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.member.user.presentation;
 
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
@@ -12,8 +13,9 @@ import com.example.cp_main_be.global.exception.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -87,15 +89,19 @@ public class UserController {
   @GetMapping("/me/gardens")
   public ResponseEntity<ApiResponse<List<Long>>> getMyGardenIds(
       @AuthenticationPrincipal User user) {
-    // 로직을 서비스 계층으로 위임하여 트랜잭션 내에서 처리하도록 변경
-    List<Long> gardenIds = userService.getMyGardenIds(user);
+    List<Long> gardenIds =
+        user.getGardens().stream()
+            .sorted(Comparator.comparing(Garden::getSlotNumber))
+            .map(Garden::getId)
+            .collect(Collectors.toList());
+
     return ResponseEntity.ok(ApiResponse.success(gardenIds));
   }
 
   @Operation(summary = "유저 정보 조회", description = "유저 정보를 조회합니다")
   @GetMapping("/{userId}")
   public ResponseEntity<ApiResponse<UserProfileResponse>> getUserInfo(
-      @PathParam("userId") Long userId) {
+      @PathVariable("userId") Long userId) {
     // SecurityContextHolder에서 현재 인증된 사용자(UUID)를 가져옴
     User user =
         userRepository
