@@ -1,11 +1,13 @@
 package com.example.cp_main_be.domain.delivery.presentation;
 
 import com.example.cp_main_be.domain.delivery.dto.request.DeliveryRequest;
+import com.example.cp_main_be.domain.delivery.dto.response.DeliveryPlantResponse;
 import com.example.cp_main_be.domain.delivery.service.DeliveryService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,5 +35,12 @@ public class DeliveryController {
     deliveryService.createDeliveryRequest(userId, deliveryRequest);
 
     return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
+  @Operation(summary = "배송 가능한 식물 목록 조회")
+  @GetMapping("/plants")
+  public ResponseEntity<ApiResponse<List<DeliveryPlantResponse>>> getDeliveryPlantList() {
+    List<DeliveryPlantResponse> deliveryPlantList = deliveryService.getDeliveryPlantList();
+    return ResponseEntity.ok(ApiResponse.success(deliveryPlantList));
   }
 }

@@ -82,7 +82,8 @@ public class GardenService {
   }
 
   /** 자신의 정원에 물을 주는 로직을 처리합니다. */
-  private void waterOwnGarden(Long ownerId, Garden garden) {
+  @Transactional
+  public void waterOwnGarden(Long ownerId, Garden garden) {
     // 8시간 쿨타임 체크
     if (garden.getLastWateredByOwnerAt() != null
         && garden.getLastWateredByOwnerAt().plusHours(8).isAfter(LocalDateTime.now())) {
