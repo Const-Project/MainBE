@@ -81,3 +81,10 @@ springdoc:
     servers:
       - url: https://api.napulnapul.com
         description: Production Server
+
+logging:
+  level:
+    # 실행되는 SQL문을 DEBUG 레벨로 출력
+    org.hibernate.SQL: DEBUG
+    # SQL에 바인딩되는 파라미터 값을 TRACE 레벨로 출력
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

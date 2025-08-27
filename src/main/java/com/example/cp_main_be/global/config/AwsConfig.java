@@ -13,19 +13,26 @@ import software.amazon.awssdk.services.s3.S3Client;
 @Configuration
 public class AwsConfig { // 파일 이름은 그대로 두셔도 됩니다.
 
-  @Value("${r2.account-id}")
+  @Value("${cloudflare.r2.account-id}")
   private String accountId;
 
-  @Value("${r2.access-key}")
+  @Value("${cloudflare.r2.access-key}")
   private String accessKey;
 
-  @Value("${r2.secret-key}")
+  @Value("${cloudflare.r2.secret-key}")
   private String secretKey;
 
   @Bean
   public S3Client s3Client() {
     // R2 접속을 위한 엔드포인트 URL 생성
     String endpoint = String.format("https://%s.r2.cloudflarestorage.com", accountId);
+
+    String endpointLiteral = "https://" + accountId + ".r2.cloudflarestorage.com";
+
+    // 디버깅용 로그 추가
+    System.out.println("R2 Endpoint: " + endpointLiteral);
+    System.out.println("Access Key: " + accessKey);
+    System.out.println("Account ID: " + accountId);
 
     // R2 인증 정보 설정 (SDK v2 방식)
     AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
@@ -36,6 +43,7 @@ public class AwsConfig { // 파일 이름은 그대로 두셔도 됩니다.
         .endpointOverride(URI.create(endpoint)) // R2 엔드포인트 지정
         .region(Region.of("auto")) // R2는 리전이 없으므로 'auto'
         .credentialsProvider(credentialsProvider)
+        .forcePathStyle(true)
         .build();
   }
 }

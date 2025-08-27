@@ -8,11 +8,9 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizReposito
 import com.example.cp_main_be.domain.mission.quiz.dto.CompletedQuizResponseDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizRequestDTO;
 import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
-import com.example.cp_main_be.domain.mission.quiz.enums.QuizType;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
-import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -150,31 +148,6 @@ public class QuizService {
         .missionId(dailyMissionMaster.getId())
         .isCorrect(isCorrect)
         .selectedAnswerNumber(selectedQuizOption.getOptionOrder())
-        .build();
-  }
-
-  public QuizResponseDTO getQuizByType(QuizType quizType) {
-    Quiz quiz = quizRepository.findAllByQuizType(quizType).get(0);
-    if (quiz == null) throw new QuizNotFoundException("해당 종류의 퀴즈가 존재하지 않습니다.");
-    List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
-
-    // 정답 정보 제외하고 DTO 생성
-    List<QuizResponseDTO.QuizOptionResponseDTO> optionDTOs =
-        quizOptions.stream()
-            .map(
-                option ->
-                    QuizResponseDTO.QuizOptionResponseDTO.builder()
-                        .id(option.getId())
-                        .text(option.getOptionText())
-                        // isAnswer 필드 제거됨
-                        .build())
-            .collect(Collectors.toList());
-
-    return QuizResponseDTO.builder()
-        .quizType(quiz.getQuizType())
-        .quizQuestion(quiz.getQuizQuestion())
-        .quizOptions(optionDTOs)
-        .quizId(quiz.getId())
         .build();
   }
 

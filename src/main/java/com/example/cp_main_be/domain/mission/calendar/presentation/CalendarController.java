@@ -1,8 +1,8 @@
 package com.example.cp_main_be.domain.mission.calendar.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.calendar.CalendarService;
 import com.example.cp_main_be.domain.mission.calendar.dto.CalendarResponse;
-import com.example.cp_main_be.domain.mission.user_daily_mission.service.CalendarService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/calendar")
+@RequestMapping("/api/v1/calendar")
 @RequiredArgsConstructor
 @Tag(name = "캘린더 API", description = "캘린더 관련 기능을 제공합니다.")
 public class CalendarController {
