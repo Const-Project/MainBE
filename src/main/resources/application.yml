@@ -20,7 +20,7 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiration-milliseconds: 5256000000
-  refresh-token-expiration-milliseconds: 5256000000*2
+  refresh-token-expiration-milliseconds: 10512000000
 
 cloudflare:
   r2:
