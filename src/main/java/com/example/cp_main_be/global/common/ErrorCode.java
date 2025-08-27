@@ -24,6 +24,7 @@ public enum ErrorCode {
   INVALID_MISSION_TYPE_FOR_QUIZ_OPTION(
       HttpStatus.BAD_REQUEST, "E40010", "퀴즈 타입의 미션에만 선지를 추가할 수 있습니다."),
   INVALID_REQUEST(HttpStatus.BAD_REQUEST, "E40011", "잘못된 요청입니다."),
+  SELF_FOLLOWING_UNABLE(HttpStatus.BAD_REQUEST, "E40012", "자신을 팔로우할 수 없습니다."),
 
   // 403 Forbidden
   ACCESS_DENIED(HttpStatus.FORBIDDEN, "E40301", "요청에 대한 권한이 없습니다."),

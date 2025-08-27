@@ -66,17 +66,23 @@ public class HomeService {
             .findById(userId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
+    WishTree wishTreeOfUser = user.getWishTree();
     // 1. UserInfo 구성
     int unreadNotificationCount = notificationRepository.countByReceiverAndIsReadFalse(user);
     HomeResponseDto.UserInfo userInfo =
         HomeResponseDto.UserInfo.builder()
             .id(user.getId())
             .username(user.getNickname())
-            .level(user.getLevel())
-            .currentExp(user.getExperience())
-            .requiredExpForNextLevel(calculateRequiredExpForLevel(user.getLevel() + 1))
+            .level(wishTreeOfUser.getStage().ordinal() + 1)
+            .currentExp(wishTreeOfUser.getPoints())
+            .requiredExpForNextLevel(wishTreeOfUser.getStage().getRequiredPointsForNextStage())
             .unreadNotificationCount(unreadNotificationCount)
             .build();
+
+    WishTree wishTree =
+        wishTreeRepository
+            .findByUserId(userId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
     Map<Integer, Garden> userGardens =
         user.getGardens().stream()
@@ -117,15 +123,20 @@ public class HomeService {
                         .gardenSlotNumber(slotNumber)
                         .avatar(avatarInfo)
                         .isLocked(false)
+                        .isUnlockable(false)
                         .isOwnerWateringAble(isOwnerWateringAble)
                         .isOwnerSunlightAble(isOwnerSunlightAble)
                         .build();
                   } else {
+                    boolean isUnlockable =
+                        (garden != null && garden.isLocked() && wishTree.isUnlockable());
+
                     return HomeResponseDto.GardenSummaryInfo.builder()
                         .gardenId(garden != null ? garden.getId() : null)
                         .gardenSlotNumber(slotNumber)
                         .avatar(null)
                         .isLocked(true)
+                        .isUnlockable(isUnlockable)
                         .isOwnerWateringAble(false)
                         .isOwnerSunlightAble(false)
                         .build();

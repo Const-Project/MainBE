@@ -58,8 +58,15 @@ public class GardenController {
   @PutMapping("/slots/unlock")
   public ResponseEntity<ApiResponse<Void>> unlockGarden() {
     User currentUser = userService.getCurrentUser();
-    gardenService.unlockNewGardenSlot(currentUser.getId());
+    gardenService.unlockNextGarden(currentUser.getId());
     return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
+  @Operation(summary = "텃밭 슬롯 해금", description = "해금 버튼 클릭 시 호출")
+  @PostMapping("/unlock")
+  public ResponseEntity<Void> unlockGarden(@AuthenticationPrincipal User user) {
+    gardenService.unlockNextGarden(user.getId());
+    return ResponseEntity.ok().build();
   }
 
   @Operation(summary = "텃밭 배경화면 update", description = "텃밭의 배경화면을 수정한다.")
