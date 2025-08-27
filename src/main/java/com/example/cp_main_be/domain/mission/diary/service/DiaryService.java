@@ -93,8 +93,8 @@ public class DiaryService {
 
   // 내 일기 목록 조회 (읽기 전용)
   @Transactional(readOnly = true)
-  public List<Diary> findMyDiaries(User user) {
-    return diaryRepository.findByUserOrderByCreatedAtDesc(user);
+  public List<Diary> findMyDiaries(User user, int year, int month) {
+    return diaryRepository.findByUserAndYearAndMonth(user, year, month);
   }
 
   public Diary updateDiary(Long userId, Long diaryId, UpdateDiaryRequest request) {

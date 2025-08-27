@@ -50,4 +50,13 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
       @Param("user") User user,
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate);
+
+  @Query(
+      "SELECT d FROM Diary d "
+          + "WHERE d.user = :user "
+          + "  AND YEAR(d.createdAt) = :year "
+          + "  AND MONTH(d.createdAt) = :month "
+          + "ORDER BY d.createdAt DESC")
+  List<Diary> findByUserAndYearAndMonth(
+      @Param("user") User user, @Param("year") int year, @Param("month") int month);
 }

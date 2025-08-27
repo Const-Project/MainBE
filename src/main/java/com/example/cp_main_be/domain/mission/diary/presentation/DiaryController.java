@@ -37,8 +37,8 @@ public class DiaryController {
   @Operation(summary = "내 일기 목록 조회", description = "내 일기 목록을 조회합니다")
   @GetMapping
   public ResponseEntity<ApiResponse<List<DiaryResponse>>> getMyDiaries(
-      @AuthenticationPrincipal User user) {
-    List<Diary> diaries = diaryService.findMyDiaries(user);
+      @AuthenticationPrincipal User user, @RequestParam int year, @RequestParam int month) {
+    List<Diary> diaries = diaryService.findMyDiaries(user, year, month);
     List<DiaryResponse> responses = diaries.stream().map(DiaryResponse::from).toList();
     return ResponseEntity.ok(ApiResponse.success(responses));
   }
