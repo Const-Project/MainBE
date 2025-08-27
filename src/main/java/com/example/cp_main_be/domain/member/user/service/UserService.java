@@ -39,7 +39,10 @@ public class UserService {
   private final FollowRepository followRepository;
 
   public void addExperience(Long actorId, int points) {
-    User user = userRepository.findById(actorId).get();
+    User user =
+        userRepository
+            .findById(actorId)
+            .orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다."));
     user.addExperience(points);
     levelService.checkLevelUp(user);
   }
