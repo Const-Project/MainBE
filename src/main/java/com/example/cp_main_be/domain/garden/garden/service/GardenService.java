@@ -159,7 +159,8 @@ public class GardenService {
     LocalDateTime startOfSunlightDay = getStartOfCurrentSunlightDay();
     if (garden.getLastSunlightReceivedAt() != null
         && garden.getLastSunlightReceivedAt().isAfter(startOfSunlightDay)) {
-      throw new CustomApiException(ErrorCode.SUNLIGHT_COOL_DOWN,"이미 햇빛을 주었습니다. 내일 오전 6시 이후에 다시 시도해주세요.");
+      throw new CustomApiException(
+          ErrorCode.SUNLIGHT_COOL_DOWN, "이미 햇빛을 주었습니다. 내일 오전 6시 이후에 다시 시도해주세요.");
     }
 
     garden.increaseSunlightCount();
