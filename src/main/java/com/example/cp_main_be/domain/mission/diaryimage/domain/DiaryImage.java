@@ -5,6 +5,7 @@ import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Getter
@@ -30,6 +31,7 @@ public class DiaryImage {
   private User user;
 
   @Column(name = "created_at")
+  @CreatedDate
   private LocalDateTime createdAt;
 
   public void updateImageUrl(String newImageUrl) {
