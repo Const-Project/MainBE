@@ -19,7 +19,7 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expiration-milliseconds: 3600000
+  access-token-expiration-milliseconds: 60000
   refresh-token-expiration-milliseconds: 604800000
 
 cloudflare:
@@ -29,6 +29,9 @@ cloudflare:
     access-key: ${R2_ACCESS_KEY}
     secret-key: ${R2_SECRET_KEY}
     account-id: ${R2_ACCOUNT_ID}
+aws:
+  s3:
+    bucket: cp-main-bucket
 
 fastapi:
   server:
