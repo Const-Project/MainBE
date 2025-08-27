@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.member.user.presentation;
 
-import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
@@ -14,9 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.websocket.server.PathParam;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -90,12 +87,8 @@ public class UserController {
   @GetMapping("/me/gardens")
   public ResponseEntity<ApiResponse<List<Long>>> getMyGardenIds(
       @AuthenticationPrincipal User user) {
-    List<Long> gardenIds =
-        user.getGardens().stream()
-            .sorted(Comparator.comparing(Garden::getSlotNumber))
-            .map(Garden::getId)
-            .collect(Collectors.toList());
-
+    // 로직을 서비스 계층으로 위임하여 트랜잭션 내에서 처리하도록 변경
+    List<Long> gardenIds = userService.getMyGardenIds(user);
     return ResponseEntity.ok(ApiResponse.success(gardenIds));
   }
 
