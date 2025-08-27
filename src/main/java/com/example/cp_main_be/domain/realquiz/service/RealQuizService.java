@@ -100,7 +100,7 @@ public class RealQuizService {
     LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
     LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
     UserQuiz userQuiz =
-        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).get(0);
+        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).stream().findFirst().orElse(null);
 
     // 퀴즈가 할당되지 않은 경우
     if (userQuiz == null) {

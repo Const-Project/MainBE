@@ -181,7 +181,6 @@ public class HomeService {
     if (userQuiz != null && userQuiz.getIsCompleted()) { // 오늘의 퀴즈 성공시
       isQuizCompleted = true;
     }
-
     // 위시 트리 임시
     PannelResponseDTO.WishTreeDto wishTreeDto =
         PannelResponseDTO.WishTreeDto.builder()
