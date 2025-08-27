@@ -52,14 +52,20 @@ public class UserService {
   }
 
   public void updateAvatar(User user, AvatarChangeRequest request, Long avatarId) {
-    if (user == null) return;
+    // [수정] 불필요한 null 체크를 제거하고, 일관된 예외 처리를 사용합니다.
+    if (user == null) {
+      throw new CustomApiException(ErrorCode.INVALID_TOKEN, "사용자 정보를 찾을 수 없습니다.");
+    }
     Avatar avatar =
         avatarRepository
             .findById(avatarId)
             .orElseThrow(() -> new AvatarNotFoundException("아바타를 찾을 수 없습니다."));
-    if (avatar == null) return;
+
+    // [버그 수정] AvatarMaster(원본)가 아닌 Avatar(개별 인스턴스)의 imageUrl을 변경해야 합니다.
+    // Avatar 엔티티에 imageUrl 필드가 있어야 합니다.
     if (request.getNewAvatarUrl() != null) {
-      avatar.getAvatarMaster().setDefaultImageUrl(request.getNewAvatarUrl());
+      // avatar.getAvatarMaster().setDefaultImageUrl(request.getNewAvatarUrl()); // 절대 이렇게 하면 안됩니다.
+      avatar.setImageUrl(request.getNewAvatarUrl()); // 이렇게 수정해야 합니다.
     }
     if (request.getNewAvatarName() != null) {
       avatar.setNickname(request.getNewAvatarName());
