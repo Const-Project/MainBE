@@ -7,6 +7,7 @@ import com.example.cp_main_be.domain.member.auth.dto.response.AnonymousRegistrat
 import com.example.cp_main_be.domain.member.auth.dto.response.TokenRefreshResponse;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
@@ -104,7 +105,7 @@ public class AuthService {
             .diaries(new ArrayList<>())
             .gardens(new ArrayList<>())
             .build();
-    wishTreeService.addPointsToWishTree(userRepository.save(newUser).getId(), 0);
+
 
     String accessToken = jwtTokenProvider.generateAccessToken(newUuid.toString());
     String refreshToken = jwtTokenProvider.generateRefreshToken(newUuid.toString());
