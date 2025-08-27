@@ -27,7 +27,7 @@ public record DiaryInfoResponse(
         diary.getComments().stream().map(CommentResponseDTO::from).toList();
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
     String writerName = diary.getUser().getNickname();
-    String profileImageUrl = diary.getUser().getProfileImageUrl();
+    String profileImageUrl = diary.getUser().getAvatarList().get(0).getImageUrl();
 
     return new DiaryInfoResponse(
         diary.getId(),
@@ -51,7 +51,7 @@ public record DiaryInfoResponse(
     public static CommentResponseDTO from(Comment comment) {
       return new CommentResponseDTO(
           comment.getId(),
-          comment.getWriter().getProfileImageUrl(),
+          comment.getWriter().getAvatarList().get(0).getImageUrl(),
           comment.getWriter().getNickname(),
           comment.getContent());
     }

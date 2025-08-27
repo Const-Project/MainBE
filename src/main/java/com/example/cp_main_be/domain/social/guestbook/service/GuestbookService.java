@@ -10,11 +10,14 @@ import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
 import com.example.cp_main_be.domain.social.guestbook.dto.request.GuestbookRequest;
 import com.example.cp_main_be.domain.social.guestbook.dto.response.GuestbookResponse;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +65,15 @@ public class GuestbookService {
     }
   }
 
-  public List<GuestbookResponse> getGuestbookList(User user) {
+  public List<GuestbookResponse> getGuestbookList(Long userId, User user) {
 
     List<Guestbook> guestbookList = guestbookRepository.findAllByOwner(user);
+    if (!Objects.equals(userId, user.getId()))
+      guestbookList =
+          guestbookRepository.findAllByOwner(
+              userRepository
+                  .findById(userId)
+                  .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND)));
 
     // 비어있는 리스트에 stream()을 호출해도 예외가 발생하지 않고 비어있는 stream이 반환됩니다.
     return guestbookList.stream()

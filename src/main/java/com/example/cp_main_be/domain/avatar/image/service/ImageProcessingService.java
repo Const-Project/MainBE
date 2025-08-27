@@ -87,6 +87,7 @@ public class ImageProcessingService {
                               }))
 //                  .bodyToMono(byte[].class)
               .bodyToMono(AiResponseDTO.class)
+
               .timeout(Duration.ofSeconds(300))
               .block(Duration.ofSeconds(300));
 

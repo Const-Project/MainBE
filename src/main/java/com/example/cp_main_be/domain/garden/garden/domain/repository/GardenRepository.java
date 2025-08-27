@@ -15,4 +15,12 @@ public interface GardenRepository extends JpaRepository<Garden, Long> {
           + "JOIN FETCH g.gardenBackground "
           + "WHERE g.user = :user")
   Optional<Garden> findByUserWithDetails(@Param("user") User user);
+
+  // 유저의 정원 중 잠겨있으면서 가장 낮은 슬롯 번호를 가진 정원 1개를 찾기
+  Optional<Garden> findFirstByUserAndIsLockedIsTrueOrderBySlotNumberAsc(User user);
+
+  // 유저의 해금된 정원 개수 세기
+  long countByUserAndIsLockedIsFalse(User user);
+
+  Optional<Garden> findFirstByUserAndIsLockedIsFalseAndAvatarIsNullOrderBySlotNumberAsc(User user);
 }

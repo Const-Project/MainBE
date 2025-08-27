@@ -35,6 +35,7 @@ public class HomeResponseDto {
     private Integer gardenSlotNumber;
     private AvatarInfo avatar; // 각 정원에 배치된 아바타 정보 -> 해금안되면 null
     private boolean isLocked;
+    private boolean isUnlockable;
     private boolean isOwnerWateringAble; // 본인 정원에 물주기 가능한지 여부 -> 해금안되면 null
     private boolean isOwnerSunlightAble; // 본인 정원에 햇빛 주기 가능한지 여부 -> 해금안되면 null
   }

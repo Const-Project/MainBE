@@ -7,6 +7,8 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.social.follow.dto.FollowResponseDTO;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,8 @@ public class FollowService {
             .findById(followingId)
             .orElseThrow(() -> new UserNotFoundException("팔로잉할 사용자를 찾을 수 없습니다."));
 
+    if (follower.getId().equals(following.getId()))
+      throw new CustomApiException(ErrorCode.SELF_FOLLOWING_UNABLE);
     if (followRepository.existsByFollowerAndFollowing(follower, following)) {
       throw new RuntimeException("이미 팔로우한 사용자입니다."); // TODO: Custom Exception
     }
@@ -76,8 +80,8 @@ public class FollowService {
         .map(
             member ->
                 FollowResponseDTO.builder()
-                    .username(member.getUsername())
-                    .userImageUrl(member.getProfileImageUrl())
+                    .username(member.getNickname())
+                    .userImageUrl(member.getAvatarList().get(0).getImageUrl())
                     .userId(member.getId())
                     .build())
         .toList();
@@ -96,8 +100,8 @@ public class FollowService {
         .map(
             member ->
                 FollowResponseDTO.builder()
-                    .username(member.getUsername())
-                    .userImageUrl(member.getProfileImageUrl())
+                    .username(member.getNickname())
+                    .userImageUrl(member.getAvatarList().get(0).getImageUrl())
                     .userId(member.getId())
                     .build())
         .toList();
