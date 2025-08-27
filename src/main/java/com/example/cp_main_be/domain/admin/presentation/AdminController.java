@@ -20,8 +20,6 @@ import com.example.cp_main_be.domain.delivery.domain.DeliveryPlant;
 import com.example.cp_main_be.domain.delivery.dto.request.DeliveryPlantRequest;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.daily_keywords.domain.DailyKeywords;
-import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
-import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
 import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import com.example.cp_main_be.global.common.ApiResponse;
@@ -43,48 +41,50 @@ public class AdminController {
 
   private final AdminService adminService;
 
-//  @PostMapping("/missions/daily")
-//  @Operation(summary = "일일 미션(미션마스터) 생성 API")
-//  public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>> createDailyMission(
-//      @RequestBody AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
-//    DailyMissionMaster response = adminService.createDailyMissionMasters(requestDTO);
-//    AdminResponseDTO.DailyMissionMastersResDTO result =
-//        DailyMissionMaster.toDailyMissionMastersResDTO(response);
-//    return ResponseEntity.ok(ApiResponse.success(result));
-//  }
-//
-//  @PutMapping("/missions/daily/{dailyMissionMasterId}")
-//  @Operation(summary = "일일 미션(미션마스터) 수정 API")
-//  public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>> updateDailyMission(
-//      @RequestBody AdminRequestDTO.UpdateMissionRequestDTO requestDTO, @PathVariable Long id) {
-//    DailyMissionMaster response = adminService.updateDailyMissionMasters(requestDTO, id);
-//    AdminResponseDTO.DailyMissionMastersResDTO result =
-//        DailyMissionMaster.toDailyMissionMastersResDTO(response);
-//    return ResponseEntity.ok(ApiResponse.success(result));
-//  }
-//
-//  @PostMapping("/quiz/create")
-//  @Operation(summary = "퀴즈 생성 API")
-//  public ApiResponse<AdminResponseDTO.CreateQuizResponseDTO> createQuiz(
-//      @RequestBody AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
-//    AdminResponseDTO.CreateQuizResponseDTO result = adminService.createQuiz(requestDTO);
-//    return ApiResponse.ok(result);
-//  }
-//
-//  @PostMapping("/{quizId}/options")
-//  @Operation(summary = "퀴즈 선지 등록 API")
-//  public ResponseEntity<ApiResponse<QuizOptions>> createQuizOption(
-//          @RequestBody AdminRequestDTO.CreateQuizOptionRequestDTO requestDTO,
-//          @PathVariable(name = "quizId") Long quizId) {
-//    QuizOptions quizOptions = adminService.createQuizOption(requestDTO, quizId);
-//    return ResponseEntity.ok(ApiResponse.success(quizOptions));
-//  }
-//  @DeleteMapping("/quiz/{quizId}")
-//  @Operation(summary = "퀴즈 삭제 API")
-//  public ApiResponse<Boolean> deleteQuiz(@PathVariable Long quizId) {
-//    Boolean success = adminService.deleteQuiz(quizId);
-//    return ApiResponse.ok(success);
-//  }
+  //  @PostMapping("/missions/daily")
+  //  @Operation(summary = "일일 미션(미션마스터) 생성 API")
+  //  public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>>
+  // createDailyMission(
+  //      @RequestBody AdminRequestDTO.CreateMissionRequestDTO requestDTO) {
+  //    DailyMissionMaster response = adminService.createDailyMissionMasters(requestDTO);
+  //    AdminResponseDTO.DailyMissionMastersResDTO result =
+  //        DailyMissionMaster.toDailyMissionMastersResDTO(response);
+  //    return ResponseEntity.ok(ApiResponse.success(result));
+  //  }
+  //
+  //  @PutMapping("/missions/daily/{dailyMissionMasterId}")
+  //  @Operation(summary = "일일 미션(미션마스터) 수정 API")
+  //  public ResponseEntity<ApiResponse<AdminResponseDTO.DailyMissionMastersResDTO>>
+  // updateDailyMission(
+  //      @RequestBody AdminRequestDTO.UpdateMissionRequestDTO requestDTO, @PathVariable Long id) {
+  //    DailyMissionMaster response = adminService.updateDailyMissionMasters(requestDTO, id);
+  //    AdminResponseDTO.DailyMissionMastersResDTO result =
+  //        DailyMissionMaster.toDailyMissionMastersResDTO(response);
+  //    return ResponseEntity.ok(ApiResponse.success(result));
+  //  }
+  //
+  //  @PostMapping("/quiz/create")
+  //  @Operation(summary = "퀴즈 생성 API")
+  //  public ApiResponse<AdminResponseDTO.CreateQuizResponseDTO> createQuiz(
+  //      @RequestBody AdminRequestDTO.CreateQuizRequestDTO requestDTO) {
+  //    AdminResponseDTO.CreateQuizResponseDTO result = adminService.createQuiz(requestDTO);
+  //    return ApiResponse.ok(result);
+  //  }
+  //
+  //  @PostMapping("/{quizId}/options")
+  //  @Operation(summary = "퀴즈 선지 등록 API")
+  //  public ResponseEntity<ApiResponse<QuizOptions>> createQuizOption(
+  //          @RequestBody AdminRequestDTO.CreateQuizOptionRequestDTO requestDTO,
+  //          @PathVariable(name = "quizId") Long quizId) {
+  //    QuizOptions quizOptions = adminService.createQuizOption(requestDTO, quizId);
+  //    return ResponseEntity.ok(ApiResponse.success(quizOptions));
+  //  }
+  //  @DeleteMapping("/quiz/{quizId}")
+  //  @Operation(summary = "퀴즈 삭제 API")
+  //  public ApiResponse<Boolean> deleteQuiz(@PathVariable Long quizId) {
+  //    Boolean success = adminService.deleteQuiz(quizId);
+  //    return ApiResponse.ok(success);
+  //  }
 
   @PostMapping("/keywords")
   @Operation(summary = "일일 키워드 등록 API")

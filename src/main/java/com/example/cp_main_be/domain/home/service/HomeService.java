@@ -176,20 +176,19 @@ public class HomeService {
       isQuizCompleted = true;
     }
 
-
-    //위시 트리 임시
-    PannelResponseDTO.WishTreeDto wishTreeDto = PannelResponseDTO.WishTreeDto.builder()
+    // 위시 트리 임시
+    PannelResponseDTO.WishTreeDto wishTreeDto =
+        PannelResponseDTO.WishTreeDto.builder()
             .currentStage("꽃") // 예시 데이터
             .currentPoints(1200) // 예시 데이터
             .requiredPointsForNextStage(1300) // 예시 데이터
             .build();
 
-
     return PannelResponseDTO.builder()
-            .isDairyCompleted(isDiaryCompleted)
-            .isQuizCompleted(isQuizCompleted)
-            .isCheckingCompleted(isCheckingCompleted)
-            .wishTree(wishTreeDto)
-            .build();
+        .isDairyCompleted(isDiaryCompleted)
+        .isQuizCompleted(isQuizCompleted)
+        .isCheckingCompleted(isCheckingCompleted)
+        .wishTree(wishTreeDto)
+        .build();
   }
 }

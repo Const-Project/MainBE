@@ -59,5 +59,4 @@ public class RealQuizController {
         realQuizService.getRealQuizAnswer(quizId, requestDTO, user);
     return ApiResponse.success(responseDTO);
   }
-
 }
