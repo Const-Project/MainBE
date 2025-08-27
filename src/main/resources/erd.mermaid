@@ -1,0 +1,275 @@
+erDiagram
+    users {
+        BIGINT user_id PK
+        UUID uuid UK
+        VARCHAR nickname
+        VARCHAR email
+        VARCHAR password_hash
+        VARCHAR profile_image_url
+        INT level
+        BIGINT experience
+        VARCHAR role
+        VARCHAR status
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+        BOOLEAN notification_enabled
+    }
+
+    avatar {
+        BIGINT avatar_id PK
+        VARCHAR nickname
+        BIGINT user_id FK
+        BIGINT master_id FK
+        VARCHAR image_url
+    }
+
+    avatar_master {
+        BIGINT id PK
+        VARCHAR default_image_url
+        TEXT description
+    }
+
+    garden {
+        BIGINT id PK
+        BIGINT user_id FK
+        BIGINT avatar_id FK
+        INT slot_number
+        INT water_count
+        INT sunlight_count
+        BIGINT garden_background_id FK
+        TIMESTAMP last_watered_by_owner_at
+        TIMESTAMP last_watered_by_friend_at
+        TIMESTAMP last_sunlight_received_at
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    diaries {
+        BIGINT diary_id PK
+        BIGINT user_id FK
+        VARCHAR title
+        TEXT content
+        VARCHAR keyword
+        BOOLEAN is_public
+        INT like_count
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    diary_images {
+        BIGINT id PK
+        VARCHAR image_url
+        BIGINT diary_id FK "Nullable"
+        BIGINT user_id FK
+        TIMESTAMP created_at
+    }
+
+    comments {
+        BIGINT id PK
+        BIGINT writer_id FK
+        VARCHAR content
+        BIGINT avatar_post_id FK "Nullable"
+        BIGINT diary_id FK "Nullable"
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    avatar_posts {
+        BIGINT avatar_post_id PK
+        BIGINT user_id FK
+        BIGINT avatar_id FK
+        VARCHAR image_url
+        TEXT caption
+        INT like_count
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    likes {
+        BIGINT id PK
+        BIGINT user_id FK
+        BIGINT target_id
+        VARCHAR target_type
+        TIMESTAMP created_at
+    }
+
+    follows {
+        BIGINT id PK
+        BIGINT follower_id FK
+        BIGINT following_id FK
+    }
+
+    guestbooks {
+        BIGINT id PK
+        BIGINT writer_id FK
+        BIGINT owner_id FK
+        VARCHAR content
+        TIMESTAMP created_at
+    }
+
+    user_block {
+        BIGINT id PK
+        BIGINT blocker_user_id FK
+        BIGINT blocked_user_id FK
+        TIMESTAMP created_at
+    }
+
+    reports {
+        BIGINT report_id PK
+        BIGINT user_id FK
+        BIGINT reported_user_id
+        BIGINT report_reason_id FK
+        TEXT additional_comment
+        VARCHAR target_type
+        BIGINT target_id
+        VARCHAR report_status
+        TIMESTAMP created_at
+        TIMESTAMP reviewed_at
+        BIGINT reviewer_id
+    }
+
+    report_reason {
+        BIGINT id PK
+        VARCHAR reason_type
+        TEXT description
+    }
+
+    refresh_tokens {
+        VARCHAR token PK
+        UUID user_uuid FK
+        TIMESTAMP expires_at
+        VARCHAR device_id
+    }
+
+    notifications {
+        BIGINT id PK
+        BIGINT receiver_id FK
+        VARCHAR content
+        VARCHAR url
+        BOOLEAN is_read
+        VARCHAR notification_type
+        TIMESTAMP created_at
+    }
+
+    device_tokens {
+        BIGINT id PK
+        BIGINT user_id FK
+        VARCHAR token UK
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+
+    wish_tree {
+        BIGINT id PK
+        BIGINT user_id FK "UK"
+        BIGINT points
+        VARCHAR stage
+    }
+
+    friend_watering_log {
+        BIGINT id PK
+        BIGINT water_giver_id FK
+        BIGINT watered_garden_id FK
+        TIMESTAMP watered_at
+    }
+
+    daily_question_answer {
+        BIGINT id PK
+        BIGINT user_id FK
+        VARCHAR question
+        VARCHAR answer
+        DATE answered_date
+    }
+
+    delivery {
+        BIGINT id PK
+        BIGINT user_id FK
+        VARCHAR recipient_name
+        VARCHAR recipient_phone
+        VARCHAR postal_code
+        VARCHAR address
+        VARCHAR address_detail
+        TEXT message
+        TIMESTAMP created_at
+    }
+
+    delivery_plant {
+        BIGINT id PK
+        VARCHAR image_url
+        VARCHAR name
+    }
+
+    real_quiz {
+        BIGINT id PK
+        VARCHAR quiz_question
+        VARCHAR quiz_type
+        INT answer_number
+        VARCHAR answer_description
+        BIGINT reward_points
+        TIMESTAMP created_at
+    }
+
+    real_quiz_option {
+        BIGINT quiz_option_id PK
+        BIGINT quiz_id FK
+        VARCHAR option_text
+        INT option_order
+    }
+
+    user_quiz {
+        BIGINT id PK
+        BIGINT user_id FK
+        BIGINT real_quiz_id FK
+        BOOLEAN is_completed
+        TIMESTAMP created_at
+    }
+
+    feeds {
+        BIGINT id PK
+        BIGINT user_id FK
+        VARCHAR content
+        VARCHAR image_url
+        TIMESTAMP created_at
+    }
+
+    garden_background {
+        BIGINT id PK
+        VARCHAR name
+        VARCHAR image_url
+    }
+
+    %% Relationships
+users ||--o{ avatar : "owns"
+avatar_master ||--o{ avatar : "is of type"
+users ||--o{ garden : "has"
+avatar |o--o| garden : "is in"
+garden_background |o--o| garden : "has background"
+users ||--o{ diaries : "writes"
+diaries |o--o| diary_images : "has one"
+users ||--o{ diary_images : "uploads"
+users ||--o{ comments : "writes"
+diaries }o--o| comments : "on"
+avatar_posts }o--o| comments : "on"
+users ||--o{ avatar_posts : "creates"
+avatar ||--o{ avatar_posts : "features"
+users ||--o{ likes : "gives"
+users ||--o{ follows : "follows (follower)"
+users ||--o{ follows : "is followed by (following)"
+users ||--o{ guestbooks : "writes"
+users ||--o{ guestbooks : "owns"
+users ||--o{ user_block : "blocks (blocker)"
+users ||--o{ user_block : "is blocked by (blocked)"
+users ||--o{ reports : "submits"
+report_reason ||--o{ reports : "has reason"
+users ||--o| refresh_tokens : "has"
+users ||--o{ notifications : "receives"
+users ||--o{ device_tokens : "has"
+users ||--|| wish_tree : "has one"
+users ||--o{ friend_watering_log : "gives water"
+garden ||--o{ friend_watering_log : "receives water"
+users ||--o{ daily_question_answer : "answers"
+users ||--o{ delivery : "requests"
+users ||--o{ user_quiz : "takes"
+real_quiz ||--o{ user_quiz : "is taken by"
+real_quiz ||--o{ real_quiz_option : "has"
+users ||--o{ feeds : "creates"

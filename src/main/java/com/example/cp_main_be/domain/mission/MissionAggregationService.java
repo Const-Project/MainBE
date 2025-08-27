@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.mission; // 패키지 위치는 프로젝트 구조에 맞게 조정하세요.
 
+import com.example.cp_main_be.domain.member.daily_question.domain.repository.DailyQuestionAnswerRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay;
@@ -21,6 +22,7 @@ public class MissionAggregationService {
   private final DiaryRepository diaryRepository;
   // 의존성 주입 변경
   private final UserQuizRepository userQuizRepository;
+  private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
 
   // private final MindCheckRepository mindCheckRepository; // 추후 MindCheck 기능 추가 시 주입
 
@@ -29,17 +31,28 @@ public class MissionAggregationService {
 
     // 1. 각 Repository에서 날짜별 완료 미션 개수 조회
     List<MissionCountPerDay> diaryCounts =
-        diaryRepository.findCompletedCountsPerDay(user, startDate, endDate);
+        diaryRepository.findCompletedCountsPerDay(user, startDate, endDate).stream()
+            .peek(
+                mission -> {
+                  long currentCount = mission.getCount();
+                  if (currentCount >= 3) {
+                    mission.setCount(3L);
+                  }
+                })
+            .toList();
+
     // userQuizRepository의 메서드 호출로 변경
     List<MissionCountPerDay> quizCounts =
         userQuizRepository.findCompletedCountsPerDay(user, startDate, endDate);
+    List<MissionCountPerDay> dailyQuestionCounts =
+        dailyQuestionAnswerRepository.findCompletedCountsPerDay(user, startDate, endDate);
     // List<MissionCountPerDay> mindCheckCounts =
     // mindCheckRepository.findCompletedCountsPerDay(user, startDate, endDate);
 
     // 2. 모든 결과를 하나의 Stream으로 합친 후, 날짜(day)별로 그룹핑하여 count 합산
     // 이 부분은 변경할 필요 없이 그대로 동작합니다.
     Map<Integer, Long> combinedCounts =
-        Stream.of(diaryCounts, quizCounts /*, mindCheckCounts */)
+        Stream.of(diaryCounts, quizCounts, dailyQuestionCounts /*, mindCheckCounts */)
             .flatMap(List::stream)
             .collect(
                 Collectors.groupingBy(

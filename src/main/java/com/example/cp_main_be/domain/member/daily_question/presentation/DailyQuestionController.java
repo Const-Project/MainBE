@@ -27,11 +27,16 @@ public class DailyQuestionController {
   private final DailyQuestionService dailyQuestionService;
   private final DailyQuestionAnswerService dailyQuestionAnswerService;
 
-  @Operation(summary = "오늘의 질문 조회", description = "앱 구동 시 호출하여 오늘의 질문을 가져옵니다.")
+  @Operation(
+      summary = "오늘의 질문 조회",
+      description = "앱 구동 시 호출하여 오늘의 질문을 가져옵니다. 사용자가 답변했는지 여부(isAnswered)도 함께 반환합니다.")
   @GetMapping
-  public ResponseEntity<ApiResponse<DailyQuestionResponse>> getDailyQuestion() {
-    String question = dailyQuestionService.getQuestionForToday();
-    DailyQuestionResponse response = new DailyQuestionResponse(question);
+  public ResponseEntity<ApiResponse<DailyQuestionResponse>> getDailyQuestion(
+      @AuthenticationPrincipal User user) {
+    DailyQuestionService.QuestionInfo questionInfo = dailyQuestionService.getQuestionInfoForToday();
+    boolean isAnswered = dailyQuestionAnswerService.hasUserAnsweredToday(user);
+    DailyQuestionResponse response =
+        new DailyQuestionResponse(questionInfo.getId(), questionInfo.getText(), isAnswered);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 

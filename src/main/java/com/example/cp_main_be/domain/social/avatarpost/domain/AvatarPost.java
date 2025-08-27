@@ -53,18 +53,6 @@ public class AvatarPost {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  // Builder 및 생성자도 수정 필요
-  @Builder
-  public AvatarPost(Avatar avatar, String caption) {
-    this.avatar = avatar;
-    this.caption = caption;
-  }
-
-  @PrePersist
-  protected void onCreate() {
-    this.createdAt = LocalDateTime.now();
-  }
-
   public void increaseLikeCount() {
     this.likeCount++;
   }
