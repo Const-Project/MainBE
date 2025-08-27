@@ -2,12 +2,9 @@ package com.example.cp_main_be.domain.mission.diary.domain.repository;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -35,10 +32,10 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
   Optional<Diary> findByIdWithDetails(@Param("diaryId") Long diaryId);
 
   @Query(
-          "SELECT d FROM Diary d "
-                  + "WHERE d.user = :user AND d.createdAt BETWEEN :startDate AND :endDate")
+      "SELECT d FROM Diary d "
+          + "WHERE d.user = :user AND d.createdAt BETWEEN :startDate AND :endDate")
   List<Diary> findTodayDiaryByUser(
-          @Param("user") User user,
-          @Param("startDate") LocalDateTime startDate,
-          @Param("endDate") LocalDateTime endDate);
+      @Param("user") User user,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 }

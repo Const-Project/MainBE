@@ -166,7 +166,10 @@ public class HomeService {
     LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
     LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
 
-    Diary diary = diaryRepository.findTodayDiaryByUser(user, startOfDay,endOfDay).stream().findFirst().orElse(null);
+    Diary diary =
+        diaryRepository.findTodayDiaryByUser(user, startOfDay, endOfDay).stream()
+            .findFirst()
+            .orElse(null);
     if (diary != null && diary.getCreatedAt().isAfter(LocalDate.now().atStartOfDay())) {
       isDiaryCompleted = true;
     }
