@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/realQuiz")
+@Tag(name = "퀴즈 API", description = "퀴즈 관련 기능을 제공합니다.")
 @RequiredArgsConstructor
-@Tag(name = "퀴즈 컨트롤러", description = "퀴즈 관련 기능을 제공합니다.")
 public class RealQuizController {
 
   private final RealQuizService realQuizService;
@@ -59,4 +59,5 @@ public class RealQuizController {
         realQuizService.getRealQuizAnswer(quizId, requestDTO, user);
     return ApiResponse.success(responseDTO);
   }
+
 }
