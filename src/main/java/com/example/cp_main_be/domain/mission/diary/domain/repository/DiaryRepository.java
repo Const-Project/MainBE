@@ -23,6 +23,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
   List<Diary> findByIsPublicIsTrueAndUser_IdNotIn(List<Long> blockedUserIds, Pageable pageable);
 
+  boolean existsByUserAndCreatedAtBetween(User user, LocalDateTime start, LocalDateTime end);
+
   @Query(
       "SELECT DISTINCT d FROM Diary d "
           + "LEFT JOIN FETCH d.user u " // 포스트 작성자 fetch

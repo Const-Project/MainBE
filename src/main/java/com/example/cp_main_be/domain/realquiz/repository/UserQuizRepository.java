@@ -22,6 +22,9 @@ public interface UserQuizRepository extends JpaRepository<UserQuiz, Long> {
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate);
 
+  boolean existsByUserAndIsCompletedIsTrueAndCreatedAtBetween(
+      User user, LocalDateTime start, LocalDateTime end);
+
   @Query(
       "SELECT new com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay(DAY(uq.createdAt), COUNT(uq.id)) "
           + "FROM UserQuiz uq "

@@ -25,6 +25,15 @@ public enum WishTreeStage {
     return FINAL;
   }
 
+  public WishTreeStage getNextStage() {
+    if (this == FINAL) {
+      return null; // 마지막 단계에서는 다음 단계 없음
+    }
+    // values()는 Enum 상수가 선언된 순서대로 배열을 반환합니다.
+    // 현재 단계의 순서(ordinal)에 +1을 하여 다음 단계를 찾습니다.
+    return values()[this.ordinal() + 1];
+  }
+
   public Long getMaxGardens(WishTreeStage stage) {
     return stage.maxGardens;
   }
