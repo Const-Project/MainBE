@@ -11,4 +11,8 @@ public class MissionCountPerDay {
     this.day = day;
     this.count = (int) count;
   }
+
+  public void setCount(long count) {
+    this.count = count;
+  }
 }
