@@ -69,6 +69,8 @@ public class AvatarService {
             .avatarMaster(master) // 찾은 master를 설정합니다.
             .build();
 
+    user.addAvatar(newAvatar);
+
     avatarRepository.save(newAvatar);
 
     WishTree wishTree =
