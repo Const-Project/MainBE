@@ -21,6 +21,7 @@ public class PannelResponseDTO {
   @Builder
   public static class WishTreeDto {
     String currentStage;
+    String nextStage;
     Long currentPoints;
     Long requiredPointsForNextStage;
     Long progressPercent;

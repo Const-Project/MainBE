@@ -46,7 +46,7 @@ public class FeedService {
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
     // [추가] 1. 현재 사용자가 차단한 유저 ID 목록을 먼저 조회합니다.
-    List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(currentUser);
+    List<Long> blockedUserIds = Collections.emptyList();
 
     Stream<FeedResponse> diaryStream;
     Stream<FeedResponse> avatarPostStream;
@@ -72,11 +72,13 @@ public class FeedService {
       // [수정] 2. 차단된 유저를 제외하고 조회
       diaryStream =
           diaryRepository
-              .findByIsPublicIsTrueAndUser_IdNotIn(blockedUserIds, candidatePageable)
+              .findByIsPublicIsTrue(candidatePageable) // NotIn 제거
               .stream()
               .map(FeedResponse::from);
       avatarPostStream =
-          avatarPostRepository.findAllByUser_IdNotIn(blockedUserIds, candidatePageable).stream()
+          avatarPostRepository
+              .findAllBy(candidatePageable) // NotIn 제거
+              .stream()
               .map(FeedResponse::from);
     }
 
