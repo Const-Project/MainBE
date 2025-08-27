@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.member.daily_question.domain.DailyQuestionA
 import com.example.cp_main_be.domain.member.daily_question.domain.repository.DailyQuestionAnswerRepository;
 import com.example.cp_main_be.domain.member.daily_question.dto.DailyQuestionAnswerRequest;
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class DailyQuestionAnswerService {
 
   private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
   private final DailyQuestionService dailyQuestionService;
+  private final WishTreeService wishTreeService;
 
   // [핵심] Long userId 대신 User user 객체를 직접 받도록 변경
   public void saveAnswer(User user, DailyQuestionAnswerRequest requestDto) {
@@ -40,6 +42,8 @@ public class DailyQuestionAnswerService {
     answer.setAnswer(requestDto.getAnswer());
 
     dailyQuestionAnswerRepository.save(answer);
+
+    wishTreeService.addPointsToWishTree(user.getId(), 15L);
   }
 
   @Transactional(readOnly = true)

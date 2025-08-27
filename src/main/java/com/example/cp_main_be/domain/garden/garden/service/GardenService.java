@@ -15,9 +15,11 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import com.example.cp_main_be.global.event.WishTreeEvolvedEvent;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +38,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class GardenService {
 
+  private final WishTreeService wishTreeService;
+
   private static final int MAX_GARDEN_COUNT = 3;
-  private static final int WATERING_POINTS = 2;
-  private static final int SUNLIGHT_POINTS = 3;
-  private static final int MAX_FRIEND_WATERING_PER_DAY = 3;
+  private static final Long WATERING_POINTS = 2L;
+  private static final Long SUNLIGHT_POINTS = 3L;
+  private static final Long MAX_FRIEND_WATERING_PER_DAY = 3L;
 
   private final GardenRepository gardenRepository;
   private final UserService userService;
@@ -85,7 +90,7 @@ public class GardenService {
     }
 
     garden.increaseWaterCount();
-    userService.addExperience(ownerId, WATERING_POINTS);
+    wishTreeService.addPointsToWishTree(ownerId, WATERING_POINTS);
     garden.recordOwnerWateringTime(); // 주인이 물 준 시간 기록
   }
 
@@ -106,7 +111,7 @@ public class GardenService {
     checkAlreadyWateredToday(actor, garden, startOfWateringDay);
 
     // 남한테 주는 경우에는 준 사람이 물 경험치를 받고 정원의 waterCount가 증가한다.
-    userService.addExperience(actorId, WATERING_POINTS);
+    wishTreeService.addPointsToWishTree(actor.getId(), WATERING_POINTS);
     garden.increaseWaterCount();
 
     // 물주기 활동 기록
@@ -158,7 +163,7 @@ public class GardenService {
     }
 
     garden.increaseSunlightCount();
-    userService.addExperience(actorId, SUNLIGHT_POINTS);
+    wishTreeService.addPointsToWishTree(actorId, SUNLIGHT_POINTS);
     garden.recordSunlightTime(); // 햇빛 준 시간 기록
   }
 
@@ -290,5 +295,11 @@ public class GardenService {
     log.info("Starting cleanup of friend watering logs older than {} days...", RETENTION_DAYS);
     int deletedCount = friendWateringLogRepository.deleteByWateredAtBefore(cutoffDate);
     log.info("Finished cleanup. Deleted {} old friend watering logs.", deletedCount);
+  }
+
+  @EventListener
+  @Transactional
+  public void handleWishTreeEvolved(WishTreeEvolvedEvent event) {
+    unlockNewGardenSlot(event.getUserId());
   }
 }

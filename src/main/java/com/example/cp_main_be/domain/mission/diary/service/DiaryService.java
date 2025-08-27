@@ -8,6 +8,7 @@ import com.example.cp_main_be.domain.mission.diary.dto.request.UpdateDiaryReques
 import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryInfoResponse;
 import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImageRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
@@ -25,6 +26,7 @@ public class DiaryService {
   private final DiaryRepository diaryRepository;
   private final DiaryImageRepository diaryImageRepository;
   private final LikeRepository likeRepository;
+  private final WishTreeService wishTreeService;
 
   public Long createDiary(User user, CreateDiaryRequest request) {
     // 1. 먼저 Diary 객체를 생성하고 저장합니다
@@ -53,6 +55,8 @@ public class DiaryService {
       // 이렇게 하면 savedDiary 객체에서도 diaryImage를 즉시 참조할 수 있습니다.
       savedDiary.updateImage(diaryImage);
     }
+
+    wishTreeService.addPointsToWishTree(user.getId(), 40L);
 
     return savedDiary.getId();
   }
