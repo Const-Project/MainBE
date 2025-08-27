@@ -41,4 +41,14 @@ public class DailyQuestionAnswerService {
 
     dailyQuestionAnswerRepository.save(answer);
   }
+
+  @Transactional(readOnly = true)
+  public boolean hasUserAnsweredToday(User user) {
+    // 비로그인 사용자는 항상 답변하지 않은 것으로 간주
+    if (user == null) {
+      return false;
+    }
+    LocalDate today = LocalDate.now();
+    return dailyQuestionAnswerRepository.existsByUserAndAnsweredDate(user, today);
+  }
 }
