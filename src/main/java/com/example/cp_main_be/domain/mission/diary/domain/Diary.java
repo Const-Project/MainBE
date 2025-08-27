@@ -27,8 +27,7 @@ public class Diary {
   @Column(nullable = false)
   private String title;
 
-  @Lob // TEXT 타입을 위해 사용
-  @Column(nullable = false)
+  @Column(name = "content", nullable = false, columnDefinition = "TEXT")
   private String content;
 
   private String keyword;
