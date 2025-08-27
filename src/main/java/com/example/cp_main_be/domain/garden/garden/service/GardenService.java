@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.garden.garden.service;
 
-import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.garden.domain.GardenBackground;
@@ -16,7 +15,6 @@ import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
-import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.event.WishTreeEvolvedEvent;
@@ -171,66 +169,27 @@ public class GardenService {
     garden.recordSunlightTime(); // 햇빛 준 시간 기록
   }
 
-  @Transactional
-  public void unlockNewGardenSlot(Long userId) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+  public void unlockNextGarden(Long userId) {
+    // 1. 유저와 소원나무 정보 가져오기
+    User user = userRepository.findById(userId).orElseThrow(/* ... */ );
+    WishTree wishTree = wishTreeRepository.findByUserId(user.getId()).orElseThrow(/* ... */ );
 
-    WishTree wishTree =
-        wishTreeRepository
-            .findByUserId(userId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.WISH_TREE_NOT_FOUND));
-
-    // 1. 사용자의 WishTree 포인트를 기준으로 현재 단계를 결정
-    // User는 WishTree를 가지고 있고, WishTree가 포인트를 관리합니다.
-    WishTreeStage currentStage = WishTreeStage.getStageForPoints(wishTree.getPoints());
-
-    // 2. 현재 단계에서 가질 수 있는 최대 텃밭 개수를 가져옴
-    long maxGardensForStage = currentStage.getMaxGardens();
-
-    // 3. 사용자가 현재 보유한 텃밭 개수 확인
-    int currentGardenCount = user.getGardens().size();
-
-    // 4. 최대 텃밭 개수에 도달했는지 확인
-    if (currentGardenCount >= maxGardensForStage) {
-      // 현재 단계에서는 더 이상 텃밭을 생성할 수 없음
-      // ErrorCode에 GARDEN_SLOT_LOCKED 추가가 필요할 수 있습니다.
-      throw new CustomApiException(
-          ErrorCode.GARDEN_SLOT_LOCKED, "현재 단계에서는 더 이상 텃밭을 만들 수 없습니다. 소원나무를 성장시켜주세요.");
+    // 2. 해금 가능한 상태인지 확인
+    if (!wishTree.isUnlockable()) {
+      throw new CustomApiException(ErrorCode.GARDEN_SLOT_LOCKED, "정원을 해금할 수 있는 포인트가 부족합니다.");
     }
 
-    // TODO: 여기 뭔가 수정해야할 듯 아바타는 설정해서 가져오고 배경화면은 그냥 기본걸 씀
-    // 5. 새로 생성될 텃밭의 기본 배경과 아바타를 설정 (ID 1L을 기본값으로 가정)
-    GardenBackground defaultBackground =
-        gardenBackgroundRepository
-            .findById(1L)
+    // 3. 소원나무 Stage를 다음 단계로 성장시키기
+    wishTree.evolveStage();
+
+    // 4. 다음으로 잠겨있는 정원을 찾아 해금하기
+    Garden gardenToUnlock =
+        gardenRepository
+            .findFirstByUserAndIsLockedIsTrueOrderBySlotNumberAsc(user)
             .orElseThrow(
-                () ->
-                    new CustomApiException(
-                        ErrorCode.DEFAULT_RESOURCE_NOT_FOUND, "기본 텃밭 배경을 찾을 수 없습니다."));
-    Avatar defaultAvatar =
-        avatarRepository
-            .findById(1L)
-            .orElseThrow(
-                () ->
-                    new CustomApiException(
-                        ErrorCode.DEFAULT_RESOURCE_NOT_FOUND, "기본 아바타를 찾을 수 없습니다."));
+                () -> new CustomApiException(ErrorCode.GARDEN_NOT_FOUND, "해금할 정원을 찾을 수 없습니다."));
 
-    // 6. 새로운 텃밭 생성
-    Garden newGarden =
-        Garden.builder()
-            .user(user)
-            .slotNumber(currentGardenCount + 1)
-            .gardenBackground(defaultBackground)
-            .avatar(defaultAvatar)
-            .build();
-
-    gardenRepository.save(newGarden);
-
-    // User 엔티티의 gardens 리스트에도 추가
-    user.addGarden(newGarden);
+    gardenToUnlock.unlock(); // Garden 엔티티의 isLocked를 false로 변경
   }
 
   @Transactional
@@ -305,6 +264,6 @@ public class GardenService {
   @EventListener
   @Transactional
   public void handleWishTreeEvolved(WishTreeEvolvedEvent event) {
-    unlockNewGardenSlot(event.getUserId());
+    unlockNextGarden(event.getUserId());
   }
 }
