@@ -13,7 +13,6 @@ import com.example.cp_main_be.global.exception.UserNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,7 +101,7 @@ public class UserController {
   @Operation(summary = "유저 정보 조회", description = "유저 정보를 조회합니다")
   @GetMapping("/{userId}")
   public ResponseEntity<ApiResponse<UserProfileResponse>> getUserInfo(
-      @PathParam("userId") Long userId) {
+      @PathVariable("userId") Long userId) {
     // SecurityContextHolder에서 현재 인증된 사용자(UUID)를 가져옴
     User user =
         userRepository
