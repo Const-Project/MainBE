@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class AuthService {
 
   private final JwtTokenProvider jwtTokenProvider;
@@ -32,80 +31,59 @@ public class AuthService {
   private final WishTreeService wishTreeService;
 
   /** 리프레시 토큰으로 액세스 토큰 재발급 + (권장) 리프레시 토큰 롤링 */
+  @Transactional
   public TokenRefreshResponse refreshAccessToken(String incomingRefreshToken, String deviceId) {
-    // 1) 서명/만료 기본 검증
+    // 1) ~ 5) 까지의 검증 로직은 동일합니다.
     if (!jwtTokenProvider.validateToken(incomingRefreshToken)) {
       throw new CustomApiException(ErrorCode.INVALID_TOKEN);
     }
-
-    // 2) DB에 존재하는지 확인 (서버 관리 토큰이 아닌 경우 거절)
     RefreshToken saved =
         refreshTokenRepository
             .findByToken(incomingRefreshToken)
             .orElseThrow(() -> new CustomApiException(ErrorCode.INVALID_TOKEN));
-
-    // 3) 서버 인지 만료도 체크 (DB 기록 기준)
     if (saved.getExpiresAt().isBefore(LocalDateTime.now())) {
       refreshTokenRepository.deleteByToken(incomingRefreshToken);
       throw new CustomApiException(ErrorCode.INVALID_TOKEN);
     }
-
-    // 4) JWT에서 uuid 추출
     String uuidStr = jwtTokenProvider.getUuidFromToken(incomingRefreshToken);
     UUID uuid = UUID.fromString(uuidStr);
-
-    // 5) 사용자 존재 확인 (안전망)
     User user =
         userRepository
             .findByUuid(uuid)
             .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
-    // 6) 액세스 토큰 새로 발급
+    // 6) 새로운 Access Token만 발급합니다.
     String newAccessToken = jwtTokenProvider.generateAccessToken(uuid.toString());
 
-    // === 선택 사항: 롤링 여부 설정 ===
-    boolean rotateRefreshToken = true; // 필요 시 yml로 뺄 수 있음
-    if (!rotateRefreshToken) {
-      // 롤링 안 함 → 기존 리프레시 토큰 그대로 반환
-      return new TokenRefreshResponse(newAccessToken, incomingRefreshToken, false);
-    }
-
-    // 7) 롤링: 기존 토큰 삭제 → 신규 토큰 발급/저장
-    refreshTokenRepository.deleteByToken(incomingRefreshToken);
-
-    String newRefreshToken = jwtTokenProvider.generateRefreshToken(uuid.toString());
-    LocalDateTime newExpiry = jwtTokenProvider.getExpirationLocalDateTime(newRefreshToken);
-
-    RefreshToken newRt =
-        RefreshToken.builder()
-            .token(newRefreshToken)
-            .userUuid(uuid)
-            .expiresAt(newExpiry)
-            .deviceId(deviceId)
-            .build();
-    refreshTokenRepository.save(newRt);
-
-    return new TokenRefreshResponse(newAccessToken, newRefreshToken, false);
+    // 7) 롤링 로직을 모두 제거하고, 기존 Refresh Token을 그대로 반환합니다.
+    return new TokenRefreshResponse(newAccessToken, incomingRefreshToken, false);
   }
 
   // [수정] 신규 사용자 가입 메서드
+  @Transactional // 회원가입의 모든 과정을 하나의 트랜잭션으로 묶습니다.
   public AnonymousRegistrationResponse registerNewUser(
       RegistrationRequest request, String deviceId) {
 
-    // 2. 랜덤 닉네임 생성 로직 삭제, 요청받은 닉네임 사용
     UUID newUuid = UUID.randomUUID();
     String nickname = request.getNickname();
 
     User newUser =
         User.builder()
             .uuid(newUuid)
-            .nickname(nickname) // 사용자가 입력한 닉네임으로 설정
+            .nickname(nickname)
             .avatarList(new ArrayList<>())
             .diaries(new ArrayList<>())
             .gardens(new ArrayList<>())
             .build();
-    wishTreeService.addPointsToWishTree(userRepository.save(newUser).getId(), 0);
 
+    // 1. 사용자를 먼저 저장합니다.
+    User savedUser = userRepository.save(newUser);
+
+    // 2. 위시트리 관련 로직을 수행합니다.
+    // 만약 여기서 예외가 발생하면, 위에서 저장한 newUser까지 모두 롤백됩니다.
+    wishTreeService.addPointsToWishTree(savedUser.getId(), 0);
+
+    // 3. 모든 것이 성공했을 때만 토큰을 생성하고 저장합니다.
     String accessToken = jwtTokenProvider.generateAccessToken(newUuid.toString());
     String refreshToken = jwtTokenProvider.generateRefreshToken(newUuid.toString());
     LocalDateTime expiry = jwtTokenProvider.getExpirationLocalDateTime(refreshToken);
@@ -122,8 +100,8 @@ public class AuthService {
     return AnonymousRegistrationResponse.builder()
         .accessToken(accessToken)
         .refreshToken(refreshToken)
-        .userId(newUser.getId())
-        .nickname(nickname) // 생성된 닉네임 반환
+        .userId(savedUser.getId()) // save() 후 반환된 객체의 ID 사용
+        .nickname(nickname)
         .isNewUser(true)
         .build();
   }

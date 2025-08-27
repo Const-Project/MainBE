@@ -21,7 +21,7 @@ public class S3Uploader implements ImageUploader {
   private final S3Client s3Client;
 
   // application.yml의 키와 일치시킵니다.
-  @Value("${cloudflare.r2.bucket}")
+  @Value("${aws.s3.bucket}")
   private String bucket;
 
   @Override
