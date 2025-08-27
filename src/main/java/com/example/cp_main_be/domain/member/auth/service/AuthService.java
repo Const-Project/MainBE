@@ -104,7 +104,6 @@ public class AuthService {
             .diaries(new ArrayList<>())
             .gardens(new ArrayList<>())
             .build();
-    wishTreeService.addPointsToWishTree(userRepository.save(newUser).getId(), 0);
 
     String accessToken = jwtTokenProvider.generateAccessToken(newUuid.toString());
     String refreshToken = jwtTokenProvider.generateRefreshToken(newUuid.toString());
