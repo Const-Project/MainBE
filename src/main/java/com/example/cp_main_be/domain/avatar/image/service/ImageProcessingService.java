@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.avatar.image.service;
 
+import com.example.cp_main_be.domain.avatar.image.AiResponseDTO;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.infra.StorageService;
@@ -10,8 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -54,17 +57,19 @@ public class ImageProcessingService {
    */
   public String processImageWithAi(MultipartFile imageFile) {
     try {
-      // 1. MultipartFile을 MultiValueMap으로 변환하여 multipart-form-data 생성
-      MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-      body.add("image_file", imageFile.getResource()); // FastAPI의 인자명과 동일하게 설정
+      MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+      bodyBuilder.part("image_file", new ByteArrayResource(imageFile.getBytes()))
+              .filename(imageFile.getOriginalFilename()) // 원래 파일명 사용
+              .contentType(MediaType.parseMediaType(imageFile.getContentType())); // 원본 Content-Type 유지
 
+// WebClient 요청 시
       // 2. WebClient를 사용하여 multipart/form-data 형식으로 전송
-      byte[] result =
+      AiResponseDTO result =
           webClient
               .post()
               .uri(fastapiServerUrl + "/process-image")
               .contentType(MediaType.MULTIPART_FORM_DATA) // multipart/form-data로 설정
-              .body(BodyInserters.fromMultipartData(body)) // MultiValueMap 전송
+                  .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
               .retrieve()
               .onStatus(
                   HttpStatusCode::isError,
@@ -80,20 +85,22 @@ public class ImageProcessingService {
                                 return Mono.error(
                                     new CustomApiException(ErrorCode.AI_AVATAR_FAILED));
                               }))
-              .bodyToMono(byte[].class)
+//                  .bodyToMono(byte[].class)
+              .bodyToMono(AiResponseDTO.class)
+
               .timeout(Duration.ofSeconds(300))
               .block(Duration.ofSeconds(300));
 
-      if (result == null || result.length == 0) {
-        log.error("AI 서버에서 유효한 이미지 바이트를 받지 못했습니다 (null/empty).");
+      if (result == null || result.getImageUrl().isEmpty()) {
+        log.error("AI 서버에서 유효한 이미지 링크를 받지 못했습니다 (null/empty).");
         throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
       }
 
       // 3. 받은 byte 배열을 스토리지에 업로드하고 URL을 받음
-      String imageUrl =
-          storageService.uploadFile(result, "avatars/", imageFile.getOriginalFilename());
+//      String imageUrl =
+//          storageService.uploadFile(result, "avatars/", imageFile.getOriginalFilename());
 
-      return imageUrl;
+      return result.getImageUrl();
 
     } catch (Exception e) {
       // 실패 시 폴백 URL 리스트에서 랜덤으로 하나를 선택하여 반환
