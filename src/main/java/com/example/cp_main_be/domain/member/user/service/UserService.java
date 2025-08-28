@@ -16,14 +16,9 @@ import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterRespon
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
-import com.example.cp_main_be.global.exception.AvatarNotFoundException;
-import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -36,6 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserService {
 
+  private static final int MAX_FRIEND_WATERING_PER_DAY = 3;
+
   private final UserRepository userRepository;
   private final LevelService levelService;
   private final AvatarRepository avatarRepository;
@@ -45,8 +42,8 @@ public class UserService {
   public void addExperience(Long actorId, int points) {
     User user =
         userRepository
-            .findById(actorId)
-            .orElseThrow(() -> new UserNotFoundException(ErrorCode.USER_NOT_FOUND.getMessage()));
+            .findById(actorId) // ID로 최신 유저 정보를 조회합니다.
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
     user.addExperience(points);
     levelService.checkLevelUp(user);
   }
@@ -59,7 +56,7 @@ public class UserService {
     Avatar avatar =
         avatarRepository
             .findById(avatarId)
-            .orElseThrow(() -> new AvatarNotFoundException("아바타를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.AVATAR_NOT_FOUND));
 
     // [버그 수정] AvatarMaster(원본)가 아닌 Avatar(개별 인스턴스)의 imageUrl을 변경해야 합니다.
     // Avatar 엔티티에 imageUrl 필드가 있어야 합니다.
@@ -74,8 +71,12 @@ public class UserService {
   }
 
   public void updateNickname(User user, String newNickname) {
-
-    user.updateProfile(newNickname, null);
+    // [수정] stale한 user 객체 대신, ID로 최신 정보를 조회해서 사용합니다.
+    User managedUser =
+        userRepository
+            .findById(user.getId())
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+    managedUser.updateProfile(newNickname, null);
     userRepository.save(user);
   }
 
@@ -86,21 +87,21 @@ public class UserService {
   public void deleteUser(Long userId) {
     User user =
         userRepository
-            .findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+            .findById(userId) // ID로 최신 유저 정보를 조회합니다.
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
     userRepository.delete(user);
   }
 
   public User findUserById(Long id) {
     return this.userRepository
         .findById(id)
-        .orElseThrow(() -> new UserNotFoundException("해당 ID의 사용자를 찾을 수 없습니다 : " + id));
+        .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
   }
 
   public User findUserByUuid(UUID uuid) {
     return this.userRepository
         .findByUuid(uuid)
-        .orElseThrow(() -> new UserNotFoundException("해당 UUID의 사용자를 찾을 수 없습니다 : " + uuid));
+        .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
   }
 
   public List<User> findAllUsers() {
@@ -128,11 +129,11 @@ public class UserService {
     if (principal instanceof String uuidString) {
       UUID userUuid = UUID.fromString(uuidString);
       return userRepository
-          .findByUuid(userUuid)
-          .orElseThrow(() -> new IllegalArgumentException("현재 로그인한 사용자를 찾을 수 없습니다."));
+          .findByUuid(userUuid) // UUID로 최신 유저 정보를 조회합니다.
+          .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
     }
 
-    throw new IllegalArgumentException("인증 정보를 찾을 수 없습니다.");
+    throw new CustomApiException(ErrorCode.INVALID_TOKEN, "인증 정보를 찾을 수 없습니다.");
   }
 
   /**
@@ -147,9 +148,10 @@ public class UserService {
     User managedUser =
         userRepository
             .findByIdWithGardens(user.getId())
-            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
     return managedUser.getGardens().stream()
+        .filter(garden -> !garden.isLocked()) // [추가] 잠겨있지 않은(isLocked=false) 텃밭만 필터링합니다.
         .sorted(Comparator.comparing(Garden::getSlotNumber))
         .map(Garden::getId)
         .collect(Collectors.toList());
@@ -165,12 +167,12 @@ public class UserService {
   public UserProfileResponse getUserProfile(Long currentUserId, Long profileUserId) {
     User currentUser =
         userRepository
-            .findById(currentUserId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+            .findById(currentUserId) // ID로 최신 유저 정보를 조회합니다.
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
     User profileUser =
         userRepository
             .findByIdWithGardensAndAvatars(profileUserId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
     // [수정] 프로필 이미지 URL을 사용자의 첫 번째 아바타 이미지로 설정
     String profileImageUrl =
@@ -210,29 +212,28 @@ public class UserService {
     int todayWateringCountForOthers =
         friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(
             currentUser, startOfWateringDay);
-    Long leftWaterCountForOthers =
-        (long) (3 - todayWateringCountForOthers); // MAX_FRIEND_WATERING_PER_DAY = 3
+    long leftWaterCountForOthers =
+        Math.max(0, (long) MAX_FRIEND_WATERING_PER_DAY - todayWateringCountForOthers);
+
+    // [성능 개선] N+1 문제를 해결하기 위해, 오늘 내가 물 준 정원 ID 목록을 한 번에 조회합니다.
+    Set<Long> wateredGardenIds =
+        friendWateringLogRepository.findWateredGardenIdsByGiverAndDate(
+            currentUser.getId(), startOfWateringDay);
 
     // 3. 프로필 주인의 정원 목록 및 물주기 가능 여부 계산
     List<UserGardenDetailResponse> userGardens =
         profileUser.getGardens().stream()
+            .sorted(Comparator.comparing(Garden::getSlotNumber))
             .map(
                 garden -> {
-                  // 현재 접속 유저가 이 정원에 오늘 물을 줄 수 있는지 여부
-                  boolean isWateringAbleByMe = false;
-                  // 조건: 1) 아직 오늘 남에게 물 줄 수 있는 횟수가 남아있어야 하고 (leftWaterCountForOthers > 0)
-                  //       2) 오늘 이 정원에 내가 물을 준 적이 없어야 한다.
-                  if (leftWaterCountForOthers > 0) {
-                    boolean alreadyWateredByMe =
-                        friendWateringLogRepository
-                            .existsByWaterGiverAndWateredGardenAndWateredAtAfter(
-                                currentUser, garden, startOfWateringDay);
-                    isWateringAbleByMe = !alreadyWateredByMe;
-                  }
+                  // DB를 반복 조회하는 대신, 미리 조회한 Set에서 확인하여 성능을 개선합니다.
+                  boolean alreadyWateredByMe = wateredGardenIds.contains(garden.getId());
+                  boolean isWateringAbleByMe = leftWaterCountForOthers > 0 && !alreadyWateredByMe;
 
                   HomeResponseDto.AvatarInfo avatarInfoForGarden =
                       HomeResponseDto.AvatarInfo.builder()
-                          .avatarId(garden.getAvatar().getId())
+                          // 아바타가 없는 텃밭이 있을 수 있는 예외 케이스를 방어합니다.
+                          .avatarId(garden.getAvatar() != null ? garden.getAvatar().getId() : null)
                           .avatarName(garden.getAvatar().getNickname())
                           .avatarImageUrl(garden.getAvatar().getAvatarMaster().getDefaultImageUrl())
                           .build();
