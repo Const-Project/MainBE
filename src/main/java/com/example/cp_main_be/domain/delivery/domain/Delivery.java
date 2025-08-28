@@ -33,8 +33,9 @@ public class Delivery {
   @Column(nullable = false)
   private String address;
 
-  @Column(nullable = false)
-  private Long seedType;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "delivery_plant_id", nullable = false)
+  private DeliveryPlant deliveryPlant;
 
   private String addressDetail;
   private String message;
