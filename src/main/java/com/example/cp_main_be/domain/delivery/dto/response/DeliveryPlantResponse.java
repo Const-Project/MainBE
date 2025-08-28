@@ -8,15 +8,13 @@ import lombok.Getter;
 @Builder
 public class DeliveryPlantResponse {
 
-  private Long id;
   private Long seedType;
   private String imageUrl;
   private String name;
 
   public static DeliveryPlantResponse from(DeliveryPlant deliveryPlant) {
     return DeliveryPlantResponse.builder()
-        .id(deliveryPlant.getId())
-        .seedType(deliveryPlant.getSeedType())
+        .seedType(deliveryPlant.getId())
         .imageUrl(deliveryPlant.getImageUrl())
         .name(deliveryPlant.getName())
         .build();

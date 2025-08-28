@@ -61,7 +61,7 @@ public class Delivery {
       String address,
       String addressDetail,
       String message,
-      Long seedType) {
+      DeliveryPlant deliveryPlant) {
     this.user = user;
     this.recipientName = recipientName;
     this.recipientPhone = recipientPhone;
@@ -69,6 +69,6 @@ public class Delivery {
     this.address = address;
     this.addressDetail = addressDetail;
     this.message = message;
-    this.seedType = seedType;
+    this.deliveryPlant = deliveryPlant;
   }
 }
