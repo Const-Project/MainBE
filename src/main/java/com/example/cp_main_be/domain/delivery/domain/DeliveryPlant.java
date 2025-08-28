@@ -14,9 +14,6 @@ public class DeliveryPlant {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "seedType")
-  private Long seedType;
-
   @Column(name = "image_url")
   private String imageUrl;
 

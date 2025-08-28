@@ -24,7 +24,7 @@ public class DeliveryResponse {
 
   public static DeliveryResponse from(Delivery delivery) {
     return DeliveryResponse.builder()
-        .seedType(delivery.getDeliveryPlant().getSeedType())
+        .seedType(delivery.getDeliveryPlant().getId())
         .recipientName(delivery.getRecipientName())
         .recipientPhone(delivery.getRecipientPhone())
         .postalCode(delivery.getPostalCode())
