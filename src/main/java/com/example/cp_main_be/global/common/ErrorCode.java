@@ -41,6 +41,7 @@ public enum ErrorCode {
   AVATAR_MASTER_NOT_FOUND(HttpStatus.NOT_FOUND, "E40408", "해당 아바타 원본을 찾을 수 없습니다."),
   WISH_TREE_NOT_FOUND(HttpStatus.NOT_FOUND, "E40409", "소원나무 정보를 찾을 수 없습니다."),
   DEFAULT_RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "E40410", "필수 기본 리소스를 찾을 수 없습니다."),
+  AVATAR_NOT_FOUND(HttpStatus.NOT_FOUND, "E40411", "해당 아바타를 찾을 수 없습니다."),
 
   // 417 Expectation Failed
   UPLOAD_FAILED(HttpStatus.EXPECTATION_FAILED, "E41701", "파일 업로드에 실패했습니다."),
