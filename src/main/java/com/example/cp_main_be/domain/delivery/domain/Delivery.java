@@ -33,6 +33,9 @@ public class Delivery {
   @Column(nullable = false)
   private String address;
 
+  @Column(nullable = false)
+  private Long seedType;
+
   private String addressDetail;
   private String message;
 
@@ -56,7 +59,8 @@ public class Delivery {
       String postalCode,
       String address,
       String addressDetail,
-      String message) {
+      String message,
+      Long seedType) {
     this.user = user;
     this.recipientName = recipientName;
     this.recipientPhone = recipientPhone;
@@ -64,5 +68,6 @@ public class Delivery {
     this.address = address;
     this.addressDetail = addressDetail;
     this.message = message;
+    this.seedType = seedType;
   }
 }

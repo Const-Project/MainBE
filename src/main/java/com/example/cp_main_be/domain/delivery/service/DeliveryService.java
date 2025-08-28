@@ -5,6 +5,7 @@ import com.example.cp_main_be.domain.delivery.domain.repository.DeliveryPlantRep
 import com.example.cp_main_be.domain.delivery.domain.repository.DeliveryRepository;
 import com.example.cp_main_be.domain.delivery.dto.request.DeliveryRequest;
 import com.example.cp_main_be.domain.delivery.dto.response.DeliveryPlantResponse;
+import com.example.cp_main_be.domain.delivery.dto.response.DeliveryResponse;
 import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
@@ -40,6 +41,7 @@ public class DeliveryService {
             .postalCode(request.getPostalCode())
             .address(request.getAddress())
             .addressDetail(request.getAddressDetail())
+            .seedType(request.getSeedType())
             .message(request.getMessage())
             .build();
 
@@ -53,6 +55,12 @@ public class DeliveryService {
         NotificationType.SEED_DELIVERY,
         "/deliveries/" + savedDelivery.getId() // 배송 상세 조회 페이지 URL
         );
+  }
+
+  public List<DeliveryResponse> getMyDelivery(User user) {
+    return deliveryRepository.findByUserId(user.getId()).stream()
+        .map(DeliveryResponse::from)
+        .toList();
   }
 
   @Transactional(readOnly = true)

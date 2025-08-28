@@ -9,12 +9,14 @@ import lombok.Getter;
 public class DeliveryPlantResponse {
 
   private Long id;
+  private Long seedType;
   private String imageUrl;
   private String name;
 
   public static DeliveryPlantResponse from(DeliveryPlant deliveryPlant) {
     return DeliveryPlantResponse.builder()
         .id(deliveryPlant.getId())
+        .seedType(deliveryPlant.getSeedType())
         .imageUrl(deliveryPlant.getImageUrl())
         .name(deliveryPlant.getName())
         .build();
