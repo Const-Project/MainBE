@@ -75,6 +75,10 @@ public class Garden {
     this.avatar = avatar; // [추가]
   }
 
+  public void unlock() {
+    this.isLocked = false;
+  }
+
   public void increaseWaterCount() {
     this.waterCount++;
   }

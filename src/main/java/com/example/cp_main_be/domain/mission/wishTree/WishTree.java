@@ -34,21 +34,40 @@ public class WishTree {
     this.stage = WishTreeStage.SPROUT;
   }
 
+  @Column(nullable = false)
+  private boolean isUnlockable = false;
+
   /**
    * 포인트 추가 및 성장 로직
    *
    * @param amount 추가할 포인트
    * @return 성장을 했는지 여부
    */
-  public boolean addPoints(Long amount) {
-    WishTreeStage previousStage = this.stage;
-    this.points += amount;
-    WishTreeStage newStage = WishTreeStage.getStageForPoints(this.points);
+  public void addPoints(Long points) {
+    this.points += points;
 
-    if (newStage != previousStage) {
-      this.stage = newStage;
-      return true; // 성장했다!
+    // 이미 해금 가능 상태이거나, 다음 스테이지가 없으면 아무것도 하지 않음
+    if (this.isUnlockable || this.stage.getNextStage() == null) {
+      return;
     }
-    return false; // 성장 안함
+
+    // 다음 스테이지의 요구 포인트를 넘었는지 확인
+    WishTreeStage nextStage = this.stage.getNextStage();
+    if (this.points >= this.stage.getRequiredPointsForNextStage()) {
+      this.isUnlockable = true; // 👈 Stage를 바로 바꾸는 대신, 해금 가능 상태로 변경
+    }
+  }
+
+  public void evolveStage() {
+    if (!this.isUnlockable) {
+      // 해금 불가능한 상태에서 호출 시 예외 처리 또는 로깅
+      return;
+    }
+
+    WishTreeStage nextStage = this.stage.getNextStage();
+    if (nextStage != null) {
+      this.stage = nextStage;
+      this.isUnlockable = false; // 상태 플래그 초기화
+    }
   }
 }

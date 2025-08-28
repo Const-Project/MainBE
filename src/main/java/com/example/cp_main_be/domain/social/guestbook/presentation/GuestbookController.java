@@ -34,11 +34,11 @@ public class GuestbookController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  @Operation(summary = "방명록 불러오기", description = "방명록의 글을 불러옵니다.")
-  @GetMapping("/guestbook/list")
+  @Operation(summary = "방명록 불러오기", description = "방명록의 글을 불러옵니다.userId가 로그인된 유저의것이면 자기것을 조회합니다.")
+  @GetMapping("/guestbook/{userId}/list")
   public ResponseEntity<ApiResponse<List<GuestbookResponse>>> getMyGuestbookList(
-      @AuthenticationPrincipal User user) {
-    List<GuestbookResponse> guestbookResponse = guestbookService.getGuestbookList(user);
+      @PathVariable Long userId, @AuthenticationPrincipal User user) {
+    List<GuestbookResponse> guestbookResponse = guestbookService.getGuestbookList(userId, user);
     return ResponseEntity.ok(ApiResponse.success(guestbookResponse));
   }
 }

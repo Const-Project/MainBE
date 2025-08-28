@@ -10,12 +10,9 @@ import com.example.cp_main_be.domain.member.notification.domain.NotificationType
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
-import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,24 +70,15 @@ public class AvatarService {
 
     avatarRepository.save(newAvatar);
 
-    WishTree wishTree =
-        wishTreeRepository
-            .findByUserId(userId)
+    // 1. 잠겨있지 않으면서(isLocked=false) 아바타가 비어있는(avatar=null) 정원을 찾습니다.
+    Garden emptyGarden =
+        gardenRepository
+            .findFirstByUserAndIsLockedIsFalseAndAvatarIsNullOrderBySlotNumberAsc(user)
             .orElseThrow(
-                () -> new CustomApiException(ErrorCode.NOT_FOUND, "사용자의 소원나무를 찾을 수 없습니다."));
+                () -> new CustomApiException(ErrorCode.GARDEN_NOT_FOUND, "배치할 수 있는 빈 정원이 없습니다."));
 
-    WishTreeStage stage = wishTree.getStage();
-    Long maxGardens = stage.getMaxGardens();
-
-    List<Garden> userGardens = user.getGardens();
-    if (userGardens.size() < maxGardens) {
-      Garden newGarden =
-          Garden.builder().user(user).slotNumber(userGardens.size() + 1).avatar(newAvatar).build();
-      gardenRepository.save(newGarden);
-    } else {
-      // 이미 존재하는 'GARDEN_SLOT_MAXED_OUT' 에러 코드를 재사용하여 일관성을 유지합니다.
-      throw new CustomApiException(ErrorCode.GARDEN_SLOT_MAXED_OUT);
-    }
+    // 2. 해당 정원에 새로 생성한 아바타를 배치합니다.
+    emptyGarden.updateAvatar(newAvatar);
   }
 
   @Transactional(readOnly = true)

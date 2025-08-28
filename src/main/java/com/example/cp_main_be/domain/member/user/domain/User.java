@@ -3,6 +3,7 @@ package com.example.cp_main_be.domain.member.user.domain;
 import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
+import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.social.bookmark.domain.Bookmark;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -82,6 +83,9 @@ public class User implements UserDetails {
   private List<Bookmark> bookMarks = new ArrayList<>();
 
   @Builder.Default private Boolean notificationEnabled = true;
+
+  @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+  private WishTree wishTree;
 
   @PrePersist
   protected void onCreate() {
