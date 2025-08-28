@@ -5,6 +5,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,8 +35,7 @@ public class AvatarPost {
   @Column(name = "image_url")
   private String imageUrl;
 
-  @Lob
-  @Column(name = "caption")
+  @Column(name = "caption", length = 2000)
   private String caption;
 
   @Column(name = "like_count")
@@ -59,5 +59,15 @@ public class AvatarPost {
 
   public void decreaseLikeCount() {
     this.likeCount = Math.max(0, this.likeCount - 1);
+  }
+
+  public static AvatarPost from(Avatar avatar, User user) {
+    return AvatarPost.builder()
+        .user(user)
+        .avatar(avatar)
+        .imageUrl(avatar.getImageUrl())
+        .caption("")
+        .comments(new ArrayList<Comment>())
+        .build();
   }
 }
