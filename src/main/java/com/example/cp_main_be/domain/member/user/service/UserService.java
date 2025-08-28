@@ -223,6 +223,7 @@ public class UserService {
     // 3. 프로필 주인의 정원 목록 및 물주기 가능 여부 계산
     List<UserGardenDetailResponse> userGardens =
         profileUser.getGardens().stream()
+            .filter(garden -> !garden.isLocked()) // isLocked가 false인 텃밭만 가져옵니다.
             .sorted(Comparator.comparing(Garden::getSlotNumber))
             .map(
                 garden -> {
