@@ -3,8 +3,10 @@ package com.example.cp_main_be.domain.avatar.image.service;
 import com.example.cp_main_be.domain.avatar.image.AiResponseDTO;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import com.example.cp_main_be.global.infra.S3Uploader;
 import com.example.cp_main_be.global.infra.StorageService;
 import java.time.Duration;
+import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class ImageProcessingService {
 
   private final WebClient webClient;
   private final StorageService storageService;
+  private final S3Uploader s3Uploader;
 
   @Value("${fastapi.server.url}")
   private String fastapiServerUrl;
@@ -58,13 +61,13 @@ public class ImageProcessingService {
   public String processImageWithAi(MultipartFile imageFile) {
     try {
       MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-      bodyBuilder.part("image_file", new ByteArrayResource(imageFile.getBytes()))
+      bodyBuilder.part("image", new ByteArrayResource(imageFile.getBytes()))
               .filename(imageFile.getOriginalFilename()) // 원래 파일명 사용
               .contentType(MediaType.parseMediaType(imageFile.getContentType())); // 원본 Content-Type 유지
 
 // WebClient 요청 시
       // 2. WebClient를 사용하여 multipart/form-data 형식으로 전송
-      AiResponseDTO result =
+      AiResponseDTO responseDTO =
           webClient
               .post()
               .uri(fastapiServerUrl + "/process-image")
@@ -90,16 +93,17 @@ public class ImageProcessingService {
               .timeout(Duration.ofSeconds(300))
               .block(Duration.ofSeconds(300));
 
-      if (result == null || result.getImageUrl().isEmpty()) {
+      byte[] result = Base64.getDecoder().decode(responseDTO.getImageData());
+
+      if (result == null || result.length == 0) {
         log.error("AI 서버에서 유효한 이미지 링크를 받지 못했습니다 (null/empty).");
         throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
       }
 
-      // 3. 받은 byte 배열을 스토리지에 업로드하고 URL을 받음
-//      String imageUrl =
-//          storageService.uploadFile(result, "avatars/", imageFile.getOriginalFilename());
+//       3. 받은 byte 배열을 스토리지에 업로드하고 URL을 받음
+      String imageUrl = s3Uploader.uploadByteArrayToPng(result,"/avatars");
 
-      return result.getImageUrl();
+      return imageUrl;
 
     } catch (Exception e) {
       // 실패 시 폴백 URL 리스트에서 랜덤으로 하나를 선택하여 반환

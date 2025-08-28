@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class AiResponseDTO {
-    String imageUrl;
+    String imageData;
 }

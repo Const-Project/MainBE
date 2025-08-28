@@ -12,6 +12,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Component
 @RequiredArgsConstructor
@@ -51,7 +52,45 @@ public class S3Uploader implements ImageUploader {
       throw new IllegalArgumentException("파일 업로드에 실패했습니다: " + e.getMessage());
     }
   }
+  /**
+   * 바이트 배열을 PNG 파일로 S3에 업로드하고 URL을 반환합니다.
+   *
+   * @param imageBytes 업로드할 이미지의 바이트 배열
+   * @param path       S3 내 파일이 저장될 경로 (예: "images/avatars")
+   * @return 업로드된 파일의 S3 URL
+   */
+  public String uploadByteArrayToPng(byte[] imageBytes, String path) {
+    // 고유한 파일명 생성 (확장자는 .png로 고정)
+    String uniqueFileName = path + "/" + UUID.randomUUID() + ".png";
 
+    try {
+      // 1. PutObjectRequest 생성
+      PutObjectRequest putObjectRequest =
+              PutObjectRequest.builder()
+                      .bucket(bucket)
+                      .key(uniqueFileName)
+                      .contentType("image/png") // MIME 타입은 PNG로 고정
+                      .contentLength((long) imageBytes.length)
+                      .build();
+
+      // 2. 바이트 배열을 요청 본문으로 변환하여 파일 업로드
+      s3Client.putObject(
+              putObjectRequest, RequestBody.fromBytes(imageBytes));
+
+      // 3. 업로드된 파일의 URL 반환
+      return s3Client
+              .utilities()
+              .getUrl(builder -> builder.bucket(bucket).key(uniqueFileName))
+              .toExternalForm();
+
+    } catch (S3Exception e) {
+      // S3 관련 에러 처리
+      throw new RuntimeException("S3 업로드 중 오류 발생: " + e.awsErrorDetails().errorMessage(), e);
+    } catch (Exception e) {
+      // 일반적인 업로드 실패 에러 처리
+      throw new RuntimeException("파일 업로드에 실패했습니다: " + e.getMessage(), e);
+    }
+  }
   @Override
   public void delete(String imageUrl) {
     // URL에서 파일 경로(key)를 추출
