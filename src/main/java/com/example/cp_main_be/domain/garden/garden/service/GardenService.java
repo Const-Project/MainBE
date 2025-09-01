@@ -92,7 +92,8 @@ public class GardenService {
   }
 
   /** 친구의 정원에 물을 주는 로직을 처리합니다. */
-  private void waterFriendGarden(Long actorId, Garden garden) {
+  @Transactional
+  public void waterFriendGarden(Long actorId, Garden garden) {
     User actor =
         userRepository
             .findById(actorId)
