@@ -33,6 +33,10 @@ public class Delivery {
   @Column(nullable = false)
   private String address;
 
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "delivery_plant_id", nullable = false)
+  private DeliveryPlant deliveryPlant;
+
   private String addressDetail;
   private String message;
 
@@ -56,7 +60,8 @@ public class Delivery {
       String postalCode,
       String address,
       String addressDetail,
-      String message) {
+      String message,
+      DeliveryPlant deliveryPlant) {
     this.user = user;
     this.recipientName = recipientName;
     this.recipientPhone = recipientPhone;
@@ -64,5 +69,6 @@ public class Delivery {
     this.address = address;
     this.addressDetail = addressDetail;
     this.message = message;
+    this.deliveryPlant = deliveryPlant;
   }
 }

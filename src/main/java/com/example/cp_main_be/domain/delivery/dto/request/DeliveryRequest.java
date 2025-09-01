@@ -1,12 +1,16 @@
 package com.example.cp_main_be.domain.delivery.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
 public class DeliveryRequest {
+
+  @NotNull(message = "씨앗 종류는 필수입니다.")
+  private Long seedType;
 
   @NotBlank(message = "수령인 이름은 필수입니다.")
   private String recipientName;

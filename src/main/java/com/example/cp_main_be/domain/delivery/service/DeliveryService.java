@@ -5,10 +5,13 @@ import com.example.cp_main_be.domain.delivery.domain.repository.DeliveryPlantRep
 import com.example.cp_main_be.domain.delivery.domain.repository.DeliveryRepository;
 import com.example.cp_main_be.domain.delivery.dto.request.DeliveryRequest;
 import com.example.cp_main_be.domain.delivery.dto.response.DeliveryPlantResponse;
+import com.example.cp_main_be.domain.delivery.dto.response.DeliveryResponse;
 import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,6 +43,10 @@ public class DeliveryService {
             .postalCode(request.getPostalCode())
             .address(request.getAddress())
             .addressDetail(request.getAddressDetail())
+            .deliveryPlant(
+                deliveryPlantRepository
+                    .findById(request.getSeedType())
+                    .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND)))
             .message(request.getMessage())
             .build();
 
@@ -53,6 +60,12 @@ public class DeliveryService {
         NotificationType.SEED_DELIVERY,
         "/deliveries/" + savedDelivery.getId() // 배송 상세 조회 페이지 URL
         );
+  }
+
+  public List<DeliveryResponse> getMyDelivery(User user) {
+    return deliveryRepository.findByUserId(user.getId()).stream()
+        .map(DeliveryResponse::from)
+        .toList();
   }
 
   @Transactional(readOnly = true)

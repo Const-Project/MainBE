@@ -6,6 +6,7 @@ import com.example.cp_main_be.domain.avatar.avatar.dto.response.AvatarMasterResp
 import com.example.cp_main_be.domain.avatar.avatar.service.AvatarService;
 import com.example.cp_main_be.domain.avatar.image.service.ImageProcessingService;
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.social.avatarpost.service.AvatarPostService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +27,7 @@ public class AvatarController {
   private final AvatarService avatarService;
   private final AvatarMasterRepository avatarMasterRepository;
   private final ImageProcessingService imageProcessingService;
+  private final AvatarPostService avatarPostService;
 
   @Operation(summary = "선택 가능한 아바타 종류 조회")
   @GetMapping("/masters") // 엔드포인트 변경

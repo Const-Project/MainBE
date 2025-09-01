@@ -11,6 +11,7 @@ import com.example.cp_main_be.domain.member.notification.service.NotificationSer
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
+import com.example.cp_main_be.domain.social.avatarpost.service.AvatarPostService;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +30,10 @@ public class AvatarService {
   private final NotificationService notificationService;
   private final WishTreeRepository wishTreeRepository;
   private final GardenRepository gardenRepository;
+  private final AvatarPostService avatarPostService;
 
   // [수정] 새로운 아바타 생성 로직 구현
-  public void createAvatar(Long userId, String nickname, String imageUrl, Long masterId) {
+  public Avatar createAvatar(Long userId, String nickname, String imageUrl, Long masterId) {
     User user =
         userRepository
             .findById(userId)
@@ -79,6 +81,9 @@ public class AvatarService {
 
     // 2. 해당 정원에 새로 생성한 아바타를 배치합니다.
     emptyGarden.updateAvatar(newAvatar);
+
+    avatarPostService.createAvatarPost(newAvatar, user);
+    return newAvatar;
   }
 
   @Transactional(readOnly = true)
