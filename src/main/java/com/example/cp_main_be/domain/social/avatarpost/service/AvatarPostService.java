@@ -1,6 +1,8 @@
 package com.example.cp_main_be.domain.social.avatarpost.service;
 
+import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
@@ -31,5 +33,10 @@ public class AvatarPostService {
 
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO로 변환하여 반환합니다.
     return PostInfoResponse.from(post, isLiked);
+  }
+
+  public PostInfoResponse createAvatarPost(Avatar avatar, User currentUser) {
+    AvatarPost avatarPost = avatarPostRepository.save(AvatarPost.from(avatar, currentUser));
+    return PostInfoResponse.from(avatarPost, true);
   }
 }
