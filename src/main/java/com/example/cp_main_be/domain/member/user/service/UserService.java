@@ -26,12 +26,14 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class UserService {
@@ -207,10 +209,14 @@ public class UserService {
 
     // 2. 남에게 물 줄 수 있는 남은 횟수 계산 (현재 접속 유저 기준)
     LocalDateTime startOfWateringDay = getStartOfCurrentWateringDay();
+    log.info(
+        "Current Server Time: {}, Calculated startOfDay: {}",
+        LocalDateTime.now(),
+        startOfWateringDay);
     int todayWateringCountForOthers =
         friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(
             currentUser, startOfWateringDay);
-    Long leftWaterCountForOthers =
+    long leftWaterCountForOthers =
         (long) (3 - todayWateringCountForOthers); // MAX_FRIEND_WATERING_PER_DAY = 3
 
     // 3. 프로필 주인의 정원 목록 및 물주기 가능 여부 계산
@@ -231,17 +237,25 @@ public class UserService {
                   }
 
                   HomeResponseDto.AvatarInfo avatarInfoForGarden =
-                      HomeResponseDto.AvatarInfo.builder()
-                          .avatarId(garden.getAvatar().getId())
-                          .avatarName(garden.getAvatar().getNickname())
-                          .avatarImageUrl(garden.getAvatar().getAvatarMaster().getDefaultImageUrl())
-                          .build();
+                      null; // 1. avatarInfo를 일단 null로 초기화
+
+                  if (garden.getAvatar() != null) { // 2. 정원에 아바타가 있을 때만 avatarInfo를 채웁니다.
+                    avatarInfoForGarden =
+                        HomeResponseDto.AvatarInfo.builder()
+                            .avatarId(garden.getAvatar().getId())
+                            .avatarName(garden.getAvatar().getNickname())
+                            .avatarImageUrl(
+                                garden.getAvatar().getAvatarMaster().getDefaultImageUrl())
+                            .build();
+                  }
 
                   // GardenResponse 대신 UserGardenDetailResponse를 빌드
                   return UserGardenDetailResponse.builder()
                       .gardenId(garden.getId())
                       .avatarInfo(avatarInfoForGarden)
                       .isWateringAbleByMe(isWateringAbleByMe)
+                      .waterCount(garden.getWaterCount()) // 👈 이 라인 추가
+                      .sunlightCount(garden.getSunlightCount()) // 👈 이 라인 추가
                       .build();
                 })
             .collect(Collectors.toList());
