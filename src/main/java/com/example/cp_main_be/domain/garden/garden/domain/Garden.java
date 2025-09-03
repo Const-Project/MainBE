@@ -60,10 +60,12 @@ public class Garden {
   private boolean isLocked;
 
   @CreatedDate
-  @Column(updatable = false)
+  @Column(nullable = false)
   private LocalDateTime createdAt;
 
-  @LastModifiedDate private LocalDateTime updatedAt;
+  @LastModifiedDate
+  @Column(nullable = false)
+  private LocalDateTime updatedAt;
 
   @Builder
   public Garden(User user, Integer slotNumber, GardenBackground gardenBackground, Avatar avatar) {
@@ -77,6 +79,8 @@ public class Garden {
 
   public void unlock() {
     this.isLocked = false;
+    this.createdAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
   }
 
   public void increaseWaterCount() {
