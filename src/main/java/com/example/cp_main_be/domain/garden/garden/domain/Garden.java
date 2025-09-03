@@ -60,11 +60,12 @@ public class Garden {
   private boolean isLocked;
 
   @CreatedDate
-  @Column(updatable = false)
-  @Builder.Default
+  @Column(nullable = false)
   private LocalDateTime createdAt;
 
-  @Builder.Default @LastModifiedDate private LocalDateTime updatedAt;
+  @LastModifiedDate
+  @Column(nullable = false)
+  private LocalDateTime updatedAt;
 
   @Builder
   public Garden(User user, Integer slotNumber, GardenBackground gardenBackground, Avatar avatar) {
