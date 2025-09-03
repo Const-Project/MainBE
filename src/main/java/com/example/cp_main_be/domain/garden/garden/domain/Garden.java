@@ -61,9 +61,10 @@ public class Garden {
 
   @CreatedDate
   @Column(updatable = false)
+  @Builder.Default
   private LocalDateTime createdAt;
 
-  @LastModifiedDate private LocalDateTime updatedAt;
+  @Builder.Default @LastModifiedDate private LocalDateTime updatedAt;
 
   @Builder
   public Garden(User user, Integer slotNumber, GardenBackground gardenBackground, Avatar avatar) {
@@ -77,6 +78,8 @@ public class Garden {
 
   public void unlock() {
     this.isLocked = false;
+    this.createdAt = LocalDateTime.now();
+    this.updatedAt = LocalDateTime.now();
   }
 
   public void increaseWaterCount() {
