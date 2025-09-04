@@ -5,6 +5,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -92,15 +93,15 @@ public class Garden {
   }
 
   public void recordOwnerWateringTime() {
-    this.lastWateredByOwnerAt = LocalDateTime.now();
+    this.lastWateredByOwnerAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
   }
 
   public void recordFriendWateringTime() {
-    this.lastWateredByFriendAt = LocalDateTime.now();
+    this.lastWateredByFriendAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
   }
 
   public void recordSunlightTime() {
-    this.lastSunlightReceivedAt = LocalDateTime.now();
+    this.lastSunlightReceivedAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
   }
 
   public void updateBackgroundImage(GardenBackground gardenBackground) {

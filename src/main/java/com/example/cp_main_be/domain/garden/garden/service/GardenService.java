@@ -80,9 +80,12 @@ public class GardenService {
   /** 자신의 정원에 물을 주는 로직을 처리합니다. */
   @Transactional
   public void waterOwnGarden(Long ownerId, Garden garden) {
+    // [수정] 시간대 문제를 방지하기 위해, 서울 시간 기준으로 현재 시간을 명시적으로 사용합니다.
+    LocalDateTime nowInSeoul = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+
     // 8시간 쿨타임 체크
     if (garden.getLastWateredByOwnerAt() != null
-        && garden.getLastWateredByOwnerAt().plusHours(8).isAfter(LocalDateTime.now())) {
+        && garden.getLastWateredByOwnerAt().plusHours(8).isAfter(nowInSeoul)) {
       throw new CustomApiException(ErrorCode.WATERING_COOL_DOWN);
     }
 
@@ -146,14 +149,15 @@ public class GardenService {
 
   @Transactional
   public void sunlightGarden(Long actorId, Long gardenId) {
+    // 텃밭 가져오기
     Garden garden =
         gardenRepository
             .findById(gardenId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.GARDEN_NOT_FOUND));
 
     // 햇빛은 본인만 줄 수 있도록 검증
     if (!garden.getUser().getId().equals(actorId)) {
-      throw new IllegalStateException("자신의 정원에만 햇빛을 줄 수 있습니다.");
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "자신의 정원에만 햇빛을 줄 수 있습니다.");
     }
 
     // 하루에 한 번만 햇빛을 줄 수 있도록 체크 (초기화 시간: 오전 6시)
@@ -166,7 +170,9 @@ public class GardenService {
 
     garden.increaseSunlightCount();
     wishTreeService.addPointsToWishTree(actorId, SUNLIGHT_POINTS);
-    garden.recordSunlightTime(); // 햇빛 준 시간 기록
+
+    // [수정] 시간대 문제를 해결하기 위해, 서울 시간 기준으로 현재 시간을 명시적으로 기록합니다.
+    garden.recordSunlightTime();
   }
 
   public void unlockNextGarden(Long userId) {
@@ -246,6 +252,7 @@ public class GardenService {
   private LocalDateTime getStartOfCurrentSunlightDay() {
     // 서버 위치와 관계없이 항상 한국 시간 기준으로 동작하도록 시간대를 명시합니다.
     LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    // 해당 날짜의 6시 반환
     LocalDateTime todaySixAM = now.toLocalDate().atTime(6, 0);
 
     if (now.isBefore(todaySixAM)) {
