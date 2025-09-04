@@ -15,6 +15,11 @@
 // import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 // import com.example.cp_main_be.domain.member.user.domain.User;
 // import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+// import com.example.cp_main_be.domain.mission.wishTree.WishTree;
+// import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
+// import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
+// import com.example.cp_main_be.global.common.CustomApiException;
+// import com.example.cp_main_be.global.common.ErrorCode;
 // import org.junit.jupiter.api.BeforeEach;
 // import org.junit.jupiter.api.DisplayName;
 // import org.junit.jupiter.api.Test;
@@ -30,24 +35,29 @@
 //  @Autowired private AvatarRepository avatarRepository;
 //  @Autowired private AvatarMasterRepository avatarMasterRepository;
 //  @Autowired private GardenBackgroundRepository gardenBackgroundRepository;
+//  @Autowired private WishTreeRepository wishTreeRepository;
 //
-//  // 테스트 대상인 GardenService는 Bean으로 등록되지 않으므로, 수동으로 생성합니다.
+//  // 테스트 대상인 Service는 Bean으로 등록되지 않으므로, 수동으로 생성합니다.
 //  private GardenService gardenService;
+//  private WishTreeService wishTreeService;
 //
 //  @BeforeEach
 //  void setUp() {
-//    // findGardenById 메서드는 gardenRepository만 사용하므로, 다른 의존성은 null로 전달해도 괜찮습니다.
+//    // WishTreeService는 ApplicationEventPublisher도 의존할 수 있으나, 이 테스트에서는 사용되지 않으므로 null을 전달합니다.
+//    // 실제 WishTreeService의 생성자에 따라 조정이 필요할 수 있습니다.
+//    wishTreeService = new WishTreeService(wishTreeRepository, null, null);
+//
 //    gardenService =
 //        new GardenService(
-//            null,
+//            wishTreeService, // [수정] sunlightGarden 테스트에 필요한 WishTreeService를 주입합니다.
 //            gardenRepository,
-//            null,
-//            null,
+//            null, // userService
+//            null, // eventPublisher
 //            gardenBackgroundRepository,
 //            avatarRepository,
 //            userRepository,
-//            null,
-//            null);
+//            null, // friendWateringLogRepository
+//            wishTreeRepository);
 //  }
 //
 //  @Test
@@ -59,8 +69,7 @@
 //        gardenBackgroundRepository.save(
 //            GardenBackground.builder().name("기본 배경").imageUrl("bg.url").build());
 //    AvatarMaster master =
-//        avatarMasterRepository.save(
-//            AvatarMaster.builder().defaultImageUrl("avatar.url").build());
+// avatarMasterRepository.save(AvatarMaster.builder().defaultImageUrl("avatar.url").build());
 //    Avatar avatar =
 //        avatarRepository.save(
 //            Avatar.builder().user(user).nickname("내 아바타").avatarMaster(master).build());
@@ -79,15 +88,15 @@
 //    Long gardenId = savedGarden.getId();
 //
 //    // When: 테스트할 메서드를 호출합니다.
-//    GardenResponse response = gardenService.findGardenById(312L);
+//    GardenResponse response = gardenService.findGardenById(gardenId);
 //
 //    // Then: 결과를 검증합니다.
 //    assertThat(response).isNotNull();
 //    assertThat(response.getId()).isEqualTo(gardenId);
 //
 //    // And: 가장 중요한 부분인 createdAt, updatedAt이 null이 아닌지 확인합니다.
-//    assertThat(response.getCreatedAt()).isNull();
-//    assertThat(response.getUpdatedAt()).isNull();
+//    assertThat(response.getCreatedAt()).isNotNull();
+//    assertThat(response.getUpdatedAt()).isNotNull();
 //  }
 //
 //  @Test
@@ -106,4 +115,32 @@
 //
 //    assertThat(exception.getMessage()).isEqualTo("Garden not found");
 //  }
+//
+//     @Test
+//     @DisplayName("햇빛 주기 실패 - 하루에 한 번만 가능")
+//     void sunlightGarden_Fail_WhenAlreadyGivenToday() {
+//         // Given: 테스트 데이터 설정
+//        User user = userRepository.save(User.builder().nickname("햇빛테스터").experience(0L).build());
+//        wishTreeRepository.save(WishTree.builder().user(user).build()); // [수정] 햇빛주기 시 포인트를 받을
+// 소원나무를 생성합니다.
+//         Garden garden =
+//                 gardenRepository.save(
+//                         Garden.builder().user(user).slotNumber(1).isLocked(false).build());
+//         Long userId = user.getId();
+//         Long gardenId = garden.getId();
+//
+//         // When: 첫 번째 햇빛 주기는 성공해야 합니다.
+//         gardenService.sunlightGarden(userId, gardenId);
+//
+//         // Then: 두 번째 햇빛 주기는 CustomApiException을 발생시켜야 합니다.
+//         CustomApiException exception =
+//                 assertThrows(
+//                         CustomApiException.class,
+//                         () -> {
+//                             gardenService.sunlightGarden(userId, gardenId);
+//                         });
+//
+//         // And: 발생한 예외의 에러 코드가 SUNLIGHT_COOL_DOWN인지 확인합니다.
+//         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SUNLIGHT_COOL_DOWN);
+//     }
 // }
