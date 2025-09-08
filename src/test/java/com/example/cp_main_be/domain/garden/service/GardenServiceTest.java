@@ -2,173 +2,145 @@
 //
 // import static org.assertj.core.api.Assertions.assertThat;
 // import static org.junit.jupiter.api.Assertions.assertThrows;
-// import static org.mockito.BDDMockito.*;
 //
+// import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
+// import com.example.cp_main_be.domain.avatar.avatar.domain.AvatarMaster;
+// import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarMasterRepository;
+// import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
 // import com.example.cp_main_be.domain.garden.garden.domain.Garden;
+// import com.example.cp_main_be.domain.garden.garden.domain.GardenBackground;
+// import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenBackgroundRepository;
 // import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
 // import com.example.cp_main_be.domain.garden.garden.dto.response.GardenResponse;
 // import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 // import com.example.cp_main_be.domain.member.user.domain.User;
-// import java.util.ArrayList;
-// import java.util.List;
-// import java.util.Optional;
-// import java.util.UUID;
+// import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+// import com.example.cp_main_be.domain.mission.wishTree.WishTree;
+// import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
+// import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
+// import com.example.cp_main_be.global.common.CustomApiException;
+// import com.example.cp_main_be.global.common.ErrorCode;
+// import org.junit.jupiter.api.BeforeEach;
 // import org.junit.jupiter.api.DisplayName;
 // import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.ArgumentCaptor;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 //
-// @ExtendWith(MockitoExtension.class)
+// @DataJpaTest // JPA 관련 컴포넌트만 테스트하기 위한 어노테이션
 // class GardenServiceTest {
 //
-//  @Mock private GardenRepository gardenRepository;
+//  // @DataJpaTest 환경에서는 실제 Repository Bean들이 주입됩니다.
+//  @Autowired private GardenRepository gardenRepository;
+//  @Autowired private UserRepository userRepository;
+//  @Autowired private AvatarRepository avatarRepository;
+//  @Autowired private AvatarMasterRepository avatarMasterRepository;
+//  @Autowired private GardenBackgroundRepository gardenBackgroundRepository;
+//  @Autowired private WishTreeRepository wishTreeRepository;
 //
-//  @InjectMocks private GardenService gardenService;
+//  // 테스트 대상인 Service는 Bean으로 등록되지 않으므로, 수동으로 생성합니다.
+//  private GardenService gardenService;
+//  private WishTreeService wishTreeService;
 //
-//  @DisplayName("텃밭 ID로 조회 성공")
-//  @Test
-//  void findGardenById_Success() {
-//    // given
-//    Long gardenId = 1L;
-//    User user = User.builder().id(1L).uuid(UUID.randomUUID()).nickname("testuser").build();
-//    Garden garden = Garden.builder().user(user).slotNumber(1).build();
+//  @BeforeEach
+//  void setUp() {
+//    // WishTreeService는 ApplicationEventPublisher도 의존할 수 있으나, 이 테스트에서는 사용되지 않으므로 null을 전달합니다.
+//    // 실제 WishTreeService의 생성자에 따라 조정이 필요할 수 있습니다.
+//    wishTreeService = new WishTreeService(wishTreeRepository, null, null);
 //
-//    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
-//
-//    // when
-//    GardenResponse gardenResponse = gardenService.findGardenById(gardenId);
-//
-//    // then
-//    assertThat(gardenResponse.getId()).isEqualTo(garden.getId());
-//    assertThat(gardenResponse.getUserId()).isEqualTo(user.getId());
-//    assertThat(gardenResponse.getSlotNumber()).isEqualTo(garden.getSlotNumber());
+//    gardenService =
+//        new GardenService(
+//            wishTreeService, // [수정] sunlightGarden 테스트에 필요한 WishTreeService를 주입합니다.
+//            gardenRepository,
+//            null, // userService
+//            null, // eventPublisher
+//            gardenBackgroundRepository,
+//            avatarRepository,
+//            userRepository,
+//            null, // friendWateringLogRepository
+//            wishTreeRepository);
 //  }
 //
-//  @DisplayName("텃밭 ID로 조회 실패 - 존재하지 않는 텃밭")
 //  @Test
-//  void findGardenById_NotFound() {
-//    // given
-//    Long gardenId = 999L;
-//    given(gardenRepository.findById(gardenId)).willReturn(Optional.empty());
+//  @DisplayName("텃밭 ID로 조회 성공 시 createdAt과 updatedAt은 null이 아니다")
+//  void findGardenById_Success_AuditingFieldsAreNotNull() {
+//    // Given: 테스트에 필요한 데이터를 미리 설정합니다.
+//    User user = userRepository.save(User.builder().nickname("테스트유저").build());
+//    GardenBackground background =
+//        gardenBackgroundRepository.save(
+//            GardenBackground.builder().name("기본 배경").imageUrl("bg.url").build());
+//    AvatarMaster master =
+// avatarMasterRepository.save(AvatarMaster.builder().defaultImageUrl("avatar.url").build());
+//    Avatar avatar =
+//        avatarRepository.save(
+//            Avatar.builder().user(user).nickname("내 아바타").avatarMaster(master).build());
 //
-//    // when & then
-//    assertThrows(
-//        IllegalArgumentException.class,
-//        () -> {
-//          gardenService.findGardenById(gardenId);
-//        });
-//  }
-//
-//  //  @DisplayName("텃밭 물주기 성공")
-//  //  @Test
-//  //  void waterGarden_Success() {
-//  //    // given
-//  //    Long gardenId = 1L;
-//  //    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
-//  //    Garden garden = Garden.builder().user(user).slotNumber(1).build();
-//  //
-//  //    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
-//  //
-//  //    // when
-//  //    gardenService.waterGarden(gardenId);
-//  //
-//  //    // then
-//  //    assertThat(garden.getWaterCount()).isEqualTo(1);
-//  //  }
-//  //
-//  //  @DisplayName("텃밭 햇빛 주기 성공")
-//  //  @Test
-//  //  void sunlightGarden_Success() {
-//  //    // given
-//  //    Long gardenId = 1L;
-//  //    User user = User.builder().id(1L).uuid(UUID.randomUUID()).username("testuser").build();
-//  //    Garden garden = Garden.builder().user(user).slotNumber(1).build();
-//  //    given(gardenRepository.findById(gardenId)).willReturn(Optional.of(garden));
-//  //
-//  //    // when
-//  //    gardenService.sunlightGarden(gardenId);
-//  //
-//  //    // then
-//  //    assertThat(garden.getSunlightCount()).isEqualTo(1);
-//  //  }
-//
-//  @Test
-//  @DisplayName("성공 - 레벨이 충분할 때 새로운 텃밭을 잠금 해제한다")
-//  void unlockGarden_Success() {
-//    // given
-//    // 레벨 2이고, 텃밭을 1개 가지고 있는 사용자
-//    User user =
-//        User.builder()
-//            .id(1L)
-//            .level(2)
-//            .gardens(new ArrayList<>(List.of(Garden.builder().slotNumber(1).build())))
+//    Garden garden =
+//        Garden.builder()
+//            .user(user)
+//            .slotNumber(1)
+//            .avatar(avatar)
+//            .gardenBackground(background)
+//            .isLocked(false)
 //            .build();
 //
-//    // when
-//    gardenService.unlockNewGardenSlot(user.getId());
+//    // When: 엔티티를 저장하면 JPA Auditing 기능이 createdAt과 updatedAt을 자동으로 채워줍니다.
+//    Garden savedGarden = gardenRepository.save(garden);
+//    Long gardenId = savedGarden.getId();
 //
-//    // then
-//    // 1. gardenRepository.save()가 호출되었는지 검증
-//    ArgumentCaptor<Garden> gardenCaptor = ArgumentCaptor.forClass(Garden.class);
-//    then(gardenRepository).should().save(gardenCaptor.capture());
+//    // When: 테스트할 메서드를 호출합니다.
+//    GardenResponse response = gardenService.findGardenById(gardenId);
 //
-//    // 2. 저장된 Garden 객체의 속성 검증
-//    Garden savedGarden = gardenCaptor.getValue();
-//    assertThat(savedGarden.getUser()).isEqualTo(user);
-//    assertThat(savedGarden.getSlotNumber()).isEqualTo(2); // 새 텃밭의 슬롯 번호는 2
+//    // Then: 결과를 검증합니다.
+//    assertThat(response).isNotNull();
+//    assertThat(response.getId()).isEqualTo(gardenId);
 //
-//    // 3. User 객체의 gardens 리스트 크기가 증가했는지 검증
-//    assertThat(user.getGardens()).hasSize(2);
+//    // And: 가장 중요한 부분인 createdAt, updatedAt이 null이 아닌지 확인합니다.
+//    assertThat(response.getCreatedAt()).isNotNull();
+//    assertThat(response.getUpdatedAt()).isNotNull();
 //  }
 //
 //  @Test
-//  @DisplayName("실패 - 레벨이 부족할 때 예외가 발생한다")
-//  void unlockGarden_Fail_InsufficientLevel() {
-//    // given
-//    // 레벨 1이고, 텃밭을 1개 가지고 있는 사용자
-//    User user =
-//        User.builder()
-//            .id(1L)
-//            .level(1)
-//            .gardens(new ArrayList<>(List.of(Garden.builder().slotNumber(1).build())))
-//            .build();
+//  @DisplayName("존재하지 않는 텃밭 ID로 조회 시 예외 발생")
+//  void findGardenById_Fail_WhenGardenNotFound() {
+//    // Given: 존재하지 않는 ID를 준비합니다.
+//    Long nonExistentGardenId = 999L;
 //
-//    // when & then
-//    IllegalStateException exception =
+//    // When & Then: 예외가 발생하는지, 그리고 예외 메시지가 올바른지 확인합니다.
+//    IllegalArgumentException exception =
 //        assertThrows(
-//            IllegalStateException.class, () -> gardenService.unlockNewGardenSlot(user.getId()));
+//            IllegalArgumentException.class,
+//            () -> {
+//              gardenService.findGardenById(nonExistentGardenId);
+//            });
 //
-//    assertThat(exception.getMessage()).isEqualTo("레벨이 부족하여 더 이상 텃밭을 잠금 해제할 수 없습니다.");
-//    then(gardenRepository).should(never()).save(any(Garden.class));
+//    assertThat(exception.getMessage()).isEqualTo("Garden not found");
 //  }
 //
-//  @Test
-//  @DisplayName("실패 - 최대 텃밭 개수(3개)에 도달했을 때 예외가 발생한다")
-//  void unlockGarden_Fail_MaxGardensReached() {
-//    // given
-//    // 레벨 4이지만, 텃밭을 이미 3개 가지고 있는 사용자
-//    User user =
-//        User.builder()
-//            .id(1L)
-//            .level(4)
-//            .gardens(
-//                new ArrayList<>(
-//                    List.of(
-//                        Garden.builder().slotNumber(1).build(),
-//                        Garden.builder().slotNumber(2).build(),
-//                        Garden.builder().slotNumber(3).build(),
-//                        Garden.builder().slotNumber(4).build())))
-//            .build();
+//     @Test
+//     @DisplayName("햇빛 주기 실패 - 하루에 한 번만 가능")
+//     void sunlightGarden_Fail_WhenAlreadyGivenToday() {
+//         // Given: 테스트 데이터 설정
+//        User user = userRepository.save(User.builder().nickname("햇빛테스터").experience(0L).build());
+//        wishTreeRepository.save(WishTree.builder().user(user).build()); // [수정] 햇빛주기 시 포인트를 받을
+// 소원나무를 생성합니다.
+//         Garden garden =
+//                 gardenRepository.save(
+//                         Garden.builder().user(user).slotNumber(1).isLocked(false).build());
+//         Long userId = user.getId();
+//         Long gardenId = garden.getId();
 //
-//    // when & then
-//    IllegalStateException exception =
-//        assertThrows(
-//            IllegalStateException.class, () -> gardenService.unlockNewGardenSlot(user.getId()));
+//         // When: 첫 번째 햇빛 주기는 성공해야 합니다.
+//         gardenService.sunlightGarden(userId, gardenId);
 //
-//    assertThat(exception.getMessage()).isEqualTo("텃밭은 최대 4개까지만 생성할 수 있습니다.");
-//    then(gardenRepository).should(never()).save(any(Garden.class));
-//  }
+//         // Then: 두 번째 햇빛 주기는 CustomApiException을 발생시켜야 합니다.
+//         CustomApiException exception =
+//                 assertThrows(
+//                         CustomApiException.class,
+//                         () -> {
+//                             gardenService.sunlightGarden(userId, gardenId);
+//                         });
+//
+//         // And: 발생한 예외의 에러 코드가 SUNLIGHT_COOL_DOWN인지 확인합니다.
+//         assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SUNLIGHT_COOL_DOWN);
+//     }
 // }
