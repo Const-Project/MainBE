@@ -16,8 +16,8 @@ import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterRespon
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import com.example.cp_main_be.global.util.TimeUtil;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -165,10 +165,12 @@ public class UserService {
    * @return UserProfileResponse DTO
    */
   public UserProfileResponse getUserProfile(Long currentUserId, Long profileUserId) {
+    // 현재 로그인한 유저
     User currentUser =
         userRepository
             .findById(currentUserId) // ID로 최신 유저 정보를 조회합니다.
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+    // 프로필 조회할 유저
     User profileUser =
         userRepository
             .findByIdWithGardensAndAvatars(profileUserId)
@@ -207,13 +209,22 @@ public class UserService {
       followStatus = FollowStatus.NOT_FOLLOWING;
     }
 
-    // 2. 남에게 물 줄 수 있는 남은 횟수 계산 (현재 접속 유저 기준)
-    LocalDateTime startOfWateringDay = getStartOfCurrentWateringDay();
-    int todayWateringCountForOthers =
+    // 2. 남에게 물 줄 수 있는 남은 횟수 계산
+    LocalDateTime startOfWateringDay = TimeUtil.getStartOfCurrentWateringDay();
+
+    // 2-1. 프로필 주인이 남에게 물을 줄 수 있는 남은 횟수 (응답 DTO용)
+    int profileUserWateringCount =
+        friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(
+            profileUser, startOfWateringDay);
+    long leftWaterCountForProfileUser =
+        Math.max(0, (long) MAX_FRIEND_WATERING_PER_DAY - profileUserWateringCount);
+
+    // 2-2. 현재 접속 유저가 남에게 물을 줄 수 있는 남은 횟수 (물주기 가능 여부 판단용)
+    int currentUserWateringCount =
         friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(
             currentUser, startOfWateringDay);
-    long leftWaterCountForOthers =
-        Math.max(0, (long) MAX_FRIEND_WATERING_PER_DAY - todayWateringCountForOthers);
+    long leftWaterCountForCurrentUser =
+        Math.max(0, (long) MAX_FRIEND_WATERING_PER_DAY - currentUserWateringCount);
 
     // [성능 개선] N+1 문제를 해결하기 위해, 오늘 내가 물 준 정원 ID 목록을 한 번에 조회합니다.
     Set<Long> wateredGardenIds =
@@ -228,8 +239,10 @@ public class UserService {
             .map(
                 garden -> {
                   // DB를 반복 조회하는 대신, 미리 조회한 Set에서 확인하여 성능을 개선합니다.
+                  // 로그인한 유저가 해당 정원에 물을 아직 안줬고 횟수가 남았다면 true
                   boolean alreadyWateredByMe = wateredGardenIds.contains(garden.getId());
-                  boolean isWateringAbleByMe = leftWaterCountForOthers > 0 && !alreadyWateredByMe;
+                  boolean isWateringAbleByMe =
+                      leftWaterCountForCurrentUser > 0 && !alreadyWateredByMe;
 
                   HomeResponseDto.AvatarInfo avatarInfoForGarden =
                       HomeResponseDto.AvatarInfo.builder()
@@ -253,20 +266,8 @@ public class UserService {
         .userNickname(profileUser.getNickname())
         .profileImageUrl(profileImageUrl)
         .followStatus(followStatus)
-        .leftWaterCountForOthers(leftWaterCountForOthers)
+        .leftWaterCountForOthers(leftWaterCountForProfileUser)
         .userGardens(userGardens)
         .build();
-  }
-
-  // GardenService에 있던 private 메서드를 가져오거나 공통 유틸 클래스로 분리해야 합니다.
-  private LocalDateTime getStartOfCurrentWateringDay() {
-    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
-    LocalDateTime todayNoon = now.toLocalDate().atTime(12, 0);
-
-    if (now.isBefore(todayNoon)) {
-      return todayNoon.minusDays(1);
-    } else {
-      return todayNoon;
-    }
   }
 }

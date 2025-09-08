@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.mission.diary.dto.response;
 
+import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,8 +28,15 @@ public record DiaryInfoResponse(
         diary.getComments().stream().map(CommentResponseDTO::from).toList();
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
     String writerName = diary.getUser().getNickname();
-    String profileImageUrl = diary.getUser().getAvatarList().get(0).getImageUrl();
 
+    // 1. 유저의 아바타 리스트를 가져옵니다.
+    List<Avatar> avatarList = diary.getUser().getAvatarList();
+
+    // 2. 리스트가 비어있는지 확인한 후 프로필 이미지 URL을 설정합니다.
+    String profileImageUrl = null; // 기본값 설정
+    if (avatarList != null && !avatarList.isEmpty()) {
+      profileImageUrl = avatarList.get(0).getImageUrl(); // 리스트에 아이템이 있을 때만 접근
+    }
     return new DiaryInfoResponse(
         diary.getId(),
         diary.getUser().getId(),
