@@ -96,7 +96,8 @@ public class Garden {
     }
     LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
     LocalDateTime nextWaterableTime = this.lastWateredByOwnerAt.plusHours(4);
-    return Duration.between(now, nextWaterableTime).getSeconds();
+    long remainingSeconds = Duration.between(now, nextWaterableTime).getSeconds();
+    return Math.max(0L, remainingSeconds);
   }
 
   public void unlock() {

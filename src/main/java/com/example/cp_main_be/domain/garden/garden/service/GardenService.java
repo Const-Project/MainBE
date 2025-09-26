@@ -149,6 +149,7 @@ public class GardenService {
     garden.recordSunlightTime();
   }
 
+  @Transactional
   public void unlockNextGarden(Long userId) {
     User user =
         userRepository
@@ -159,13 +160,15 @@ public class GardenService {
       throw new CustomApiException(ErrorCode.GARDEN_SLOT_LOCKED, "해금할 수 있는 정원이 없습니다.");
     }
 
+    // 먼저 정원 조회 (실패 시 여기서 예외)
     Garden gardenToUnlock =
         gardenRepository
             .findFirstByUserAndIsLockedIsTrueOrderBySlotNumberAsc(user)
             .orElseThrow(() -> new CustomApiException(ErrorCode.GARDEN_NOT_FOUND, "해금할 정원이 없습니다."));
 
+    // 정원이 존재할 때만 실행
     gardenToUnlock.unlock();
-    user.decrementUnlockableGardenCount();
+    user.decrementUnlockableGardenCount(); // 성공 확정 후 카운트 감소
   }
 
   @Transactional

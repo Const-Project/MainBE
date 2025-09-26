@@ -14,6 +14,7 @@ import com.example.cp_main_be.domain.social.like.domain.Like;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,8 +40,12 @@ public class LikeService {
       throw new RuntimeException("이미 좋아요를 눌렀습니다."); // TODO: Custom Exception
     }
 
-    Like like = Like.builder().user(user).targetId(targetId).targetType(targetType).build();
-    likeRepository.save(like);
+    try {
+      Like like = Like.builder().user(user).targetId(targetId).targetType(targetType).build();
+      likeRepository.save(like);
+    } catch (DataIntegrityViolationException e) {
+      throw new IllegalArgumentException("이미 좋아요를 누르셨습니다.");
+    }
 
     if ("feed".equalsIgnoreCase(targetType)) {
       Feed feed =

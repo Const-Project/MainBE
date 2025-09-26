@@ -64,7 +64,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
   @Query(
       value =
-          "SELECT d.diary_id FROM diaries d WHERE d.is_public = true AND d.diary_id != :excludePostId ORDER BY RAND()",
+          "SELECT d.diary_id FROM diaries d WHERE d.is_public = true "
+              + "AND (:excludePostId IS NULL OR d.diary_id <> :excludePostId) ORDER BY RAND()",
       nativeQuery = true)
   List<Long> findRandomPublicDiaryIds(
       @Param("excludePostId") Long excludePostId, Pageable pageable);

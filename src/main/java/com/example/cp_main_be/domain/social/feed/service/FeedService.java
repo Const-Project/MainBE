@@ -106,13 +106,21 @@ public class FeedService {
     int diarySize = size / 2;
     int avatarPostSize = size - diarySize;
 
-    // 2. 각 소스에서 랜덤 ID 목록을 가져옵니다.
-    List<Long> randomDiaryIds =
-        diaryRepository.findRandomPublicDiaryIds(excludePostId, PageRequest.of(page, diarySize));
-    // AvatarPostRepository에 findRandomPublicAvatarPostIds 메서드가 있다고 가정합니다.
-    List<Long> randomAvatarPostIds =
-        avatarPostRepository.findRandomPublicAvatarPostIds(
-            excludePostId, PageRequest.of(page, avatarPostSize));
+    if (size <= 0) {
+      return Collections.emptyList();
+    }
+
+    List<Long> randomDiaryIds = Collections.emptyList();
+    if (diarySize > 0) {
+      randomDiaryIds =
+          diaryRepository.findRandomPublicDiaryIds(excludePostId, PageRequest.of(page, diarySize));
+    }
+    List<Long> randomAvatarPostIds = Collections.emptyList();
+    if (avatarPostSize > 0) {
+      randomAvatarPostIds =
+          avatarPostRepository.findRandomPublicAvatarPostIds(
+              excludePostId, PageRequest.of(page, avatarPostSize));
+    }
 
     List<FeedItemResponse> feedItems = new ArrayList<>();
 

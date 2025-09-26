@@ -33,6 +33,9 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
 
   // [추가] 위 메서드를 편리하게 사용하기 위한 default 메서드
   default Map<Long, Long> countLikesByTargetIds(List<Long> targetIds, String targetType) {
+    if (targetIds == null || targetIds.isEmpty()) {
+      return Map.of();
+    }
     return countByTargetIdsAndTargetType(targetIds, targetType).stream()
         .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
   }
