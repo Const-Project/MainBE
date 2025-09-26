@@ -7,8 +7,10 @@ import com.example.cp_main_be.global.common.ApiResponse;
 import com.example.cp_main_be.global.dto.FeedItemResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,11 +31,12 @@ public class FeedController {
   public ResponseEntity<ApiResponse<List<FeedResponse>>> getFeed(
       @AuthenticationPrincipal User user, // 인증된 사용자 정보
       @RequestParam(required = false) String filter,
-      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+          LocalDateTime cursor,
       @RequestParam(defaultValue = "20") int size) {
 
     // 서비스 메서드에 현재 사용자의 UUID와 필터 값을 전달
-    List<FeedResponse> feedItems = feedService.getFeed(user.getUuid(), filter, page, size);
+    List<FeedResponse> feedItems = feedService.getFeed(user.getUuid(), filter, cursor, size);
 
     // List<Object>가 아닌 List<FeedItemResponse>로 응답 타입을 명확히 합니다.
     return ResponseEntity.ok(ApiResponse.success(feedItems));

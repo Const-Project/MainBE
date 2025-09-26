@@ -72,4 +72,18 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
 
   // [추가] ID 목록으로 Diary 엔티티를 한 번에 조회하는 메서드
   List<Diary> findAllByIdIn(List<Long> ids);
+
+  // 커서 기반 페이지네이션을 위한 메서드 (전체 피드용)
+  // user와 comments를 함께 조회하여 N+1 문제 해결
+  @Query(
+      "SELECT d FROM Diary d JOIN FETCH d.user WHERE d.isPublic = true AND d.createdAt < :cursor ORDER BY d.createdAt DESC")
+  List<Diary> findPublicDiariesWithCursor(@Param("cursor") LocalDateTime cursor, Pageable pageable);
+
+  // 커서 기반 페이지네이션을 위한 메서드 (팔로잉 피드용)
+  @Query(
+      "SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user IN :followingUsers AND d.isPublic = true AND d.createdAt < :cursor ORDER BY d.createdAt DESC")
+  List<Diary> findFollowingDiariesWithCursor(
+      @Param("followingUsers") List<User> followingUsers,
+      @Param("cursor") LocalDateTime cursor,
+      Pageable pageable);
 }

@@ -2,9 +2,11 @@ package com.example.cp_main_be.domain.social.avatarpost.domain.repository;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,4 +39,15 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
   List<AvatarPost> findAllByIdIn(List<Long> ids);
 
   List<AvatarPost> findAllByUser_IdNotIn(List<Long> blockedUserIds, Pageable pageable);
+
+  // 커서 기반 페이지네이션을 위한 메서드 (전체 피드용)
+  // @EntityGraph를 사용하면 더 깔끔하게 N+1 문제 해결 가능
+  @EntityGraph(attributePaths = {"user"}) // user 정보를 함께 EAGER 조회
+  List<AvatarPost> findByCreatedAtBeforeOrderByCreatedAtDesc(
+      LocalDateTime cursor, Pageable pageable);
+
+  // 커서 기반 페이지네이션을 위한 메서드 (팔로잉 피드용)
+  @EntityGraph(attributePaths = {"user"})
+  List<AvatarPost> findByUserInAndCreatedAtBeforeOrderByCreatedAtDesc(
+      List<User> followingUsers, LocalDateTime cursor, Pageable pageable);
 }

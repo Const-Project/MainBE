@@ -43,6 +43,7 @@ public class LikeService {
     try {
       Like like = Like.builder().user(user).targetId(targetId).targetType(targetType).build();
       likeRepository.save(like);
+      likeRepository.flush();
     } catch (DataIntegrityViolationException e) {
       throw new IllegalArgumentException("이미 좋아요를 누르셨습니다.");
     }
