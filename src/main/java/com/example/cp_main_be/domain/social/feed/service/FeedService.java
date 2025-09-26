@@ -2,17 +2,19 @@ package com.example.cp_main_be.domain.social.feed.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryFeedItemResponse;
+import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
+import com.example.cp_main_be.domain.social.avatarpost.dto.AvatarPostFeedItemResponse;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
+import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
+import com.example.cp_main_be.global.dto.FeedItemResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +32,7 @@ public class FeedService {
   private final DiaryRepository diaryRepository;
   private final FollowRepository followRepository;
   private final AvatarPostRepository avatarPostRepository;
-  private final UserBlockRepository userBlockRepository;
+  private final LikeRepository likeRepository;
 
   public List<FeedResponse> getFeed(UUID currentUserUuid, String filter, int page, int size) {
     // 올바른 페이지네이션을 위해, 각 소스에서 요청된 페이지의 끝까지 데이터를 충분히 가져옵니다.
@@ -96,5 +98,67 @@ public class FeedService {
     int end = Math.min(start + size, sortedFeed.size());
 
     return sortedFeed.subList(start, end);
+  }
+
+  // [수정] 인스타그램 상세 스크롤과 같은 랜덤 피드 (일기 + 아바타 포스트)
+  public List<FeedItemResponse> getRandomFeed(Long excludePostId, int page, int size) {
+    // 1. 각 소스에서 가져올 항목 수를 계산합니다. (예: 10개 요청 시 5개씩)
+    int diarySize = size / 2;
+    int avatarPostSize = size - diarySize;
+
+    // 2. 각 소스에서 랜덤 ID 목록을 가져옵니다.
+    List<Long> randomDiaryIds =
+        diaryRepository.findRandomPublicDiaryIds(excludePostId, PageRequest.of(page, diarySize));
+    // AvatarPostRepository에 findRandomPublicAvatarPostIds 메서드가 있다고 가정합니다.
+    List<Long> randomAvatarPostIds =
+        avatarPostRepository.findRandomPublicAvatarPostIds(
+            excludePostId, PageRequest.of(page, avatarPostSize));
+
+    List<FeedItemResponse> feedItems = new ArrayList<>();
+
+    // 3. 일기(Diary) 처리
+    if (!randomDiaryIds.isEmpty()) {
+      List<Diary> diaries = diaryRepository.findAllByIdIn(randomDiaryIds);
+      Map<Long, Long> likeCounts = likeRepository.countLikesByTargetIds(randomDiaryIds, "DIARY");
+      // TODO: 댓글 수도 N+1 문제 없이 가져오도록 개선 필요
+      // Map<Long, Integer> commentCounts =
+      // commentRepository.countCommentsByDiaryIds(randomDiaryIds);
+
+      List<DiaryFeedItemResponse> diaryItems =
+          diaries.stream()
+              .map(
+                  diary -> {
+                    long likeCount = likeCounts.getOrDefault(diary.getId(), 0L);
+                    int commentCount = diary.getComments().size(); // 현재는 N+1 발생 가능
+                    return new DiaryFeedItemResponse(diary, likeCount, commentCount);
+                  })
+              .toList();
+      feedItems.addAll(diaryItems);
+    }
+
+    // 4. 아바타 포스트(AvatarPost) 처리
+    if (!randomAvatarPostIds.isEmpty()) {
+      // AvatarPostRepository에 findAllByIdIn 메서드가 있다고 가정합니다.
+      List<AvatarPost> avatarPosts = avatarPostRepository.findAllByIdIn(randomAvatarPostIds);
+      Map<Long, Long> likeCounts =
+          likeRepository.countLikesByTargetIds(randomAvatarPostIds, "AVATAR_POST");
+
+      List<AvatarPostFeedItemResponse> avatarPostItems =
+          avatarPosts.stream()
+              .map(
+                  post -> {
+                    long likeCount = likeCounts.getOrDefault(post.getId(), 0L);
+                    int commentCount = post.getComments().size(); // 현재는 N+1 발생 가능
+                    // AvatarPost를 FeedItemResponse로 변환하는 DTO가 있다고 가정합니다.
+                    return new AvatarPostFeedItemResponse(post, likeCount, commentCount);
+                  })
+              .toList();
+      feedItems.addAll(avatarPostItems);
+    }
+
+    // 5. 최종 리스트를 섞어서 순서를 랜덤하게 만듭니다.
+    Collections.shuffle(feedItems);
+
+    return feedItems;
   }
 }

@@ -25,5 +25,16 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
   List<AvatarPost> findByUserInAndUser_IdNotIn(
       List<User> users, List<Long> blockedUserIds, Pageable pageable);
 
+  // [추가] 랜덤으로 아바타 포스트 ID 목록을 조회하는 쿼리 (MySQL 기준)
+  // AvatarPost에는 isPublic 필드가 없으므로 모든 포스트를 대상으로 합니다.
+  @Query(
+      value = "SELECT ap.id FROM avatar_post ap WHERE ap.id != :excludePostId ORDER BY RAND()",
+      nativeQuery = true)
+  List<Long> findRandomPublicAvatarPostIds(
+      @Param("excludePostId") Long excludePostId, Pageable pageable);
+
+  // [추가] ID 목록으로 AvatarPost 엔티티를 한 번에 조회하는 메서드
+  List<AvatarPost> findAllByIdIn(List<Long> ids);
+
   List<AvatarPost> findAllByUser_IdNotIn(List<Long> blockedUserIds, Pageable pageable);
 }

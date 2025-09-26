@@ -61,4 +61,14 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
           + "ORDER BY d.createdAt DESC")
   List<Diary> findByUserAndYearAndMonth(
       @Param("user") User user, @Param("year") int year, @Param("month") int month);
+
+  @Query(
+      value =
+          "SELECT d.diary_id FROM diaries d WHERE d.is_public = true AND d.diary_id != :excludePostId ORDER BY RAND()",
+      nativeQuery = true)
+  List<Long> findRandomPublicDiaryIds(
+      @Param("excludePostId") Long excludePostId, Pageable pageable);
+
+  // [추가] ID 목록으로 Diary 엔티티를 한 번에 조회하는 메서드
+  List<Diary> findAllByIdIn(List<Long> ids);
 }

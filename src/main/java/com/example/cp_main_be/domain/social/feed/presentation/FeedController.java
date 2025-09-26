@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.feed.service.FeedService;
 import com.example.cp_main_be.global.common.ApiResponse;
+import com.example.cp_main_be.global.dto.FeedItemResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
@@ -35,6 +36,17 @@ public class FeedController {
     List<FeedResponse> feedItems = feedService.getFeed(user.getUuid(), filter, page, size);
 
     // List<Object>가 아닌 List<FeedItemResponse>로 응답 타입을 명확히 합니다.
+    return ResponseEntity.ok(ApiResponse.success(feedItems));
+  }
+
+  @Operation(summary = "랜덤 피드 조회 (무한 스크롤용)", description = "상세보기 화면에서 하단에 표시될 랜덤 피드를 불러옵니다")
+  @GetMapping("/random")
+  public ResponseEntity<ApiResponse<List<FeedItemResponse>>> getRandomFeed(
+      @AuthenticationPrincipal User user,
+      @RequestParam Long excludePostId, // 화면 상단에 고정된 게시물 ID (중복 방지용)
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    List<FeedItemResponse> feedItems = feedService.getRandomFeed(excludePostId, page, size);
     return ResponseEntity.ok(ApiResponse.success(feedItems));
   }
 }

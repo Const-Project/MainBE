@@ -75,11 +75,14 @@ public class UserDailyMissionService {
     final int DIARY_MISSION_COMPLETE_POINT = 15;
     MissionType type = userDailyMission.getDailyMissionMaster().getMissionType();
     if (type.equals(MissionType.PHOTO))
-      userService.addExperience(userService.getCurrentUser().getId(), PHOTO_MISSION_COMPLETE_POINT);
+      userService.addExperience(
+          userService.getCurrentUser().getId(), (long) PHOTO_MISSION_COMPLETE_POINT);
     else if (type.equals(MissionType.QUIZ))
-      userService.addExperience(userService.getCurrentUser().getId(), QUIZ_MISSION_COMPLETE_POINT);
+      userService.addExperience(
+          userService.getCurrentUser().getId(), (long) QUIZ_MISSION_COMPLETE_POINT);
     else
-      userService.addExperience(userService.getCurrentUser().getId(), DIARY_MISSION_COMPLETE_POINT);
+      userService.addExperience(
+          userService.getCurrentUser().getId(), (long) DIARY_MISSION_COMPLETE_POINT);
     userDailyMissionRepository.save(userDailyMission);
   }
 

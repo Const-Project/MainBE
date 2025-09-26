@@ -40,7 +40,7 @@ public class AvatarPost {
 
   @Column(name = "like_count")
   @Builder.Default
-  private int likeCount = 0;
+  private long likeCount = 0;
 
   @OneToMany(mappedBy = "avatarPost", cascade = CascadeType.ALL)
   private List<Comment> comments;

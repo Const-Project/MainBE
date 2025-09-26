@@ -14,7 +14,6 @@ import com.example.cp_main_be.domain.social.like.domain.Like;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,7 @@ public class LikeService {
   private final AvatarPostRepository avatarPostRepository;
   private final NotificationService notificationService;
 
-  public int addLike(Long userId, Long targetId, String targetType) {
+  public long addLike(Long userId, Long targetId, String targetType) {
     User user =
         userRepository
             .findById(userId)
@@ -41,13 +40,8 @@ public class LikeService {
     }
 
     Like like = Like.builder().user(user).targetId(targetId).targetType(targetType).build();
-    try {
-      likeRepository.save(like);
-    } catch (DataIntegrityViolationException e) {
-      throw new RuntimeException("이미 좋아요를 눌렀습니다.");
-    }
+    likeRepository.save(like);
 
-    // 좋아요 알림 로직
     if ("feed".equalsIgnoreCase(targetType)) {
       Feed feed =
           feedRepository
@@ -55,44 +49,41 @@ public class LikeService {
               .orElseThrow(() -> new IllegalArgumentException("피드를 찾을 수 없습니다."));
       User receiver = feed.getUser();
 
-      // 자기 자신에게는 알림을 보내지 않음
       if (!receiver.getId().equals(userId)) {
         notificationService.send(receiver, user, NotificationType.FEED_LIKE, "/feeds/" + targetId);
       }
 
-      // 일단 보류
-      return 0;
     } else if ("DIARY".equalsIgnoreCase(targetType)) {
       Diary diary =
           diaryRepository
               .findById(targetId)
               .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
-      diary.increaseLikeCount();
+      // [제거] diary.increaseLikeCount();
 
       User receiver = diary.getUser();
       if (!receiver.getId().equals(userId)) {
         notificationService.send(
             receiver, user, NotificationType.DIARY_LIKE, "/diaries/" + targetId);
       }
-      return diary.getLikeCount();
     } else if ("AVATAR_POST".equalsIgnoreCase(targetType)) {
       AvatarPost avatarPost =
           avatarPostRepository
               .findById(targetId)
               .orElseThrow(() -> new IllegalArgumentException("포스트를 찾을 수 없습니다."));
-      avatarPost.increaseLikeCount();
+      // [제거] avatarPost.increaseLikeCount();
 
       User receiver = avatarPost.getUser();
       if (!receiver.getId().equals(userId)) {
         notificationService.send(
             receiver, user, NotificationType.AVATAR_POST_LIKE, "/avatar-posts/" + targetId);
       }
-      return avatarPost.getLikeCount();
     }
-    return 0;
+
+    // [수정] 실제 Like 개수를 세어서 반환
+    return likeRepository.countByTargetIdAndTargetType(targetId, targetType);
   }
 
-  public int removeLike(Long userId, Long targetId, String targetType) {
+  public long removeLike(Long userId, Long targetId, String targetType) {
     User user =
         userRepository
             .findById(userId)
@@ -101,26 +92,16 @@ public class LikeService {
     Like like =
         likeRepository
             .findByUserAndTargetIdAndTargetType(user, targetId, targetType)
-            .orElseThrow(() -> new RuntimeException("좋아요를 찾을 수 없습니다.")); // TODO: Custom Exception
+            .orElseThrow(() -> new RuntimeException("좋아요를 찾을 수 없습니다."));
     likeRepository.delete(like);
 
     if ("diary".equalsIgnoreCase(targetType)) {
-      Diary diary =
-          diaryRepository
-              .findById(targetId)
-              .orElseThrow(() -> new IllegalArgumentException("일기를 찾을 수 없습니다."));
-
-      diary.decreaseLikeCount();
-      return diary.getLikeCount();
+      // [제거] diary.decreaseLikeCount();
     } else if ("avatar_post".equalsIgnoreCase(targetType)) {
-      AvatarPost avatarPost =
-          avatarPostRepository
-              .findById(targetId)
-              .orElseThrow(() -> new IllegalArgumentException("포스트를 찾을 수 없습니다."));
-
-      avatarPost.decreaseLikeCount();
-      return avatarPost.getLikeCount();
+      // [제거] avatarPost.decreaseLikeCount();
     }
-    return 0;
+
+    // [수정] 실제 Like 개수를 세어서 반환
+    return likeRepository.countByTargetIdAndTargetType(targetId, targetType);
   }
 }
