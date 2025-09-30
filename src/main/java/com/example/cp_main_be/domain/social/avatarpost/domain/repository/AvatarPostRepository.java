@@ -50,4 +50,22 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
   @EntityGraph(attributePaths = {"user"})
   List<AvatarPost> findByUserInAndCreatedAtBeforeOrderByCreatedAtDesc(
       List<User> followingUsers, LocalDateTime cursor, Pageable pageable);
+
+  // AvatarPostRepository.java
+  @Query(
+      value =
+          """
+          SELECT ap.id
+          FROM avatar_post ap
+          WHERE (
+              :#{#excludeIds == null} = true
+              OR :#{#excludeIds.isEmpty()} = true
+              OR ap.id NOT IN (:excludeIds)
+          )
+          ORDER BY RAND()
+          LIMIT :limit
+          """,
+      nativeQuery = true)
+  List<Long> findRandomPublicAvatarPostIdsExcluding(
+      @Param("excludeIds") List<Long> excludeIds, @Param("limit") int limit);
 }

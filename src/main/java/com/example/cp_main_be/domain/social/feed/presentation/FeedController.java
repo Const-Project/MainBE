@@ -1,22 +1,21 @@
 package com.example.cp_main_be.domain.social.feed.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.social.feed.dto.request.RandomFeedRequest;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
+import com.example.cp_main_be.domain.social.feed.dto.response.FeedScrollResponse;
 import com.example.cp_main_be.domain.social.feed.service.FeedService;
 import com.example.cp_main_be.global.common.ApiResponse;
-import com.example.cp_main_be.global.dto.FeedItemResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,13 +42,21 @@ public class FeedController {
   }
 
   @Operation(summary = "랜덤 피드 조회 (무한 스크롤용)", description = "상세보기 화면에서 하단에 표시될 랜덤 피드를 불러옵니다")
-  @GetMapping("/random")
-  public ResponseEntity<ApiResponse<List<FeedItemResponse>>> getRandomFeed(
+  @PostMapping("/random") // GET → POST로 변경
+  public ResponseEntity<ApiResponse<FeedScrollResponse>> getRandomFeed(
       @AuthenticationPrincipal User user,
-      @RequestParam Long excludePostId, // 화면 상단에 고정된 게시물 ID (중복 방지용)
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "10") int size) {
-    List<FeedItemResponse> feedItems = feedService.getRandomFeed(excludePostId, page, size);
-    return ResponseEntity.ok(ApiResponse.success(feedItems));
+      @RequestBody RandomFeedRequest request) { // @RequestBody로 변경
+
+    FeedScrollResponse response =
+        feedService.getRandomFeed(
+            request.getExcludeDiaryIds() != null
+                ? request.getExcludeDiaryIds()
+                : Collections.emptyList(),
+            request.getExcludeAvatarPostIds() != null
+                ? request.getExcludeAvatarPostIds()
+                : Collections.emptyList(),
+            request.getSize());
+
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 }

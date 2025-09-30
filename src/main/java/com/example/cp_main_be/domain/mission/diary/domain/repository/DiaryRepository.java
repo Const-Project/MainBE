@@ -86,4 +86,24 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
       @Param("followingUsers") List<User> followingUsers,
       @Param("cursor") LocalDateTime cursor,
       Pageable pageable);
+
+  // ⭐⭐ 새로 추가: 리스트 제외용 메서드
+  // SpEL로 빈 리스트 체크 (가장 안전한 방법)
+  @Query(
+      value =
+          """
+          SELECT d.diary_id
+          FROM diaries d
+          WHERE d.is_public = true
+          AND (
+              :#{#excludeIds == null} = true
+              OR :#{#excludeIds.isEmpty()} = true
+              OR d.diary_id NOT IN (:excludeIds)
+          )
+          ORDER BY RAND()
+          LIMIT :limit
+          """,
+      nativeQuery = true)
+  List<Long> findRandomPublicDiaryIdsExcluding(
+      @Param("excludeIds") List<Long> excludeIds, @Param("limit") int limit);
 }

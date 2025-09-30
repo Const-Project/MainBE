@@ -11,6 +11,7 @@ import com.example.cp_main_be.domain.social.avatarpost.dto.AvatarPostFeedItemRes
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
 import com.example.cp_main_be.domain.social.comment.dto.CommentCountDto;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
+import com.example.cp_main_be.domain.social.feed.dto.response.FeedScrollResponse;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
@@ -20,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,19 +39,15 @@ public class FeedService {
   private final LikeRepository likeRepository;
   private final CommentRepository commentRepository;
 
-  // FeedService.java
-
-  // public List<FeedResponse> getFeed(UUID currentUserUuid, String filter, int page, int size) {
-  // ... }
-  // 위 메서드를 아래와 같이 변경합니다.
-
+  /** 시간순 정렬된 피드 조회 (커서 기반) */
   public List<FeedResponse> getFeed(
       UUID currentUserUuid, String filter, LocalDateTime cursor, int size) {
-    // 커서가 없으면(최초 요청) 현재 시간으로 설정
+
     if (cursor == null) {
       cursor = LocalDateTime.now();
     }
-    Pageable pageable = PageRequest.of(0, size); // 각 소스에서 size만큼만 가져옴
+
+    Pageable pageable = PageRequest.of(0, size);
 
     User currentUser =
         userRepository
@@ -75,37 +71,44 @@ public class FeedService {
           avatarPostRepository.findByCreatedAtBeforeOrderByCreatedAtDesc(cursor, pageable);
     }
 
-    // 두 스트림을 합치고, size만큼만 잘라낸 후, DTO로 변환
-    return Stream.concat(
-            diaries.stream().map(FeedResponse::from), avatarPosts.stream().map(FeedResponse::from))
-        .sorted(Comparator.comparing(FeedResponse::createdAt).reversed())
-        .limit(size)
-        .toList();
+    // 두 정렬된 리스트를 merge하여 size개만 반환
+    return mergeSortedFeeds(diaries, avatarPosts, size);
   }
 
-  public List<FeedItemResponse> getRandomFeed(Long excludePostId, int page, int size) {
+  /** 랜덤 피드 조회 (제외 목록 기반) */
+  public FeedScrollResponse getRandomFeed(
+      List<Long> excludeDiaryIds, List<Long> excludeAvatarPostIds, int size) {
+
     if (size <= 0) {
-      return Collections.emptyList();
+      return new FeedScrollResponse(Collections.emptyList(), false);
     }
 
-    // 1. 각 소스에서 가져올 항목 수를 계산합니다.
+    // null 체크
+    List<Long> safeDiaryIds = (excludeDiaryIds != null) ? excludeDiaryIds : Collections.emptyList();
+    List<Long> safeAvatarIds =
+        (excludeAvatarPostIds != null) ? excludeAvatarPostIds : Collections.emptyList();
+
+    // 각 소스에서 가져올 항목 수 계산
     int diarySize = size / 2;
     int avatarPostSize = size - diarySize;
 
-    // 2. 각 소스에서 랜덤 ID 목록을 조회합니다.
+    // 충분한 양을 가져오기 위해 2배로 요청
+    int diaryFetchSize = diarySize * 2;
+    int avatarPostFetchSize = avatarPostSize * 2;
+
+    // 각 소스에서 랜덤 ID 조회 (제외 목록 포함)
     List<Long> randomDiaryIds =
-        (diarySize > 0)
-            ? diaryRepository.findRandomPublicDiaryIds(
-                excludePostId, PageRequest.of(page, diarySize))
+        (diaryFetchSize > 0)
+            ? diaryRepository.findRandomPublicDiaryIdsExcluding(safeDiaryIds, diaryFetchSize)
             : Collections.emptyList();
 
     List<Long> randomAvatarPostIds =
-        (avatarPostSize > 0)
-            ? avatarPostRepository.findRandomPublicAvatarPostIds(
-                excludePostId, PageRequest.of(page, avatarPostSize))
+        (avatarPostFetchSize > 0)
+            ? avatarPostRepository.findRandomPublicAvatarPostIdsExcluding(
+                safeAvatarIds, avatarPostFetchSize)
             : Collections.emptyList();
 
-    // 3. 각 소스의 데이터를 가져와 FeedItemResponse로 변환합니다.
+    // 각 소스의 데이터를 FeedItemResponse로 변환
     List<FeedItemResponse> feedItems = new ArrayList<>();
 
     // Diary 처리
@@ -130,24 +133,51 @@ public class FeedService {
                 new AvatarPostFeedItemResponse(post, likeCount, commentCount));
     feedItems.addAll(avatarPostItems);
 
-    // 4. 최종 리스트를 섞어서 순서를 랜덤하게 만듭니다.
+    // 랜덤 섞기
     Collections.shuffle(feedItems);
 
-    return feedItems;
+    // size만큼만 반환
+    List<FeedItemResponse> result = feedItems.stream().limit(size).toList();
+
+    // 더 가져올 데이터가 있는지 확인 (각 소스별로 체크)
+    boolean hasDiaryMore = randomDiaryIds.size() >= diaryFetchSize;
+    boolean hasAvatarPostMore = randomAvatarPostIds.size() >= avatarPostFetchSize;
+    boolean hasMore = hasDiaryMore || hasAvatarPostMore;
+
+    return new FeedScrollResponse(result, hasMore);
   }
 
-  /**
-   * ID 목록을 기반으로 엔티티와 관련 데이터(좋아요, 댓글 수)를 조회하고 FeedItemResponse로 매핑하는 공통 메서드
-   *
-   * @param ids 조회할 엔티티 ID 목록
-   * @param type 대상 타입 문자열 ("DIARY", "AVATAR_POST")
-   * @param entityFetcher ID 목록으로 엔티티 목록을 조회하는 함수
-   * @param idExtractor 엔티티에서 ID를 추출하는 함수
-   * @param responseMapper 엔티티와 카운트 정보로 최종 DTO를 생성하는 함수
-   * @return 변환된 FeedItemResponse 목록
-   * @param <T> 엔티티 타입 (Diary, AvatarPost)
-   * @param <R> 응답 DTO 타입 (DiaryFeedItemResponse, AvatarPostFeedItemResponse)
-   */
+  /** 시간순 정렬된 두 리스트를 병합하여 size개만 반환 */
+  private List<FeedResponse> mergeSortedFeeds(
+      List<Diary> diaries, List<AvatarPost> avatarPosts, int size) {
+
+    List<FeedResponse> result = new ArrayList<>(size);
+    int i = 0, j = 0;
+
+    while (result.size() < size && (i < diaries.size() || j < avatarPosts.size())) {
+      if (i >= diaries.size()) {
+        // Diary 소진, AvatarPost만 추가
+        result.add(FeedResponse.from(avatarPosts.get(j++)));
+      } else if (j >= avatarPosts.size()) {
+        // AvatarPost 소진, Diary만 추가
+        result.add(FeedResponse.from(diaries.get(i++)));
+      } else {
+        // 둘 다 있으면 시간 비교
+        LocalDateTime diaryTime = diaries.get(i).getCreatedAt();
+        LocalDateTime postTime = avatarPosts.get(j).getCreatedAt();
+
+        if (diaryTime.isAfter(postTime)) {
+          result.add(FeedResponse.from(diaries.get(i++)));
+        } else {
+          result.add(FeedResponse.from(avatarPosts.get(j++)));
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /** ID 목록을 기반으로 엔티티와 관련 데이터(좋아요, 댓글 수)를 조회하고 FeedItemResponse로 매핑 */
   private <T, R extends FeedItemResponse> List<R> fetchAndMapFeedItems(
       List<Long> ids,
       String type,
@@ -162,24 +192,20 @@ public class FeedService {
     // 엔티티 조회
     List<T> entities = entityFetcher.apply(ids);
 
-    // --- 이 부분이 수정되었습니다 ---
-    // 좋아요 및 댓글 수를 타입에 따라 분기하여 조회합니다.
+    // 좋아요 및 댓글 수를 타입에 따라 분기하여 조회
     Map<Long, Long> likeCounts;
     List<CommentCountDto> commentCountDtos;
 
     if ("DIARY".equalsIgnoreCase(type)) {
-      likeCounts =
-          likeRepository.countLikesByTargetIds(ids, "DIARY"); // likeRepository도 분리되었다면 수정 필요
+      likeCounts = likeRepository.countLikesByTargetIds(ids, "DIARY");
       commentCountDtos = commentRepository.countCommentsByDiaryIds(ids);
     } else if ("AVATAR_POST".equalsIgnoreCase(type)) {
-      likeCounts =
-          likeRepository.countLikesByTargetIds(ids, "AVATAR_POST"); // likeRepository도 분리되었다면 수정 필요
+      likeCounts = likeRepository.countLikesByTargetIds(ids, "AVATAR_POST");
       commentCountDtos = commentRepository.countCommentsByAvatarPostIds(ids);
     } else {
       likeCounts = Collections.emptyMap();
       commentCountDtos = Collections.emptyList();
     }
-    // --- 수정 끝 ---
 
     Map<Long, Long> commentCounts =
         commentCountDtos.stream()
@@ -197,7 +223,6 @@ public class FeedService {
         .toList();
   }
 
-  // 3개의 파라미터를 받는 함수형 인터페이스가 기본 API에 없으므로 직접 정의합니다.
   @FunctionalInterface
   interface TriFunction<T, U, V, R> {
     R apply(T t, U u, V v);
