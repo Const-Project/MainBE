@@ -8,34 +8,33 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record DiaryInfoResponse(
-    Long id, // 일기 id
-    Long writerId, // 작성자 id
-    String writerName, // 작성자 이름
-    String profileImageUrl, // 작성자 프로필 이미지 url
-    String title, // 일기 제목
-    String content, // 일기 내용
-    String imageUrl, // 일기 이미지
-    boolean isLiked, //
-    int likeCount,
+    Long id,
+    Long writerId,
+    String writerName,
+    String profileImageUrl,
+    String title,
+    String content,
+    String imageUrl,
+    boolean isLiked,
+    long likeCount, // [수정] int -> long
     int commentCount,
     List<CommentResponseDTO> comments,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
     @JsonProperty("isPublic") boolean isPublic) {
 
-  public static DiaryInfoResponse from(Diary diary, boolean isLiked) {
+  // [수정] 생성자에서 likeCount를 직접 받도록 변경
+  public static DiaryInfoResponse from(Diary diary, boolean isLiked, long likeCount) {
     List<CommentResponseDTO> commentDTOs =
         diary.getComments().stream().map(CommentResponseDTO::from).toList();
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
     String writerName = diary.getUser().getNickname();
 
-    // 1. 유저의 아바타 리스트를 가져옵니다.
     List<Avatar> avatarList = diary.getUser().getAvatarList();
 
-    // 2. 리스트가 비어있는지 확인한 후 프로필 이미지 URL을 설정합니다.
-    String profileImageUrl = null; // 기본값 설정
+    String profileImageUrl = null;
     if (avatarList != null && !avatarList.isEmpty()) {
-      profileImageUrl = avatarList.get(0).getImageUrl(); // 리스트에 아이템이 있을 때만 접근
+      profileImageUrl = avatarList.get(0).getImageUrl();
     }
     return new DiaryInfoResponse(
         diary.getId(),
@@ -46,7 +45,7 @@ public record DiaryInfoResponse(
         diary.getContent(),
         imageUrl,
         isLiked,
-        diary.getLikeCount(),
+        likeCount, // [수정] 파라미터로 받은 값을 사용
         commentDTOs.size(),
         commentDTOs,
         diary.getCreatedAt(),

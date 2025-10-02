@@ -12,16 +12,16 @@ public class AvatarPostFeedItemResponse implements FeedItemResponse {
   private final String postType = "AVATAR_POST";
   private AuthorResponse author;
   private String caption;
-  private int likeCount;
-  private int commentCount;
+  private long likeCount;
+  private long commentCount;
   private LocalDateTime createdAt;
 
-  public AvatarPostFeedItemResponse(AvatarPost post) {
+  public AvatarPostFeedItemResponse(AvatarPost post, long likeCount, long commentCount) {
     this.postId = post.getId();
     this.author = new AuthorResponse(post.getUser());
     this.caption = post.getCaption();
-    this.likeCount = post.getLikeCount();
-    this.commentCount = post.getComments() != null ? post.getComments().size() : 0;
+    this.likeCount = likeCount;
+    this.commentCount = commentCount;
     this.createdAt = post.getCreatedAt();
   }
 }

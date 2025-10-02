@@ -14,20 +14,4 @@ public class UserRegisterResponse {
   private UUID uuid;
   private String accessToken;
   private String refreshToken;
-
-  @Getter
-  @Builder
-  public static class LevelStatusResponseDTO {
-    // GET /level 의 Response
-    private Integer level; // 레벨
-    private Long experience; // 경험
-  }
-
-  @Getter
-  @Builder
-  public static class MyInfoResponseDTO {
-    private Long id;
-    private String username;
-    private UUID uuid;
-  }
 }

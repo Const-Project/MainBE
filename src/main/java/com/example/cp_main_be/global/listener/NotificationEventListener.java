@@ -1,5 +1,6 @@
 package com.example.cp_main_be.global.listener;
 
+import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
@@ -34,6 +35,7 @@ public class NotificationEventListener {
   private final DiaryRepository diaryRepository;
   private final AvatarPostRepository avatarPostRepository;
   private final WishTreeService wishTreeService;
+  private final GardenService gardenService;
 
   @EventListener
   @Transactional
