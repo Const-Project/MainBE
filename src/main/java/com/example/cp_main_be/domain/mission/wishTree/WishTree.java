@@ -30,44 +30,40 @@ public class WishTree {
   @Builder
   public WishTree(User user) {
     this.user = user;
-    this.points = user.getExperience();
+    // [수정] User에 더 이상 experience 필드가 없으므로, 신규 생성 시 0점으로 시작합니다.
+    this.points = 0L;
     this.stage = WishTreeStage.SPROUT;
   }
 
-  @Column(nullable = false)
-  private boolean isUnlockable = false;
-
-  /**
-   * 포인트 추가 및 성장 로직
-   *
-   * @param amount 추가할 포인트
-   * @return 성장을 했는지 여부
-   */
   public void addPoints(Long points) {
     this.points += points;
-
-    // 이미 해금 가능 상태이거나, 다음 스테이지가 없으면 아무것도 하지 않음
-    if (this.isUnlockable || this.stage.getNextStage() == null) {
-      return;
-    }
-
-    // 다음 스테이지의 요구 포인트를 넘었는지 확인
-    WishTreeStage nextStage = this.stage.getNextStage();
-    if (this.points >= this.stage.getRequiredPointsForNextStage()) {
-      this.isUnlockable = true; // 👈 Stage를 바로 바꾸는 대신, 해금 가능 상태로 변경
-    }
+    evolveStageIfNeeded();
   }
 
-  public void evolveStage() {
-    if (!this.isUnlockable) {
-      // 해금 불가능한 상태에서 호출 시 예외 처리 또는 로깅
-      return;
-    }
+  /**
+   * @deprecated canEvolve() 메서드 사용을 권장합니다.
+   * @return 진화 가능 여부
+   */
+  @Deprecated
+  public boolean isUnlockable() {
+    // [수정] 중복 로직을 제거하고 canEvolve()를 사용하도록 통일합니다.
+    return canEvolve();
+  }
 
-    WishTreeStage nextStage = this.stage.getNextStage();
-    if (nextStage != null) {
-      this.stage = nextStage;
-      this.isUnlockable = false; // 상태 플래그 초기화
+  public boolean canEvolve() {
+    // 다음 스테이지가 없으면 진화 불가
+    if (this.stage == WishTreeStage.FINAL) {
+      return false;
+    }
+    return this.stage.getRequiredPointsForNextStage() <= this.points;
+  }
+
+  private void evolveStageIfNeeded() {
+    // 진화할 수 있는 동안 계속 반복 (경험치를 몰아서 얻었을 경우 대비)
+    while (canEvolve()) {
+      this.stage = this.stage.getNextStage();
+      // 연관된 User 객체에 해금 가능 횟수를 1 늘려달라고 요청
+      this.user.incrementUnlockableGardenCount();
     }
   }
 }

@@ -16,4 +16,7 @@ public class UserGardenDetailResponse {
   private HomeResponseDto.AvatarInfo avatarInfo; // 해당 정원에 배치된 아바타의 상세 정보
 
   private Boolean isWateringAbleByMe; // 현재 접속 유저가 이 정원에 물을 줄 수 있는지 여부
+
+  private Integer waterCount; // 👈 이 필드 추가
+  private Integer sunlightCount; // 👈 이 필드 추가
 }

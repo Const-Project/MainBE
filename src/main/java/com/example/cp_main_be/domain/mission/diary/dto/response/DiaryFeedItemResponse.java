@@ -14,18 +14,19 @@ public class DiaryFeedItemResponse implements FeedItemResponse {
   private final String title;
   private final String content;
   private final String imageUrl;
-  private final int likeCount;
-  private int commentCount; // Diary에 Comment 리스트가 있다고 가정
+  private final long likeCount; // [수정] int -> long 타입으로 변경 (Repository 반환 타입과 일치)
+  private final long commentCount;
   private final LocalDateTime createdAt;
 
-  public DiaryFeedItemResponse(Diary diary) {
+  // [수정] 생성자에서 likeCount와 commentCount를 직접 받도록 변경
+  public DiaryFeedItemResponse(Diary diary, long likeCount, long commentCount) {
     this.postId = diary.getId();
     this.author = new AuthorResponse(diary.getUser());
     this.title = diary.getTitle();
     this.content = diary.getContent();
     this.imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
-    this.likeCount = diary.getLikeCount();
+    this.likeCount = likeCount; // [수정] diary 객체 대신 파라미터로 받은 값을 사용
+    this.commentCount = commentCount; // 주석 해제 및 파라미터 값 사용
     this.createdAt = diary.getCreatedAt();
-    // this.commentCount = diary.getComments().size(); // Diary에 OneToMany Comment 관계가 필요
   }
 }

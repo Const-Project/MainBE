@@ -9,9 +9,9 @@ public interface FeedItemResponse {
 
   AuthorResponse getAuthor();
 
-  int getLikeCount();
+  long getLikeCount();
 
-  int getCommentCount();
+  long getCommentCount();
 
   LocalDateTime getCreatedAt();
 }

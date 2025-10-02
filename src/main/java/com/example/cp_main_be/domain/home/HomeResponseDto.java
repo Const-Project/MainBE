@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.home;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
@@ -38,6 +39,10 @@ public class HomeResponseDto {
     private boolean isUnlockable;
     private boolean isOwnerWateringAble; // 본인 정원에 물주기 가능한지 여부 -> 해금안되면 null
     private boolean isOwnerSunlightAble; // 본인 정원에 햇빛 주기 가능한지 여부 -> 해금안되면 null
+    // [추가] 다음 물주기 가능 시간 (ISO 8601 형식 문자열)
+    private LocalDateTime nextWaterableAt;
+    // [추가] 다음 물주기까지 남은 시간 (초 단위)
+    private Long waterableInSeconds;
   }
 
   @Getter
