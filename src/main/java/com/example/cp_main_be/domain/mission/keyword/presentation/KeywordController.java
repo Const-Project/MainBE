@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.mission.keyword.presentation;
 
+import com.example.cp_main_be.domain.mission.keyword.dto.request.AddKeywordRequest;
 import com.example.cp_main_be.domain.mission.keyword.dto.response.KeywordResponse;
 import com.example.cp_main_be.domain.mission.keyword.dto.response.TodayKeywordResponse;
 import com.example.cp_main_be.domain.mission.keyword.service.KeywordService;
@@ -9,9 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,7 +20,7 @@ public class KeywordController {
 
   private final KeywordService keywordService;
 
-  @Operation(summary = "오늘의 일일미션 조회", description = "오늘 할당된 일일미션을 조회합니다")
+  @Operation(summary = "오늘의 일기 키워드 조회", description = "오늘 할당된 일기 키워드를 조회합니다")
   @GetMapping("/today")
   public ResponseEntity<ApiResponse<TodayKeywordResponse>> getTodaysKeywords() {
     TodayKeywordResponse response = keywordService.getTodayKeyword();
@@ -33,5 +32,12 @@ public class KeywordController {
   public ResponseEntity<ApiResponse<List<KeywordResponse>>> getAllKeywords() {
     List<KeywordResponse> response = keywordService.getAllKeywords();
     return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(summary = "키워드 추가", description = "db에 키워드를 추가합니다")
+  @PostMapping
+  public ResponseEntity<Void> addKeyword(@RequestBody AddKeywordRequest request) {
+    keywordService.addNewKeyword(request);
+    return ResponseEntity.ok().build();
   }
 }
