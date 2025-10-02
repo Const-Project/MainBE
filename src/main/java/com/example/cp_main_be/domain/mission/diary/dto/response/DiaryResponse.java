@@ -11,20 +11,17 @@ public class DiaryResponse {
   private final String content;
   private final String imageUrl;
   private final boolean isPublic;
-  private final int likeCount;
+  private final long likeCount; // [수정] int -> long
   private final LocalDateTime createdAt;
   private final LocalDateTime updatedAt;
 
-  // private AuthorDto author; // 작성자 정보가 필요하면 추가
-
-  // Lombok Builder나 생성자를 통해 더 유연하게 만들 수 있습니다.
   private DiaryResponse(
       Long diaryId,
       String title,
       String content,
       String imageUrl,
       boolean isPublic,
-      int likeCount,
+      long likeCount, // [수정] int -> long
       LocalDateTime createdAt,
       LocalDateTime updatedAt) {
     this.diaryId = diaryId;
@@ -37,7 +34,8 @@ public class DiaryResponse {
     this.updatedAt = updatedAt;
   }
 
-  public static DiaryResponse from(Diary diary) {
+  // [수정] 생성자에서 likeCount를 직접 받도록 변경
+  public static DiaryResponse from(Diary diary, long likeCount) {
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
     return new DiaryResponse(
         diary.getId(),
@@ -45,7 +43,7 @@ public class DiaryResponse {
         diary.getContent(),
         imageUrl,
         diary.isPublic(),
-        diary.getLikeCount(),
+        likeCount, // [수정] 파라미터로 받은 값을 사용
         diary.getCreatedAt(),
         diary.getUpdatedAt());
   }

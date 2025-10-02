@@ -14,7 +14,7 @@ public record PostInfoResponse(
     String content,
     String imageUrl,
     boolean isLiked,
-    int likeCount,
+    long likeCount,
     int commentCount,
     List<CommentResponseDTO> comments,
     LocalDateTime createdAt,
