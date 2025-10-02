@@ -6,14 +6,18 @@ import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryReposi
 import com.example.cp_main_be.domain.mission.diary.dto.request.CreateDiaryRequest;
 import com.example.cp_main_be.domain.mission.diary.dto.request.UpdateDiaryRequest;
 import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryInfoResponse;
+import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImageRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,13 +96,40 @@ public class DiaryService {
     }
 
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO의 팩토리 메서드로 변환하여 반환합니다.
-    return DiaryInfoResponse.from(diary, isLiked);
+    return DiaryInfoResponse.from(
+        diary, isLiked, likeRepository.countByTargetIdAndTargetType(diaryId, "DIARY"));
   }
 
   // 내 일기 목록 조회 (읽기 전용)
   @Transactional(readOnly = true)
   public List<Diary> findMyDiaries(User user, int year, int month) {
     return diaryRepository.findByUserAndYearAndMonth(user, year, month);
+  }
+
+  // [추가] 내 일기 목록을 DTO로 변환하며 N+1 문제를 해결하는 메서드
+  @Transactional(readOnly = true)
+  public List<DiaryResponse> findMyDiariesAsResponses(User user, int year, int month) {
+    // 1. 먼저 일기 엔티티 목록을 조회합니다.
+    List<Diary> diaries = findMyDiaries(user, year, month);
+
+    if (diaries.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    // 2. 조회된 일기들의 ID를 추출합니다.
+    List<Long> diaryIds = diaries.stream().map(Diary::getId).collect(Collectors.toList());
+
+    // 3. 한 번의 쿼리로 모든 일기의 좋아요 수를 Map<diaryId, likeCount> 형태로 가져옵니다.
+    Map<Long, Long> likeCounts = likeRepository.countLikesByTargetIds(diaryIds, "DIARY");
+
+    // 4. 엔티티 목록을 순회하며 DTO로 변환합니다. 이때 Map에서 좋아요 수를 찾아 사용합니다.
+    return diaries.stream()
+        .map(
+            diary -> {
+              long likeCount = likeCounts.getOrDefault(diary.getId(), 0L);
+              return DiaryResponse.from(diary, likeCount);
+            })
+        .collect(Collectors.toList());
   }
 
   public Diary updateDiary(Long userId, Long diaryId, UpdateDiaryRequest request) {

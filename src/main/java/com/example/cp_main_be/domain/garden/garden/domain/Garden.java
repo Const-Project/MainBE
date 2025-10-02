@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import lombok.*;
@@ -76,6 +77,27 @@ public class Garden {
     this.sunlightCount = 0;
     this.gardenBackground = gardenBackground;
     this.avatar = avatar; // [추가]
+  }
+
+  @Transient // DB에 저장하지 않는, 계산된 필드임을 명시
+  public boolean isWaterableByOwner() {
+    if (this.lastWateredByOwnerAt == null) {
+      return true; // 한 번도 물을 준 적이 없다면 항상 가능
+    }
+    LocalDateTime nextWaterableTime = this.lastWateredByOwnerAt.plusHours(4);
+    // 다음 물주기 가능 시간이 현재 시간보다 이전이거나 같으면 true
+    return !nextWaterableTime.isAfter(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
+  }
+
+  @Transient // DB에 저장하지 않는, 계산된 필드임을 명시
+  public long getWaterableByOwnerInSeconds() {
+    if (isWaterableByOwner()) {
+      return 0L; // 이미 물주기가 가능하면 남은 시간은 0
+    }
+    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    LocalDateTime nextWaterableTime = this.lastWateredByOwnerAt.plusHours(4);
+    long remainingSeconds = Duration.between(now, nextWaterableTime).getSeconds();
+    return Math.max(0L, remainingSeconds);
   }
 
   public void unlock() {

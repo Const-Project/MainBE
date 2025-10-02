@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
 import com.example.cp_main_be.domain.member.user.dto.request.NicknameChangeRequest;
+import com.example.cp_main_be.domain.member.user.dto.response.LevelStatusResponseDto;
 import com.example.cp_main_be.domain.member.user.dto.response.UserProfileResponse;
 import com.example.cp_main_be.domain.member.user.dto.response.UserRegisterResponse;
 import com.example.cp_main_be.domain.member.user.service.UserService;
@@ -72,11 +73,11 @@ public class UserController {
   }
 
   @GetMapping("/level")
-  @Operation(summary = "점수 및 레벨 조회")
-  public ResponseEntity<ApiResponse<UserRegisterResponse.LevelStatusResponseDTO>> getLevel(
+  @Operation(summary = "소망나무 점수 및 레벨 현황 조회", description = "기존 /level 엔드포인트를 대체합니다.")
+  public ResponseEntity<ApiResponse<LevelStatusResponseDto>> getLevelStatus(
       @AuthenticationPrincipal User user) {
-    UserRegisterResponse.LevelStatusResponseDTO levelStatusResponseDTO = userService.getLevel(user);
-    return ResponseEntity.ok(ApiResponse.success(levelStatusResponseDTO));
+    LevelStatusResponseDto levelStatus = userService.getLevelStatus(user);
+    return ResponseEntity.ok(ApiResponse.success(levelStatus));
   }
 
   @Operation(

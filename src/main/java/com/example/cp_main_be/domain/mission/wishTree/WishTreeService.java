@@ -20,13 +20,14 @@ public class WishTreeService {
 
   @Transactional
   public WishTree addPointsToWishTree(Long userId, Long points) {
-    // 1. 유저의 소망 나무를 찾거나, 없으면 새로 생성
     WishTree wishTree = findOrCreateWishTree(userId);
 
-    // 2. WishTree 엔티티에 포인트 추가 및 해금 가능 상태로 변경 (내부 로직)
-    wishTree.addPoints(points);
+    // [추가] 나무 또는 최종 단계에 도달하면 더 이상 포인트를 추가하지 않음
+    if (wishTree.getStage() == WishTreeStage.TREE || wishTree.getStage() == WishTreeStage.FINAL) {
+      return wishTree; // 아무 작업도 하지 않고 현재 상태 반환
+    }
 
-    // 3. Stage 성장 및 이벤트 발행 로직 모두 제거
+    wishTree.addPoints(points);
     return wishTree;
   }
 
