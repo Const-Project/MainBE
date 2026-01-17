@@ -44,7 +44,9 @@ logging:
         security: TRACE
 
 ---
-
+# ==========================================
+# Local Profile (여기서 파일 생성 설정 추가됨)
+# ==========================================
 spring:
   config:
     activate:
@@ -57,13 +59,24 @@ spring:
     hibernate:
       ddl-auto: update
     defer-datasource-initialization: true
+    # ▼▼▼ 추가된 설정: 로컬 실행 시 DDL 파일 생성 ▼▼▼
+    properties:
+      jakarta: # Spring Boot 2.x라면 'jakarta'를 'javax'로 변경하세요
+        persistence:
+          schema-generation:
+            scripts:
+              action: create
+              create-target: ./entity-schema.sql # 프로젝트 루트에 파일 생성
+              create-source: metadata
   h2:
     console:
       enabled: true
       path: /h2-console
 
 ---
-
+# ==========================================
+# Prod Profile
+# ==========================================
 spring:
   config:
     activate:

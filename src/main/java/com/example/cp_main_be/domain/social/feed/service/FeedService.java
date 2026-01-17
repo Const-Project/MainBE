@@ -14,7 +14,8 @@ import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedScrollResponse;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
-import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
+import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
+import com.example.cp_main_be.domain.social.like.diary.repository.DiaryLikeRepository;
 import com.example.cp_main_be.global.dto.FeedItemResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDateTime;
@@ -36,7 +37,8 @@ public class FeedService {
   private final DiaryRepository diaryRepository;
   private final FollowRepository followRepository;
   private final AvatarPostRepository avatarPostRepository;
-  private final LikeRepository likeRepository;
+  private final DiaryLikeRepository diaryLikeRepository;
+  private final AvatarPostLikeRepository avatarPostLikeRepository;
   private final CommentRepository commentRepository;
 
   /** 시간순 정렬된 피드 조회 (커서 기반) */
@@ -197,10 +199,10 @@ public class FeedService {
     List<CommentCountDto> commentCountDtos;
 
     if ("DIARY".equalsIgnoreCase(type)) {
-      likeCounts = likeRepository.countLikesByTargetIds(ids, "DIARY");
+      likeCounts = diaryLikeRepository.countLikesByDiaryIds(ids);
       commentCountDtos = commentRepository.countCommentsByDiaryIds(ids);
     } else if ("AVATAR_POST".equalsIgnoreCase(type)) {
-      likeCounts = likeRepository.countLikesByTargetIds(ids, "AVATAR_POST");
+      likeCounts = avatarPostLikeRepository.countLikesByAvatarPostIds(ids);
       commentCountDtos = commentRepository.countCommentsByAvatarPostIds(ids);
     } else {
       likeCounts = Collections.emptyMap();

@@ -1,25 +1,24 @@
-package com.example.cp_main_be.domain.social.like.domain;
+package com.example.cp_main_be.domain.social.like.diary.domain;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(
-    name = "likes",
+    name = "diary_likes",
     uniqueConstraints =
         @UniqueConstraint(
-            name = "uk_likes_user_target",
-            columnNames = {"user_id", "target_id", "target_type"}))
+            name = "uk_diary_like",
+            columnNames = {"user_id", "diary_id"}))
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Like {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class DiaryLike {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,11 +28,9 @@ public class Like {
   @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @Column(name = "target_id", nullable = false)
-  private Long targetId;
-
-  @Column(name = "target_type", nullable = false)
-  private String targetType; // 예: "DIARY", "AVATAR_POST"
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "diary_id", nullable = false)
+  private Diary diary;
 
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
@@ -41,5 +38,11 @@ public class Like {
   @PrePersist
   protected void onCreate() {
     this.createdAt = LocalDateTime.now();
+  }
+
+  @Builder
+  public DiaryLike(User user, Diary diary) {
+    this.user = user;
+    this.diary = diary;
   }
 }

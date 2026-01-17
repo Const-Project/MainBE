@@ -8,11 +8,11 @@ import lombok.*;
 
 @Entity
 @Getter
-@Inheritance(strategy = InheritanceType.JOINED) // 1. 상속 전략 설정 (조인 전략)
-@DiscriminatorColumn(name = "mission_type") // 2. 타입을 구분할 컬럼
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE) // 1. 상속 전략 변경
+@DiscriminatorColumn(name = "mission_type")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Setter
-public abstract class UserDailyMission { // 3. 추상 클래스로 변경
+public abstract class UserDailyMission {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "user_mission_id")
@@ -37,6 +37,17 @@ public abstract class UserDailyMission { // 3. 추상 클래스로 변경
 
   @Column(name = "completed_at")
   private LocalDateTime completedAt;
+
+  // -- 사진 미션용 컬럼 --
+  @Column(name = "submission_image_url", length = 2048)
+  private String submissionImageUrl;
+
+  // -- 퀴즈 미션용 컬럼 --
+  @Column(name = "selected_answer_number")
+  private Integer selectedAnswerNumber;
+
+  @Column(name = "is_quiz_correct")
+  private Boolean isQuizCorrect;
 
   @PrePersist
   protected void onCreate() {
