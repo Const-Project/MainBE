@@ -122,7 +122,7 @@ public class UserService {
     userRepository.delete(user);
   }
 
-  public User findUserById(Long id) {
+  public User findById(Long id) {
     return this.userRepository
         .findById(id)
         .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));

@@ -1,33 +1,26 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.domain;
 
-import jakarta.persistence.Column;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Getter
-@Setter
-@DiscriminatorValue("QUIZ") // 부모 테이블의 mission_type 컬럼에 "QUIZ"로 저장됨
+@DiscriminatorValue("QUIZ")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserQuizMission extends UserDailyMission {
-  @Column(name = "selected_option_id")
-  private Long selectedOptionId;
 
-  @Column(name = "is_quiz_correct")
-  private Boolean isQuizCorrect;
-
-  @Column(name = "quiz_answered_at")
-  private LocalDateTime quizAnsweredAt;
-
-  @Column(name = "selected_answer_number")
-  private Integer selectedAnswerNumber;
+  @Builder
+  public UserQuizMission(User user, DailyMissionMaster dailyMissionMaster) {
+    super(user, dailyMissionMaster);
+  }
 
   public void setSelectedAnswerNumber(int optionOrder) {
-    this.selectedAnswerNumber = optionOrder;
+    super.setSelectedAnswerNumber(optionOrder);
   }
 }

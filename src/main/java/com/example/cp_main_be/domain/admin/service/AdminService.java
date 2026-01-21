@@ -146,7 +146,7 @@ public class AdminService {
 
   @Transactional
   public User changeUserStatus(Long userId, AdminRequestDTO.ChangeUserStatusRequestDTO requestDTO) {
-    User user = userService.findUserById(userId);
+    User user = userService.findById(userId);
     user.setStatus(requestDTO.getUserStatus());
     return user;
   }

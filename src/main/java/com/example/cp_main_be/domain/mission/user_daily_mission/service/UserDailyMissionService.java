@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.service;
 
-import com.example.cp_main_be.domain.avatar.image.DailyMissionImage;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.UserService;
@@ -11,7 +10,6 @@ import com.example.cp_main_be.domain.mission.quiz.domain.Quiz;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsRepository;
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
-import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserImageMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionPanelResponse;
 import com.example.cp_main_be.global.common.CustomApiException;
@@ -48,19 +46,15 @@ public class UserDailyMissionService {
   }
 
   public String uploadPictureForDailyMission(Long userDailyMissionId, MultipartFile file) {
-    UserImageMission userDailyMission =
-        (UserImageMission)
-            userDailyMissionRepository
-                .findById(userDailyMissionId)
-                .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
+    UserDailyMission userDailyMission =
+        userDailyMissionRepository
+            .findById(userDailyMissionId)
+            .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
 
     String imageUrl = s3Uploader.upload(file, "mission-images");
 
-    userDailyMission.setDailyMissionImage(DailyMissionImage.builder().imageUrl(imageUrl).build());
-
-    if (userDailyMission.getDailyMissionImage().getImageUrl().equals(imageUrl)) {
-      userDailyMission.setCompleted(true);
-    }
+    userDailyMission.setSubmissionImageUrl(imageUrl);
+    userDailyMission.setCompleted(true);
 
     return imageUrl;
   }

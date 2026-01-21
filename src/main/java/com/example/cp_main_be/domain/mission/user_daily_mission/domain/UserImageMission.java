@@ -1,21 +1,26 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.domain;
 
-import com.example.cp_main_be.domain.avatar.image.DailyMissionImage;
-import jakarta.persistence.*;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-@Setter
 @Getter
-@DiscriminatorValue("IMAGE") // 부모 테이블의 mission_type 컬럼에 "IMAGE"로 저장됨
+@DiscriminatorValue("IMAGE")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserImageMission extends UserDailyMission {
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  @JoinColumn(name = "image_id")
-  private DailyMissionImage dailyMissionImage;
 
-  // 생성자 등 필요한 로직 추가 ...
+  @Builder
+  public UserImageMission(User user, DailyMissionMaster dailyMissionMaster) {
+    super(user, dailyMissionMaster);
+  }
+
+  public void setSubmissionImageUrl(String imageUrl) {
+    super.setSubmissionImageUrl(imageUrl);
+  }
 }
