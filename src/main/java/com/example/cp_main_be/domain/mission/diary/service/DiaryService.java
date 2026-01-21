@@ -10,7 +10,7 @@ import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryResponse;
 import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImage;
 import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImageRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
-import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
+import com.example.cp_main_be.domain.social.like.diary.repository.DiaryLikeRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import java.util.Collections;
@@ -29,7 +29,7 @@ public class DiaryService {
 
   private final DiaryRepository diaryRepository;
   private final DiaryImageRepository diaryImageRepository;
-  private final LikeRepository likeRepository;
+  private final DiaryLikeRepository diaryLikeRepository;
   private final WishTreeService wishTreeService;
 
   public Long createDiary(User user, CreateDiaryRequest request) {
@@ -91,13 +91,11 @@ public class DiaryService {
 
     boolean isLiked = false;
     if (currentUser != null) {
-      isLiked = likeRepository.existsByUserAndTargetIdAndTargetType(currentUser, diaryId, "DIARY");
-      // 가능하다면 userId 기반 시그니처(existsByUser_Id...) 사용을 권장합니다.
+      isLiked = diaryLikeRepository.existsByUserAndDiary(currentUser, diary);
     }
 
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO의 팩토리 메서드로 변환하여 반환합니다.
-    return DiaryInfoResponse.from(
-        diary, isLiked, likeRepository.countByTargetIdAndTargetType(diaryId, "DIARY"));
+    return DiaryInfoResponse.from(diary, isLiked, diaryLikeRepository.countByDiary(diary));
   }
 
   // 내 일기 목록 조회 (읽기 전용)
@@ -120,7 +118,7 @@ public class DiaryService {
     List<Long> diaryIds = diaries.stream().map(Diary::getId).collect(Collectors.toList());
 
     // 3. 한 번의 쿼리로 모든 일기의 좋아요 수를 Map<diaryId, likeCount> 형태로 가져옵니다.
-    Map<Long, Long> likeCounts = likeRepository.countLikesByTargetIds(diaryIds, "DIARY");
+    Map<Long, Long> likeCounts = diaryLikeRepository.countLikesByDiaryIds(diaryIds);
 
     // 4. 엔티티 목록을 순회하며 DTO로 변환합니다. 이때 Map에서 좋아요 수를 찾아 사용합니다.
     return diaries.stream()
