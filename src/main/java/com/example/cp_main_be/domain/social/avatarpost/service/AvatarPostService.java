@@ -5,7 +5,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
-import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
+import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AvatarPostService {
 
   private final AvatarPostRepository avatarPostRepository;
-  private final LikeRepository likeRepository;
+  private final AvatarPostLikeRepository avatarPostLikeRepository;
 
   public PostInfoResponse getAvatarPostInfo(Long postId, User currentUser) {
     // 1. N+1 문제를 해결하기 위해 연관된 엔티티(작성자, 댓글, 댓글 작성자)를 함께 조회합니다.
@@ -26,10 +26,10 @@ public class AvatarPostService {
             .orElseThrow(() -> new IllegalArgumentException("해당 포스트를 찾을 수 없습니다."));
 
     // 2. 현재 사용자의 '좋아요' 여부를 확인합니다.
-    // 'targetId'가 postId와 일치하는지 확인해야 합니다. 'AVATAR_POST' 타입도 함께 확인하는 것이 더 안전합니다.
-    boolean isLiked =
-        likeRepository.existsByUserIdAndTargetIdAndTargetType(
-            currentUser.getId(), postId, "AVATAR_POST");
+    boolean isLiked = false;
+    if (currentUser != null) {
+      isLiked = avatarPostLikeRepository.existsByUserAndAvatarPost(currentUser, post);
+    }
 
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO로 변환하여 반환합니다.
     return PostInfoResponse.from(post, isLiked);
