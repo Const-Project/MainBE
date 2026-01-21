@@ -10,11 +10,8 @@ import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
-import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
-import com.example.cp_main_be.domain.social.like.domain.Like;
-import com.example.cp_main_be.domain.social.like.domain.repository.LikeRepository;
 import com.example.cp_main_be.global.event.*;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +27,6 @@ public class NotificationEventListener {
 
   private static final Logger log = LoggerFactory.getLogger(NotificationEventListener.class);
   private final NotificationService notificationService;
-  private final FeedRepository feedRepository; // 필요하다면 주입
-  private final LikeRepository likeRepository;
   private final DiaryRepository diaryRepository;
   private final AvatarPostRepository avatarPostRepository;
   private final WishTreeService wishTreeService;
@@ -82,18 +77,16 @@ public class NotificationEventListener {
   @EventListener
   @Transactional
   public void handleLikeCreatedEvent(LikeCreatedEvent event) {
-    Like like = event.getLike();
-    User sender = like.getUser();
-    String targetType = like.getTargetType();
-    Long targetId = like.getTargetId();
-    User receiver;
+    User sender = event.getWriter();
+    User receiver = event.getOwner();
+    String targetType = event.getTargetType();
+    Long targetId = event.getTargetId();
+
     String url;
     if (Objects.equals(targetType, "DIARY")) {
-      receiver = diaryRepository.findById(targetId).get().getUser();
-      url = "/api/v1/diaries/" + targetId;
+      url = "/diaries/" + targetId;
     } else {
-      receiver = avatarPostRepository.findById(targetId).get().getUser();
-      url = "/api/v1/avatar-posts/" + targetId;
+      url = "/avatar-posts/" + targetId;
     }
 
     if (!sender.getId().equals(receiver.getId())) {
