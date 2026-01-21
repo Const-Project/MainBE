@@ -1,6 +1,22 @@
 server:
   forward-headers-strategy: framework
 
+# ==========================================
+# 1. Firebase 설정 (수정됨)
+# ==========================================
+firebase:
+  # 중요: 로컬에서는 이 환경변수가 없어도 에러가 안 나도록 ':#{null}'을 붙여야 합니다.
+  # 의미: 환경변수가 있으면 쓰고, 없으면 null로 처리해라.
+  key-json: ${FIREBASE_KEY_JSON:#{null}}
+
+# ==========================================
+# 2. Supabase 설정 (추가됨)
+# ==========================================
+supabase:
+  # 백엔드에서 관리자 권한(Service Key)을 쓰기 위해 필요합니다.
+  url: ${SUPABASE_URL}
+  service-key: ${SUPABASE_SERVICE_KEY}
+
 spring:
   profiles:
     active: local
@@ -15,13 +31,14 @@ spring:
   security:
     debug: true
   config:
-    import: "optional:dotenv:"
+    import: "optional:dotenv:.env" # .env 파일 명시 (로컬 실행 시 편리)
 
 jwt:
   secret: ${JWT_SECRET}
   access-token-expiration-milliseconds: 5256000000
   refresh-token-expiration-milliseconds: 10512000000
 
+# R2는 Supabase Storage로 완전히 넘어가면 나중에 삭제하세요.
 cloudflare:
   r2:
     endpoint: ${R2_ENDPOINT}
@@ -45,37 +62,38 @@ logging:
 
 ---
 # ==========================================
-# Local Profile (여기서 파일 생성 설정 추가됨)
+# Local Profile (로컬 Supabase 연결)
 # ==========================================
 spring:
   config:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
-    username: sa
-    password:
+    # 터미널에 나온 DB URL (포트 54322 확인!)
+    url: jdbc:postgresql://127.0.0.1:54322/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
-    defer-datasource-initialization: true
-    # ▼▼▼ 추가된 설정: 로컬 실행 시 DDL 파일 생성 ▼▼▼
+      ddl-auto: update # 로컬 개발용
+    show-sql: true
     properties:
-      jakarta: # Spring Boot 2.x라면 'jakarta'를 'javax'로 변경하세요
-        persistence:
-          schema-generation:
-            scripts:
-              action: create
-              create-target: ./entity-schema.sql # 프로젝트 루트에 파일 생성
-              create-source: metadata
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+      hibernate:
+        format_sql: true
 
+# 로컬 Supabase API 설정
+supabase:
+  url: http://127.0.0.1:54321
+  service-key: ${LOCAL_SERVICE_KEY} # .env에서 가져옵니다
+
+# 로컬용 JWT 설정
+jwt:
+  secret: ${LOCAL_JWT_SECRET} # .env에서 가져옵니다
 ---
 # ==========================================
-# Prod Profile
+# Prod Profile (Railway + Supabase)
 # ==========================================
 spring:
   config:
@@ -87,8 +105,10 @@ spring:
     password: ${DB_PASSWORD}
   jpa:
     hibernate:
+      # 운영 환경에서는 update가 위험할 수 있습니다.
+      # 테이블이 이미 확정되었다면 'validate'를, 아직 개발 중이라면 'update'를 쓰세요.
       ddl-auto: update
-    show-sql: false
+    show-sql: false # 운영 로그 지저분해짐 방지
   security:
     debug: false
 
@@ -100,7 +120,4 @@ springdoc:
 
 logging:
   level:
-    # 실행되는 SQL문을 DEBUG 레벨로 출력
-    org.hibernate.SQL: DEBUG
-    # SQL에 바인딩되는 파라미터 값을 TRACE 레벨로 출력
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.SQL: INFO # 운영에서는 쿼리 로그를 INFO로 줄이는 게 좋습니다.
