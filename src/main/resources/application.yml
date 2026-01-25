@@ -7,7 +7,7 @@ server:
 firebase:
   # 중요: 로컬에서는 이 환경변수가 없어도 에러가 안 나도록 ':#{null}'을 붙여야 합니다.
   # 의미: 환경변수가 있으면 쓰고, 없으면 null로 처리해라.
-  key-json: ${FIREBASE_KEY_JSON:#{null}}
+  key-json: ${FIREBASE_KEY_BASE64:#{null}}
 
 # ==========================================
 # 2. Supabase 설정 (추가됨)
