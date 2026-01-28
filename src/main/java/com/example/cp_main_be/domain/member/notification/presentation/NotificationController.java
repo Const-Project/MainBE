@@ -59,7 +59,18 @@ public class NotificationController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
-  @Operation(summary = "알림 설정", description = "알림 설정을 변경합니다")
+  @Operation(summary = "알림/마케팅 설정 조회", description = "현재 알림 및 마케팅 수신 동의 설정을 조회합니다")
+  @GetMapping("/settings")
+  public ResponseEntity<
+          ApiResponse<
+              com.example.cp_main_be.domain.member.notification.dto.response
+                  .NotificationSettingsResponse>>
+      getNotificationSettings(@AuthenticationPrincipal User user) {
+    return ResponseEntity.ok(
+        ApiResponse.success(notificationService.getNotificationSettings(user.getId())));
+  }
+
+  @Operation(summary = "알림/마케팅 설정 변경", description = "알림 및 마케팅 수신 동의 설정을 변경합니다")
   @PatchMapping("/settings")
   public ResponseEntity<ApiResponse<Void>> updateNotificationSettings(
       @AuthenticationPrincipal User user, @RequestBody @Valid NotificationSettingsRequest request) {

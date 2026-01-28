@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class NotificationSettingsRequest {
   private boolean notificationEnabled; // 전체 알림 수신 여부
-  // TODO: 활동별 알림 수신 여부 필드 추가 (예: boolean commentNotificationEnabled;)
+  private boolean marketingConsent; // [추가] 마케팅 수신 동의 여부
 }
