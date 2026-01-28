@@ -1,0 +1,9 @@
+{
+  "agents": {
+    "librarian": { "model": "google/gemini-3-flash", "enabled": true },
+    "oracle": { "model": "google/gemini-3-flash", "enabled": true },
+    "explore": { "model": "google/gemini-3-flash", "enabled": true },
+    "planner-sisyphus": { "model": "google/gemini-3-flash", "enabled": true }
+  }
+}
+
