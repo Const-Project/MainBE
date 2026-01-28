@@ -29,10 +29,10 @@ public record PostInfoResponse(
     return new PostInfoResponse(
         post.getId(),
         post.getUser().getId(),
-        post.getCaption(),
-        post.getImageUrl(),
         writerName,
         profileImageUrl,
+        post.getCaption(),
+        post.getImageUrl(),
         isLiked,
         post.getLikeCount(),
         commentDTOs.size(),

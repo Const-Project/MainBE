@@ -105,7 +105,13 @@ public class NotificationService {
       NotificationType notificationType,
       String url,
       String thumbnailUrl) {
-    String content = String.format(notificationType.getMessageTemplate(), sender.getNickname());
+    String content;
+    if (sender != null) {
+      content = String.format(notificationType.getMessageTemplate(), sender.getNickname());
+    } else {
+      // sender가 없는 시스템 알림(예: 신고 알림)의 경우 템플릿 그대로 사용
+      content = notificationType.getMessageTemplate();
+    }
     return Notification.builder()
         .receiver(receiver)
         .notificationType(notificationType)
@@ -154,9 +160,26 @@ public class NotificationService {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
-    // TODO: User 엔티티에 알림 설정 필드 추가 후 로직 구현
+
     user.setNotificationEnabled(request.isNotificationEnabled());
+    // [추가] 마케팅 수신 동의 설정 업데이트 - User 엔티티에 필드 추가 필요
+    user.setMarketingConsent(request.isMarketingConsent());
     userRepository.save(user);
+  }
+
+  @Transactional(readOnly = true)
+  public com.example.cp_main_be.domain.member.notification.dto.response.NotificationSettingsResponse
+      getNotificationSettings(Long userId) {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
+    return com.example.cp_main_be.domain.member.notification.dto.response
+        .NotificationSettingsResponse.builder()
+        .notificationEnabled(user.getNotificationEnabled())
+        .marketingConsent(user.getMarketingConsent() != null ? user.getMarketingConsent() : false)
+        .build();
   }
 
   private void sendPushNotification(User receiver, Notification notification) {
