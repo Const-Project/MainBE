@@ -45,7 +45,7 @@ public class FollowService {
 
     // 알림 전송
     notificationService.send(
-        following, follower, NotificationType.FOLLOW, "/users/" + follower.getId());
+        following, follower, NotificationType.FOLLOW, "/users/" + follower.getId(), null);
   }
 
   public void unfollowUser(Long followerId, Long followingId) {

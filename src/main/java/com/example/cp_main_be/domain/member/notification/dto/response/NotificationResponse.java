@@ -11,6 +11,7 @@ public class NotificationResponse {
   private Long id;
   private String content;
   private String url;
+  private String thumbnailUrl;
   private boolean isRead;
   private String notificationType;
   private LocalDateTime createdAt;
@@ -20,6 +21,7 @@ public class NotificationResponse {
         .id(notification.getId())
         .content(notification.getContent())
         .url(notification.getUrl())
+        .thumbnailUrl(notification.getThumbnailUrl())
         .isRead(notification.isRead())
         .notificationType(notification.getNotificationType().getType())
         .createdAt(notification.getCreatedAt())

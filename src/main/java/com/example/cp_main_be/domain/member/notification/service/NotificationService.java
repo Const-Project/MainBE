@@ -57,9 +57,15 @@ public class NotificationService {
     return emitter;
   }
 
-  public void send(User receiver, User sender, NotificationType notificationType, String url) {
+  public void send(
+      User receiver,
+      User sender,
+      NotificationType notificationType,
+      String url,
+      String thumbnailUrl) {
     Notification notification =
-        notificationRepository.save(createNotification(receiver, sender, notificationType, url));
+        notificationRepository.save(
+            createNotification(receiver, sender, notificationType, url, thumbnailUrl));
     String receiverId = String.valueOf(receiver.getId());
     String eventId = receiverId + "_" + System.currentTimeMillis();
     Map<String, SseEmitter> emitters =
@@ -94,13 +100,18 @@ public class NotificationService {
   }
 
   private Notification createNotification(
-      User receiver, User sender, NotificationType notificationType, String url) {
+      User receiver,
+      User sender,
+      NotificationType notificationType,
+      String url,
+      String thumbnailUrl) {
     String content = String.format(notificationType.getMessageTemplate(), sender.getNickname());
     return Notification.builder()
         .receiver(receiver)
         .notificationType(notificationType)
         .content(content)
         .url(url)
+        .thumbnailUrl(thumbnailUrl)
         .isRead(false)
         .build();
   }
@@ -179,7 +190,7 @@ public class NotificationService {
   public void sendSunshineNotification() {
     List<User> users = userRepository.findAll(); // 모든 유저에게 보낼 경우
     for (User user : users) {
-      send(user, user, NotificationType.SUNSHINE, "/garden");
+      send(user, user, NotificationType.SUNSHINE, "/garden", null);
     }
     log.info("Sending sunshine notification at {}", LocalDateTime.now());
   }
@@ -188,7 +199,7 @@ public class NotificationService {
   public void sendPollenAvailableNotification() {
     List<User> users = userRepository.findAll();
     for (User user : users) {
-      send(user, user, NotificationType.POLLEN_AVAILABLE, "/friends");
+      send(user, user, NotificationType.POLLEN_AVAILABLE, "/friends", null);
     }
     log.info("Sending pollen available notification at {}", LocalDateTime.now());
   }

@@ -36,6 +36,11 @@ public class WishTree {
   }
 
   public void addPoints(Long points) {
+    // [수정] 해금(unlock)이 필요한 정원이 있는 경우, 경험치를 추가하지 않음
+    if (this.user.getUnlockableGardenCount() != null && this.user.getUnlockableGardenCount() > 0) {
+      return;
+    }
+
     this.points += points;
     evolveStageIfNeeded();
   }

@@ -49,6 +49,7 @@ public class GardenService {
             .findById(gardenId)
             .orElseThrow(() -> new IllegalArgumentException("Garden not found"));
 
+    garden.recordAccess();
     return GardenResponse.from(garden);
   }
 
@@ -79,6 +80,7 @@ public class GardenService {
     garden.increaseWaterCount();
     wishTreeService.addPointsToWishTree(ownerId, WATERING_POINTS);
     garden.recordOwnerWateringTime(); // 주인이 물 준 시간 기록
+    garden.recordAccess();
   }
 
   /** 친구의 정원에 물을 주는 로직을 처리합니다. */
@@ -147,6 +149,7 @@ public class GardenService {
     garden.increaseSunlightCount();
     wishTreeService.addPointsToWishTree(actorId, SUNLIGHT_POINTS);
     garden.recordSunlightTime();
+    garden.recordAccess();
   }
 
   @Transactional

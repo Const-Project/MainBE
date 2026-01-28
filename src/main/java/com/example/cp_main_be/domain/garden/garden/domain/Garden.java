@@ -59,6 +59,9 @@ public class Garden {
   @Column(name = "last_sunlight_received_at")
   private LocalDateTime lastSunlightReceivedAt;
 
+  @Column(name = "last_accessed_at")
+  private LocalDateTime lastAccessedAt;
+
   private boolean isLocked;
 
   @CreatedDate
@@ -137,5 +140,9 @@ public class Garden {
 
   public void setUser(User user) {
     this.user = user;
+  }
+
+  public void recordAccess() {
+    this.lastAccessedAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
   }
 }

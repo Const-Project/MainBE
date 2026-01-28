@@ -26,5 +26,6 @@ public class CreateDiaryRequest {
   @NotNull(message = "공개 여부는 필수값입니다. (true/false)")
   private Boolean isPublic;
 
+  @NotNull(message = "이미지는 필수 항목입니다.")
   private Long imageId; // 있으면 받고 없으면 안받음
 }
