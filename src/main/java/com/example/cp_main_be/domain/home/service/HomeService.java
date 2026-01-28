@@ -60,6 +60,14 @@ public class HomeService {
     long expNeededForLevelUp = expForNextLevelStart - expForCurrentLevelStart;
 
     int unreadNotificationCount = notificationRepository.countByReceiverAndIsReadFalse(user);
+
+    Integer lastAccessedSlotNumber =
+        user.getGardens().stream()
+            .filter(g -> g.getLastAccessedAt() != null)
+            .max(java.util.Comparator.comparing(Garden::getLastAccessedAt))
+            .map(Garden::getSlotNumber)
+            .orElse(1); // 기본값은 1번 슬롯
+
     HomeResponseDto.UserInfo userInfo =
         HomeResponseDto.UserInfo.builder()
             .id(user.getId())
@@ -68,6 +76,7 @@ public class HomeService {
             .currentExp(expInCurrentLevel)
             .requiredExpForNextLevel(expNeededForLevelUp)
             .unreadNotificationCount(unreadNotificationCount)
+            .lastAccessedSlotNumber(lastAccessedSlotNumber)
             .build();
 
     Map<Integer, Garden> userGardens =

@@ -70,7 +70,7 @@ public class DeliveryService {
 
   @Transactional(readOnly = true)
   public List<DeliveryPlantResponse> getDeliveryPlantList() {
-    return deliveryPlantRepository.findAll().stream()
+    return deliveryPlantRepository.findAllByOrderByIdAsc().stream()
         .map(DeliveryPlantResponse::from)
         .collect(Collectors.toList());
   }

@@ -62,7 +62,7 @@ public class NotificationEventListener {
 
     // 3. 알림 수신자가 있고, 자기 자신의 게시물에 댓글을 단 게 아닐 경우에만 알림 전송
     if (receiver != null && !receiver.getId().equals(writer.getId())) {
-      notificationService.send(receiver, writer, notificationType, redirectUrl);
+      notificationService.send(receiver, writer, notificationType, redirectUrl, null);
       log.info(
           "Notification sent to user ID: {} from user ID: {}", receiver.getId(), writer.getId());
     } else if (receiver != null) {
@@ -90,7 +90,7 @@ public class NotificationEventListener {
     }
 
     if (!sender.getId().equals(receiver.getId())) {
-      notificationService.send(receiver, sender, NotificationType.FEED_LIKE, url);
+      notificationService.send(receiver, sender, NotificationType.FEED_LIKE, url, null);
     }
   }
 
@@ -103,7 +103,7 @@ public class NotificationEventListener {
     String url = "/garden/" + receiver.getId();
 
     if (!sender.getId().equals(receiver.getId())) {
-      notificationService.send(receiver, sender, NotificationType.GUESTBOOK, url);
+      notificationService.send(receiver, sender, NotificationType.GUESTBOOK, url, null);
     }
   }
 
@@ -115,7 +115,7 @@ public class NotificationEventListener {
     User receiver = follow.getFollowing();
     String url = "/user/" + sender.getId();
 
-    notificationService.send(receiver, sender, NotificationType.FOLLOW, url);
+    notificationService.send(receiver, sender, NotificationType.FOLLOW, url, null);
   }
 
   @EventListener
@@ -127,6 +127,6 @@ public class NotificationEventListener {
 
     wishTreeService.addPointsToWishTree(sender.getId(), 2L);
 
-    notificationService.send(receiver, sender, NotificationType.WATERING_BY_FRIEND, url);
+    notificationService.send(receiver, sender, NotificationType.WATERING_BY_FRIEND, url, null);
   }
 }

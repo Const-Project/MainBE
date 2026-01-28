@@ -83,6 +83,15 @@ public class AvatarService {
     emptyGarden.updateAvatar(newAvatar);
 
     avatarPostService.createAvatarPost(newAvatar, user);
+
+    // [추가] 아바타 생성 알림 전송 (Item 4)
+    notificationService.send(
+        user,
+        user,
+        NotificationType.POLLEN, // 임시로 POLLEN 사용하거나 신규 타입 필요, 여기서는 URL과 이미지가 중요
+        "/garden/" + user.getId(),
+        newAvatar.getImageUrl());
+
     return newAvatar;
   }
 
@@ -105,6 +114,6 @@ public class AvatarService {
     // TODO: 꽃가루 관련 비즈니스 로직 추가
 
     notificationService.send(
-        receiver, sender, NotificationType.POLLEN, "/garden/" + receiver.getId());
+        receiver, sender, NotificationType.POLLEN, "/garden/" + receiver.getId(), null);
   }
 }

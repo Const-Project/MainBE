@@ -13,7 +13,7 @@ public class HomeResponseDto {
   private final List<GardenSummaryInfo> gardenSummaries; // 본인의 모든 정원 목록
   private final List<MissionInfo> todayMissions;
 
-  //  private final ActivityInfo activityInfo; // 주간 미션 상태
+  // private final ActivityInfo activityInfo; // 주간 미션 상태
 
   // --- 내부 DTO 클래스들 ---
 
@@ -25,7 +25,8 @@ public class HomeResponseDto {
     private int level;
     private long currentExp;
     private long requiredExpForNextLevel;
-    private int unreadNotificationCount; // 읽지 않은 알림 수 (새 메시지 1)
+    private int unreadNotificationCount;
+    private Integer lastAccessedSlotNumber;
   }
 
   // 각 정원의 요약 정보 (홈 화면 슬라이드에 사용)
@@ -63,9 +64,9 @@ public class HomeResponseDto {
     // private String description; // 필요시 미션 상세 설명 추가 가능
   }
 
-  //  @Getter
-  //  @Builder
-  //  public static class ActivityInfo {
-  //    private List<Boolean> weeklyMissionStatus; // 최근 7일간의 미션 완료 여부
-  //  }
+  // @Getter
+  // @Builder
+  // public static class ActivityInfo {
+  // private List<Boolean> weeklyMissionStatus; // 최근 7일간의 미션 완료 여부
+  // }
 }

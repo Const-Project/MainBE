@@ -26,6 +26,9 @@ public class Notification {
   @Column(nullable = false)
   private String url;
 
+  @Column(name = "thumbnail_url")
+  private String thumbnailUrl;
+
   @Column(nullable = false)
   private boolean isRead;
 
@@ -52,11 +55,13 @@ public class Notification {
       NotificationType notificationType,
       String content,
       String url,
+      String thumbnailUrl,
       boolean isRead) {
     this.receiver = receiver;
     this.notificationType = notificationType;
     this.content = content;
     this.url = url;
+    this.thumbnailUrl = thumbnailUrl;
     this.isRead = isRead;
   }
 
