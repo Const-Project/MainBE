@@ -31,7 +31,7 @@ spring:
   security:
     debug: true
   config:
-    import: "optional:dotenv:.env" # .env 파일 명시 (로컬 실행 시 편리)
+    import: "optional:dotenv:.env.properties" # .env 파일 명시 (로컬 실행 시 편리)
 
 jwt:
   secret: ${JWT_SECRET}

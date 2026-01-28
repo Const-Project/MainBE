@@ -58,8 +58,8 @@ public class DeliveryService {
         user,
         user,
         NotificationType.SEED_DELIVERY,
-        "/deliveries/" + savedDelivery.getId() // 배송 상세 조회 페이지 URL
-        );
+        "/deliveries/" + savedDelivery.getId(), // 배송 상세 조회 페이지 URL
+        null);
   }
 
   public List<DeliveryResponse> getMyDelivery(User user) {
