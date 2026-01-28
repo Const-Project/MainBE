@@ -30,6 +30,13 @@ public class User implements UserDetails {
   @Column(name = "user_id")
   private Long id;
 
+  @Column(name = "last_visited_garden_id")
+  private Long lastVisitedGardenId;
+
+  public void updateLastVisitedGarden(Long gardenId) {
+    this.lastVisitedGardenId = gardenId;
+  }
+
   @Column(unique = true)
   private UUID uuid;
 
@@ -78,6 +85,8 @@ public class User implements UserDetails {
   private List<Bookmark> bookMarks = new ArrayList<>();
 
   @Builder.Default private Boolean notificationEnabled = true;
+
+  @Builder.Default private Boolean marketingConsent = false; // [추가] 마케팅 수신 동의
 
   @Builder.Default private Integer unlockableGardenCount = 0;
 

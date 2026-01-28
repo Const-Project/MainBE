@@ -61,12 +61,23 @@ public class HomeService {
 
     int unreadNotificationCount = notificationRepository.countByReceiverAndIsReadFalse(user);
 
-    Integer lastAccessedSlotNumber =
-        user.getGardens().stream()
-            .filter(g -> g.getLastAccessedAt() != null)
-            .max(java.util.Comparator.comparing(Garden::getLastAccessedAt))
-            .map(Garden::getSlotNumber)
-            .orElse(1); // 기본값은 1번 슬롯
+    Integer lastAccessedSlotNumber = 1;
+
+    if (user.getLastVisitedGardenId() != null) {
+      lastAccessedSlotNumber =
+          user.getGardens().stream()
+              .filter(g -> g.getId().equals(user.getLastVisitedGardenId()))
+              .findFirst()
+              .map(Garden::getSlotNumber)
+              .orElse(1);
+    } else {
+      lastAccessedSlotNumber =
+          user.getGardens().stream()
+              .filter(g -> g.getLastAccessedAt() != null)
+              .max(java.util.Comparator.comparing(Garden::getLastAccessedAt))
+              .map(Garden::getSlotNumber)
+              .orElse(1);
+    }
 
     HomeResponseDto.UserInfo userInfo =
         HomeResponseDto.UserInfo.builder()

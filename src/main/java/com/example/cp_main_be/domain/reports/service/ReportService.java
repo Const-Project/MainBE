@@ -27,6 +27,8 @@ public class ReportService {
   private final ReportReasonRepository reportReasonRepository;
   private final DiaryRepository diaryRepository; // Assuming Diary can be reported
   private final CommentRepository commentRepository; // Assuming Comment can be reported
+  private final com.example.cp_main_be.domain.member.notification.service.NotificationService
+      notificationService; // [추가]
 
   public void createReport(Long reporterId, ReportRequestDto reportRequestDto) {
     User reporter =
@@ -56,6 +58,21 @@ public class ReportService {
             .build();
 
     reportRepository.save(report);
+
+    // [추가] 신고 대상자에게 익명 알림 발송
+    // reportedUser 엔티티를 찾아야 함
+    User reportedUser =
+        userRepository
+            .findById(reportedUserId)
+            .orElseThrow(() -> new UserNotFoundException("신고 대상자를 찾을 수 없습니다."));
+
+    notificationService.send(
+        reportedUser,
+        null, // sender는 null (익명/시스템)
+        com.example.cp_main_be.domain.member.notification.domain.NotificationType.REPORT_RECEIVED,
+        "/report/received/" + report.getId(), // 알림 클릭 시 이동할 URL (예시)
+        null // 썸네일 없음
+        );
 
     // TODO: Implement logic to hide content from the reporter
     // TODO: Implement logic to block the user if a user is reported

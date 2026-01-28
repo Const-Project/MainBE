@@ -19,4 +19,7 @@ public class DeliveryPlant {
 
   @Column(name = "name")
   private String name;
+
+  @Column(name = "unlock_level")
+  private Integer unlockLevel;
 }
