@@ -23,4 +23,7 @@ public interface DailyQuestionAnswerRepository extends JpaRepository<DailyQuesti
       @Param("user") User user,
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate);
+
+  List<DailyQuestionAnswer> findAllByUserAndAnsweredDateBetween(
+      User user, LocalDate startDate, LocalDate endDate);
 }

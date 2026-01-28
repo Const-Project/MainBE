@@ -20,6 +20,7 @@ public enum NotificationType {
   WATERING_BY_FRIEND("watering_by_friend", "누군가 내 아바타에게 물을 주었습니다."),
   POLLEN_AVAILABLE("pollen_available", "꽃가루가 쌓여있어요, 친구들에게 나눠봐요!"),
   REPORT_PROCESSED("report_processed", "회원님의 신고가 처리되었습니다."),
+  REPORT_RECEIVED("report_received", "누군가 회원님을 신고했습니다. 뻐꾸기가 지켜보고 있어요!"),
   SEED_DELIVERY("seed_delivery", "씨앗 배송이 시작되었어요! 송장번호: %s");
 
   private final String type;

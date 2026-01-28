@@ -20,7 +20,9 @@ public class HomeController {
 
   private final HomeService homeService;
 
-  @Operation(summary = "홈 화면 데이터 조회", description = "사용자의 홈 화면에 필요한 모든 정보를 한번에 조회합니다.")
+  @Operation(
+      summary = "홈 화면 데이터 조회",
+      description = "사용자의 홈 화면에 필요한 모든 정보를 조회합니다. (마지막으로 방문한 텃밭이 있다면 해당 텃밭을 우선적으로 보여줍니다)")
   @GetMapping
   public ResponseEntity<ApiResponse<HomeResponseDto>> getHomeScreenData(
       @AuthenticationPrincipal User user) {

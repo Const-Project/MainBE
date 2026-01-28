@@ -42,6 +42,9 @@ public class GardenService {
   private final GardenBackgroundRepository gardenBackgroundRepository;
   private final UserRepository userRepository;
   private final FriendWateringLogRepository friendWateringLogRepository;
+  private final com.example.cp_main_be.domain.member.log.domain.repository
+          .UserDailyActivityLogRepository
+      userDailyActivityLogRepository;
 
   public GardenResponse findGardenById(Long gardenId) {
     Garden garden =
@@ -50,6 +53,9 @@ public class GardenService {
             .orElseThrow(() -> new IllegalArgumentException("Garden not found"));
 
     garden.recordAccess();
+    // [추가] 마지막 방문 정원 ID 기록
+    garden.getUser().updateLastVisitedGarden(garden.getId());
+
     return GardenResponse.from(garden);
   }
 
@@ -81,6 +87,9 @@ public class GardenService {
     wishTreeService.addPointsToWishTree(ownerId, WATERING_POINTS);
     garden.recordOwnerWateringTime(); // 주인이 물 준 시간 기록
     garden.recordAccess();
+
+    // [추가] 오늘 물주기 활동 기록
+    recordDailyActivity(owner, true, false);
   }
 
   /** 친구의 정원에 물을 주는 로직을 처리합니다. */
@@ -150,6 +159,13 @@ public class GardenService {
     wishTreeService.addPointsToWishTree(actorId, SUNLIGHT_POINTS);
     garden.recordSunlightTime();
     garden.recordAccess();
+
+    // [추가] 오늘 햇빛주기 활동 기록
+    User user =
+        userRepository
+            .findById(actorId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+    recordDailyActivity(user, false, true);
   }
 
   @Transactional
@@ -219,6 +235,26 @@ public class GardenService {
     log.info("Starting cleanup of friend watering logs older than {} days...", RETENTION_DAYS);
     int deletedCount = friendWateringLogRepository.deleteByWateredAtBefore(cutoffDate);
     log.info("Finished cleanup. Deleted {} old friend watering logs.", deletedCount);
+  }
+
+  private void recordDailyActivity(User user, boolean watered, boolean sunlight) {
+    LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+    com.example.cp_main_be.domain.member.log.domain.UserDailyActivityLog log =
+        userDailyActivityLogRepository
+            .findByUserAndDate(user, today)
+            .orElseGet(
+                () ->
+                    com.example.cp_main_be.domain.member.log.domain.UserDailyActivityLog.builder()
+                        .user(user)
+                        .date(today)
+                        .hasWatered(false)
+                        .hasSunlight(false)
+                        .build());
+
+    if (watered) log.updateWatered(true);
+    if (sunlight) log.updateSunlight(true);
+
+    userDailyActivityLogRepository.save(log);
   }
 
   @EventListener
