@@ -40,9 +40,11 @@ public class AvatarPostService {
 
     // 2. 현재 사용자의 '좋아요' 여부를 확인합니다.
     boolean isLiked = false;
+    long likeCount = 0L;
     if (currentUser != null) {
       isLiked = avatarPostLikeRepository.existsByUserAndAvatarPost(currentUser, post);
     }
+    likeCount = avatarPostLikeRepository.countByAvatarPost(post);
 
     List<Long> blockedUserIds =
         currentUser != null
@@ -57,11 +59,12 @@ public class AvatarPostService {
             .toList();
 
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO로 변환하여 반환합니다.
-    return PostInfoResponse.from(post, isLiked, comments);
+    return PostInfoResponse.from(post, isLiked, likeCount, comments);
   }
 
   public PostInfoResponse createAvatarPost(Avatar avatar, User currentUser) {
     AvatarPost avatarPost = avatarPostRepository.save(AvatarPost.from(avatar, currentUser));
-    return PostInfoResponse.from(avatarPost, true, avatarPost.getComments());
+    long likeCount = avatarPostLikeRepository.countByAvatarPost(avatarPost);
+    return PostInfoResponse.from(avatarPost, true, likeCount, avatarPost.getComments());
   }
 }
