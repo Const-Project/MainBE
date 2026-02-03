@@ -101,7 +101,7 @@ public class NotificationEventListener {
     Guestbook guestBook = event.getGuestbook();
     User sender = guestBook.getWriter();
     User receiver = guestBook.getOwner(); // Assuming Guestbook is on a Garden
-    String url = "/garden/" + receiver.getId();
+    String url = "/users/" + receiver.getId();
 
     if (!sender.getId().equals(receiver.getId())) {
       notificationService.send(receiver, sender, NotificationType.GUESTBOOK, url, null);
@@ -114,7 +114,7 @@ public class NotificationEventListener {
     Follow follow = event.getFollow();
     User sender = follow.getFollower();
     User receiver = follow.getFollowing();
-    String url = "/user/" + sender.getId();
+    String url = "/users/" + sender.getId();
 
     notificationService.send(receiver, sender, NotificationType.FOLLOW, url, null);
   }

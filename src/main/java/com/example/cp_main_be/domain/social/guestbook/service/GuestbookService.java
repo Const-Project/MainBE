@@ -62,7 +62,7 @@ public class GuestbookService {
     // 자기 자신에게는 알림을 보내지 않음
     if (!writerId.equals(ownerId)) {
       notificationService.send(
-          owner, writer, NotificationType.GUESTBOOK, "/guestbooks/" + ownerId, null);
+          owner, writer, NotificationType.GUESTBOOK, "/users/" + ownerId, null);
     }
   }
 
