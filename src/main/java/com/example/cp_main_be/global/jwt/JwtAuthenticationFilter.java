@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (token == null) {
       logger.warn("Token is null. No Authorization header or accessToken cookie found.");
     } else {
-      logger.info("Token found: {}", token);
+      logger.info("Token found.");
 
       try {
         // validateToken에서 예외가 발생하면 바로 catch로 넘어감
