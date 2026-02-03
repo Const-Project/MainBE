@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.social.comment.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
@@ -29,6 +30,7 @@ public class CommentService {
   private final UserRepository userRepository;
   private final DiaryRepository diaryRepository; // Diary Repository 주입
   private final AvatarPostRepository avatarPostRepository; // AvatarPost Repository 주입
+  private final UserBlockRepository userBlockRepository;
   private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
@@ -52,12 +54,18 @@ public class CommentService {
           diaryRepository
               .findById(targetId)
               .orElseThrow(() -> new CustomApiException(ErrorCode.DIARY_NOT_FOUND));
+      if (userBlockRepository.existsByBlockerUserAndBlockedUser(diary.getUser(), writer)) {
+        throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단한 사용자에게 댓글을 달 수 없습니다.");
+      }
       commentBuilder.diary(diary);
     } else if ("AVATAR_POST".equalsIgnoreCase(targetType)) {
       AvatarPost avatarPost =
           avatarPostRepository
               .findById(targetId)
               .orElseThrow(() -> new CustomApiException(ErrorCode.POST_NOT_FOUND));
+      if (userBlockRepository.existsByBlockerUserAndBlockedUser(avatarPost.getUser(), writer)) {
+        throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단한 사용자에게 댓글을 달 수 없습니다.");
+      }
       commentBuilder.avatarPost(avatarPost);
     } else {
       throw new CustomApiException(ErrorCode.INVALID_REQUEST, "지원하지 않는 대상 타입입니다.");
