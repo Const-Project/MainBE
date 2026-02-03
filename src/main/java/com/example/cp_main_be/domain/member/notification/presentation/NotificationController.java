@@ -46,8 +46,9 @@ public class NotificationController {
 
   @Operation(summary = "알림 읽음 처리", description = "내 알림을 읽음 처리합니다")
   @PatchMapping("/{id}/read")
-  public ResponseEntity<ApiResponse<Void>> readNotification(@PathVariable Long id) {
-    notificationService.readNotification(id);
+  public ResponseEntity<ApiResponse<Void>> readNotification(
+      @AuthenticationPrincipal User user, @PathVariable Long id) {
+    notificationService.readNotification(user.getId(), id);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
