@@ -97,7 +97,7 @@ public class ReportService {
         reportedUser,
         null, // sender는 null (익명/시스템)
         com.example.cp_main_be.domain.member.notification.domain.NotificationType.REPORT_RECEIVED,
-        "/report/received/" + report.getId(), // 알림 클릭 시 이동할 URL (예시)
+        "/reports/" + report.getId(), // 알림 클릭 시 이동할 URL
         null // 썸네일 없음
         );
 
