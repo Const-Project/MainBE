@@ -49,6 +49,9 @@ public class AuthService {
         refreshTokenRepository
             .findByToken(incomingRefreshToken)
             .orElseThrow(() -> new CustomApiException(ErrorCode.INVALID_TOKEN));
+    if (deviceId != null && saved.getDeviceId() != null && !deviceId.equals(saved.getDeviceId())) {
+      throw new CustomApiException(ErrorCode.INVALID_TOKEN);
+    }
     if (saved.getExpiresAt().isBefore(LocalDateTime.now())) {
       refreshTokenRepository.deleteByToken(incomingRefreshToken);
       throw new CustomApiException(ErrorCode.INVALID_TOKEN);
