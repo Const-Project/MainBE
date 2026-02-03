@@ -114,6 +114,16 @@ public class GardenService {
             .orElseThrow(() -> new CustomApiException(ErrorCode.GARDEN_NOT_FOUND));
 
     User owner = garden.getUser();
+    User actor =
+        userRepository
+            .findById(actorId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+
+    if (!owner.getId().equals(actorId)
+        && (userBlockRepository.existsByBlockerUserAndBlockedUser(owner, actor)
+            || userBlockRepository.existsByBlockerUserAndBlockedUser(actor, owner))) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
 
     if (owner.getId().equals(actorId)) {
       waterOwnGarden(actorId, garden);

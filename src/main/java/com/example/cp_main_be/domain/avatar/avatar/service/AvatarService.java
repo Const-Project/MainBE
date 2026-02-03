@@ -10,6 +10,7 @@ import com.example.cp_main_be.domain.member.notification.domain.NotificationType
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
 import com.example.cp_main_be.domain.social.avatarpost.service.AvatarPostService;
 import com.example.cp_main_be.global.common.CustomApiException;
@@ -31,6 +32,7 @@ public class AvatarService {
   private final WishTreeRepository wishTreeRepository;
   private final GardenRepository gardenRepository;
   private final AvatarPostService avatarPostService;
+  private final UserBlockRepository userBlockRepository;
 
   // [수정] 새로운 아바타 생성 로직 구현
   public Avatar createAvatar(Long userId, String nickname, String imageUrl, Long masterId) {
@@ -110,6 +112,11 @@ public class AvatarService {
 
     Avatar avatar = findAvatarById(avatarId);
     User receiver = avatar.getUser();
+
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(receiver, sender)
+        || userBlockRepository.existsByBlockerUserAndBlockedUser(sender, receiver)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
 
     // TODO: 꽃가루 관련 비즈니스 로직 추가
 
