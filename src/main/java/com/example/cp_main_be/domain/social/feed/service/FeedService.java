@@ -13,12 +13,16 @@ import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRep
 import com.example.cp_main_be.domain.social.comment.dto.CommentCountDto;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedScrollResponse;
+import com.example.cp_main_be.domain.social.feed.dto.response.RandomFeedSessionResponse;
+import com.example.cp_main_be.domain.social.feed.session.RandomFeedSession;
+import com.example.cp_main_be.domain.social.feed.session.RandomFeedSessionRepository;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
 import com.example.cp_main_be.domain.social.like.diary.repository.DiaryLikeRepository;
 import com.example.cp_main_be.global.dto.FeedItemResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -42,6 +46,10 @@ public class FeedService {
   private final DiaryLikeRepository diaryLikeRepository;
   private final AvatarPostLikeRepository avatarPostLikeRepository;
   private final CommentRepository commentRepository;
+  private final RandomFeedSessionRepository randomFeedSessionRepository;
+
+  private static final int RANDOM_POOL_MULTIPLIER = 5;
+  private static final int SESSION_TTL_MINUTES = 30;
 
   /** 시간순 정렬된 피드 조회 (커서 기반) */
   public List<FeedResponse> getFeed(
@@ -168,6 +176,52 @@ public class FeedService {
     return new FeedScrollResponse(result, hasMore);
   }
 
+  public RandomFeedSessionResponse startRandomFeedSession(UUID currentUserUuid, int size) {
+    User currentUser =
+        userRepository
+            .findByUuid(currentUserUuid)
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+    List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(currentUser);
+
+    int safeSize = Math.max(1, size);
+    int poolSize = safeSize * RANDOM_POOL_MULTIPLIER;
+
+    List<Long> diaryIds =
+        diaryRepository.findRandomPublicDiaryIdsExcludingAndBlocked(
+            Collections.emptyList(), blockedUserIds, poolSize);
+    List<Long> avatarPostIds =
+        avatarPostRepository.findRandomPublicAvatarPostIdsExcludingAndBlocked(
+            Collections.emptyList(), blockedUserIds, poolSize);
+
+    String token = UUID.randomUUID().toString();
+    RandomFeedSession session =
+        new RandomFeedSession(
+            diaryIds, avatarPostIds, 0, 0, Instant.now().plusSeconds(SESSION_TTL_MINUTES * 60L));
+    randomFeedSessionRepository.save(token, session);
+
+    List<FeedItemResponse> items = buildRandomSessionPage(session, safeSize);
+    boolean hasMore = hasMoreSessionItems(session);
+
+    return new RandomFeedSessionResponse(token, items, hasMore);
+  }
+
+  public RandomFeedSessionResponse getRandomFeedSessionNext(String sessionToken, int size) {
+    RandomFeedSession session =
+        randomFeedSessionRepository
+            .find(sessionToken)
+            .orElseThrow(() -> new IllegalArgumentException("랜덤 피드 세션이 만료되었거나 존재하지 않습니다."));
+
+    int safeSize = Math.max(1, size);
+    List<FeedItemResponse> items = buildRandomSessionPage(session, safeSize);
+    boolean hasMore = hasMoreSessionItems(session);
+
+    if (!hasMore) {
+      randomFeedSessionRepository.delete(sessionToken);
+    }
+
+    return new RandomFeedSessionResponse(sessionToken, items, hasMore);
+  }
+
   /** 시간순 정렬된 두 리스트를 병합하여 size개만 반환 */
   private List<FeedResponse> mergeSortedFeeds(
       List<Diary> diaries, List<AvatarPost> avatarPosts, int size) {
@@ -196,6 +250,63 @@ public class FeedService {
     }
 
     return result;
+  }
+
+  private List<FeedItemResponse> buildRandomSessionPage(RandomFeedSession session, int size) {
+    int diaryRemaining = session.getDiaryIds().size() - session.getDiaryCursor();
+    int avatarRemaining = session.getAvatarPostIds().size() - session.getAvatarPostCursor();
+
+    if (diaryRemaining <= 0 && avatarRemaining <= 0) {
+      return Collections.emptyList();
+    }
+
+    int diarySize = size / 2;
+    int avatarSize = size - diarySize;
+
+    int diaryFetch = Math.min(diaryRemaining, diarySize);
+    int avatarFetch = Math.min(avatarRemaining, avatarSize);
+
+    List<Long> diaryIds =
+        session
+            .getDiaryIds()
+            .subList(session.getDiaryCursor(), session.getDiaryCursor() + diaryFetch);
+    List<Long> avatarIds =
+        session
+            .getAvatarPostIds()
+            .subList(session.getAvatarPostCursor(), session.getAvatarPostCursor() + avatarFetch);
+
+    session.advanceDiaryCursor(diaryFetch);
+    session.advanceAvatarPostCursor(avatarFetch);
+
+    List<FeedItemResponse> feedItems = new ArrayList<>();
+
+    List<DiaryFeedItemResponse> diaryItems =
+        fetchAndMapFeedItems(
+            diaryIds,
+            "DIARY",
+            diaryRepository::findAllByIdIn,
+            Diary::getId,
+            (diary, likeCount, commentCount) ->
+                new DiaryFeedItemResponse(diary, likeCount, commentCount));
+    feedItems.addAll(diaryItems);
+
+    List<AvatarPostFeedItemResponse> avatarItems =
+        fetchAndMapFeedItems(
+            avatarIds,
+            "AVATAR_POST",
+            avatarPostRepository::findAllByIdIn,
+            AvatarPost::getId,
+            (post, likeCount, commentCount) ->
+                new AvatarPostFeedItemResponse(post, likeCount, commentCount));
+    feedItems.addAll(avatarItems);
+
+    Collections.shuffle(feedItems);
+    return feedItems;
+  }
+
+  private boolean hasMoreSessionItems(RandomFeedSession session) {
+    return session.getDiaryCursor() < session.getDiaryIds().size()
+        || session.getAvatarPostCursor() < session.getAvatarPostIds().size();
   }
 
   /** ID 목록을 기반으로 엔티티와 관련 데이터(좋아요, 댓글 수)를 조회하고 FeedItemResponse로 매핑 */
