@@ -60,6 +60,11 @@ logging:
       springframework:
         security: TRACE
 
+notification:
+  debug:
+    enabled: false
+    sample-rate: 1.0
+
 ---
 # ==========================================
 # Local Profile (로컬 Supabase 연결)

@@ -56,7 +56,7 @@ public class DeliveryService {
     // 알림을 받는 사람(owner)과 보내는 사람(writer)이 자기 자신인 시스템 알림
     notificationService.send(
         user,
-        user,
+        null,
         NotificationType.SEED_DELIVERY,
         "/deliveries/" + savedDelivery.getId(), // 배송 상세 조회 페이지 URL
         null);

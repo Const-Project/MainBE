@@ -34,9 +34,10 @@ public class HomeService {
   private final DiaryRepository diaryRepository;
   private final UserQuizRepository userQuizRepository;
   private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
+  private static final ZoneId KOREA_ZONE = ZoneId.of("Asia/Seoul");
 
   private LocalDateTime getStartOfCurrentSunlightDay() {
-    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    LocalDateTime now = LocalDateTime.now(KOREA_ZONE);
     LocalDateTime todaySixAM = now.toLocalDate().atTime(6, 0);
     return now.isBefore(todaySixAM) ? todaySixAM.minusDays(1) : todaySixAM;
   }
@@ -152,7 +153,7 @@ public class HomeService {
                 })
             .collect(Collectors.toList());
 
-    LocalDate today = LocalDate.now();
+    LocalDate today = LocalDate.now(KOREA_ZONE);
     LocalDateTime startOfDay = today.atStartOfDay();
     LocalDateTime endOfDay = today.atTime(23, 59, 59);
 
@@ -193,7 +194,7 @@ public class HomeService {
   }
 
   public PannelResponseDTO getPannelData(User user) {
-    LocalDate today = LocalDate.now();
+    LocalDate today = LocalDate.now(KOREA_ZONE);
     LocalDateTime startOfDay = today.atStartOfDay();
     LocalDateTime endOfDay = today.atTime(23, 59, 59);
 
