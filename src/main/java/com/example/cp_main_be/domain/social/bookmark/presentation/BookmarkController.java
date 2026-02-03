@@ -29,8 +29,11 @@ public class BookmarkController {
   @Operation(summary = "북마크 목록 조회", description = "내가 북마크한 아바타 포스트 목록을 조회합니다.")
   @GetMapping
   public ResponseEntity<ApiResponse<List<AvatarPostFeedItemResponse>>> getMyBookmarks(
-      @AuthenticationPrincipal User user) {
-    return ResponseEntity.ok(ApiResponse.success(bookmarkService.getMyBookmarks(user.getId())));
+      @AuthenticationPrincipal User user,
+      @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+      @org.springframework.web.bind.annotation.RequestParam(defaultValue = "20") int size) {
+    return ResponseEntity.ok(
+        ApiResponse.success(bookmarkService.getMyBookmarks(user.getId(), page, size)));
   }
 
   @Operation(summary = "아바타 포스트 북마크 추가", description = "아바타 포스트를 북마크합니다.")

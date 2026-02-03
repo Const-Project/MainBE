@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,11 +73,15 @@ public class BookmarkService {
   }
 
   @Transactional(readOnly = true)
-  public List<AvatarPostFeedItemResponse> getMyBookmarks(Long userId) {
+  public List<AvatarPostFeedItemResponse> getMyBookmarks(Long userId, int page, int size) {
     User user = userService.findById(userId);
     List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(user);
 
-    List<Bookmark> bookmarks = bookmarkRepository.findAllByUserOrderByCreatedAtDesc(user);
+    int safePage = Math.max(0, page);
+    int safeSize = Math.max(1, size);
+    Pageable pageable = PageRequest.of(safePage, safeSize);
+    List<Bookmark> bookmarks =
+        bookmarkRepository.findAllByUserOrderByCreatedAtDesc(user, pageable).getContent();
     if (bookmarks.isEmpty()) {
       return Collections.emptyList();
     }
