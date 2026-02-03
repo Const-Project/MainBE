@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.social.like.avatar_post.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.like.avatar_post.domain.AvatarPostLike;
@@ -21,6 +22,7 @@ public class AvatarPostLikeService {
   private final AvatarPostLikeRepository avatarPostLikeRepository;
   private final UserService userService;
   private final AvatarPostRepository avatarPostRepository;
+  private final UserBlockRepository userBlockRepository;
   private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
@@ -30,6 +32,11 @@ public class AvatarPostLikeService {
         avatarPostRepository
             .findById(postId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.POST_NOT_FOUND));
+
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(post.getUser(), user)
+        || userBlockRepository.existsByBlockerUserAndBlockedUser(user, post.getUser())) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단 상태에서는 좋아요를 할 수 없습니다.");
+    }
 
     if (avatarPostLikeRepository.existsByUserAndAvatarPost(user, post)) {
       throw new CustomApiException(ErrorCode.LIKE_ALREADY_EXISTS);
@@ -49,6 +56,11 @@ public class AvatarPostLikeService {
         avatarPostRepository
             .findById(postId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.POST_NOT_FOUND));
+
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(post.getUser(), user)
+        || userBlockRepository.existsByBlockerUserAndBlockedUser(user, post.getUser())) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단 상태에서는 좋아요를 취소할 수 없습니다.");
+    }
 
     if (!avatarPostLikeRepository.existsByUserAndAvatarPost(user, post)) {
       throw new CustomApiException(ErrorCode.LIKE_NOT_FOUND);
