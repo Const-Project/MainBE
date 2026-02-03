@@ -47,6 +47,10 @@ public class GuestbookService {
             .findById(ownerId)
             .orElseThrow(() -> new UserNotFoundException("방명록 소유자 사용자를 찾을 수 없습니다."));
 
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(owner, writer)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단한 사용자에게 방명록을 작성할 수 없습니다.");
+    }
+
     // 1일 1회 제한 로직
     LocalDate today = LocalDate.now(KOREA_ZONE);
     LocalDateTime startOfDay = today.atStartOfDay();
