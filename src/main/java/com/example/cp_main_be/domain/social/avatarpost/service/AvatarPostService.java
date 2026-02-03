@@ -31,6 +31,13 @@ public class AvatarPostService {
             .findByIdWithDetails(postId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.POST_NOT_FOUND));
 
+    if (currentUser != null
+        && (userBlockRepository.existsByBlockerUserAndBlockedUser(currentUser, post.getUser())
+            || userBlockRepository.existsByBlockerUserAndBlockedUser(
+                post.getUser(), currentUser))) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
+
     // 2. 현재 사용자의 '좋아요' 여부를 확인합니다.
     boolean isLiked = false;
     if (currentUser != null) {

@@ -84,6 +84,13 @@ public class DiaryService {
             .findByIdWithDetails(diaryId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.DIARY_NOT_FOUND));
 
+    if (currentUser != null
+        && (userBlockRepository.existsByBlockerUserAndBlockedUser(currentUser, diary.getUser())
+            || userBlockRepository.existsByBlockerUserAndBlockedUser(
+                diary.getUser(), currentUser))) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
+
     // 비공개 글 접근 제어: 비로그인 또는 작성자 외 사용자는 차단
     if (!diary.isPublic()) {
       if (currentUser == null || !diary.getUser().getId().equals(currentUser.getId())) {
