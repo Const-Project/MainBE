@@ -4,6 +4,7 @@ import com.example.cp_main_be.domain.member.notification.domain.NotificationType
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.social.follow.dto.FollowResponseDTO;
@@ -23,6 +24,7 @@ public class FollowService {
   private final FollowRepository followRepository;
   private final UserRepository userRepository;
   private final NotificationService notificationService; // 알림 서비스 주입
+  private final UserBlockRepository userBlockRepository;
 
   public void followUser(Long followerId, Long followingId) {
     User follower =
@@ -36,6 +38,10 @@ public class FollowService {
 
     if (follower.getId().equals(following.getId()))
       throw new CustomApiException(ErrorCode.SELF_FOLLOWING_UNABLE);
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(following, follower)
+        || userBlockRepository.existsByBlockerUserAndBlockedUser(follower, following)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단 상태에서는 팔로우할 수 없습니다.");
+    }
     if (followRepository.existsByFollowerAndFollowing(follower, following)) {
       throw new RuntimeException("이미 팔로우한 사용자입니다."); // TODO: Custom Exception
     }
@@ -57,6 +63,11 @@ public class FollowService {
         userRepository
             .findById(followingId)
             .orElseThrow(() -> new UserNotFoundException("언팔로우할 사용자를 찾을 수 없습니다."));
+
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(following, follower)
+        || userBlockRepository.existsByBlockerUserAndBlockedUser(follower, following)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단 상태에서는 언팔로우할 수 없습니다.");
+    }
 
     Follow follow =
         followRepository
