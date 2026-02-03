@@ -2,6 +2,8 @@ package com.example.cp_main_be.domain.reports.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlock;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.reports.domain.ReportReason;
@@ -32,6 +34,7 @@ public class ReportService {
   private final DiaryRepository diaryRepository; // Assuming Diary can be reported
   private final CommentRepository commentRepository; // Assuming Comment can be reported
   private final AvatarPostRepository avatarPostRepository;
+  private final UserBlockRepository userBlockRepository;
   private final com.example.cp_main_be.domain.member.notification.service.NotificationService
       notificationService; // [추가]
 
@@ -82,6 +85,13 @@ public class ReportService {
         userRepository
             .findById(reportedUserId)
             .orElseThrow(() -> new UserNotFoundException("신고 대상자를 찾을 수 없습니다."));
+
+    // [추가] 신고한 사용자가 신고 대상자를 즉시 차단 (노출 차단 목적)
+    if (!userBlockRepository.existsByBlockerUserAndBlockedUser(reporter, reportedUser)) {
+      UserBlock userBlock =
+          UserBlock.builder().blockerUser(reporter).blockedUser(reportedUser).build();
+      userBlockRepository.save(userBlock);
+    }
 
     notificationService.send(
         reportedUser,
