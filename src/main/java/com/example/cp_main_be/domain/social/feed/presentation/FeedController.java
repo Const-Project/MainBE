@@ -49,6 +49,7 @@ public class FeedController {
 
     FeedScrollResponse response =
         feedService.getRandomFeed(
+            user.getUuid(),
             request.getExcludeDiaryIds() != null
                 ? request.getExcludeDiaryIds()
                 : Collections.emptyList(),

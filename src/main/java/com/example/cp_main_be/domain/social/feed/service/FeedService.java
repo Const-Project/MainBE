@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.social.feed.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.mission.diary.dto.response.DiaryFeedItemResponse;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FeedService {
 
   private final UserRepository userRepository;
+  private final UserBlockRepository userBlockRepository;
   private final DiaryRepository diaryRepository;
   private final FollowRepository followRepository;
   private final AvatarPostRepository avatarPostRepository;
@@ -56,6 +58,8 @@ public class FeedService {
             .findByUuid(currentUserUuid)
             .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
 
+    List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(currentUser);
+
     List<Diary> diaries;
     List<AvatarPost> avatarPosts;
 
@@ -63,14 +67,22 @@ public class FeedService {
       List<User> followingUsers =
           followRepository.findByFollower(currentUser).stream().map(Follow::getFollowing).toList();
 
-      diaries = diaryRepository.findFollowingDiariesWithCursor(followingUsers, cursor, pageable);
+      List<User> visibleFollowingUsers =
+          followingUsers.stream().filter(user -> !blockedUserIds.contains(user.getId())).toList();
+
+      diaries =
+          diaryRepository.findFollowingDiariesWithCursorExcludingBlocked(
+              visibleFollowingUsers, cursor, blockedUserIds, pageable);
       avatarPosts =
-          avatarPostRepository.findByUserInAndCreatedAtBeforeOrderByCreatedAtDesc(
-              followingUsers, cursor, pageable);
+          avatarPostRepository.findByUserInAndUserIdNotInAndCreatedAtBeforeOrderByCreatedAtDesc(
+              visibleFollowingUsers, blockedUserIds, cursor, pageable);
     } else {
-      diaries = diaryRepository.findPublicDiariesWithCursor(cursor, pageable);
+      diaries =
+          diaryRepository.findPublicDiariesWithCursorExcludingBlocked(
+              cursor, blockedUserIds, pageable);
       avatarPosts =
-          avatarPostRepository.findByCreatedAtBeforeOrderByCreatedAtDesc(cursor, pageable);
+          avatarPostRepository.findByCreatedAtBeforeAndUserIdNotInOrderByCreatedAtDesc(
+              cursor, blockedUserIds, pageable);
     }
 
     // 두 정렬된 리스트를 merge하여 size개만 반환
@@ -79,11 +91,17 @@ public class FeedService {
 
   /** 랜덤 피드 조회 (제외 목록 기반) */
   public FeedScrollResponse getRandomFeed(
-      List<Long> excludeDiaryIds, List<Long> excludeAvatarPostIds, int size) {
+      UUID currentUserUuid, List<Long> excludeDiaryIds, List<Long> excludeAvatarPostIds, int size) {
 
     if (size <= 0) {
       return new FeedScrollResponse(Collections.emptyList(), false);
     }
+
+    User currentUser =
+        userRepository
+            .findByUuid(currentUserUuid)
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+    List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(currentUser);
 
     // null 체크
     List<Long> safeDiaryIds = (excludeDiaryIds != null) ? excludeDiaryIds : Collections.emptyList();
@@ -101,13 +119,14 @@ public class FeedService {
     // 각 소스에서 랜덤 ID 조회 (제외 목록 포함)
     List<Long> randomDiaryIds =
         (diaryFetchSize > 0)
-            ? diaryRepository.findRandomPublicDiaryIdsExcluding(safeDiaryIds, diaryFetchSize)
+            ? diaryRepository.findRandomPublicDiaryIdsExcludingAndBlocked(
+                safeDiaryIds, blockedUserIds, diaryFetchSize)
             : Collections.emptyList();
 
     List<Long> randomAvatarPostIds =
         (avatarPostFetchSize > 0)
-            ? avatarPostRepository.findRandomPublicAvatarPostIdsExcluding(
-                safeAvatarIds, avatarPostFetchSize)
+            ? avatarPostRepository.findRandomPublicAvatarPostIdsExcludingAndBlocked(
+                safeAvatarIds, blockedUserIds, avatarPostFetchSize)
             : Collections.emptyList();
 
     // 각 소스의 데이터를 FeedItemResponse로 변환

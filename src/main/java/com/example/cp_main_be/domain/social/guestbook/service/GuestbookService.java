@@ -5,6 +5,7 @@ import com.example.cp_main_be.domain.member.notification.service.NotificationSer
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
@@ -29,6 +30,7 @@ public class GuestbookService {
 
   private final GuestbookRepository guestbookRepository;
   private final UserRepository userRepository;
+  private final UserBlockRepository userBlockRepository;
   private final NotificationService notificationService;
   private final UserService userService;
   private final WishTreeService wishTreeService;
@@ -76,8 +78,11 @@ public class GuestbookService {
                   .findById(userId)
                   .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND)));
 
+    List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(user);
+
     // 비어있는 리스트에 stream()을 호출해도 예외가 발생하지 않고 비어있는 stream이 반환됩니다.
     return guestbookList.stream()
+        .filter(guestbook -> !blockedUserIds.contains(guestbook.getWriter().getId()))
         .map(
             guestbook ->
                 GuestbookResponse.builder()

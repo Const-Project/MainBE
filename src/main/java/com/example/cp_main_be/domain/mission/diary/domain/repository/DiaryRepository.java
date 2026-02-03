@@ -79,12 +79,37 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
       "SELECT d FROM Diary d JOIN FETCH d.user WHERE d.isPublic = true AND d.createdAt < :cursor ORDER BY d.createdAt DESC")
   List<Diary> findPublicDiariesWithCursor(@Param("cursor") LocalDateTime cursor, Pageable pageable);
 
+  @Query(
+      "SELECT d FROM Diary d JOIN FETCH d.user WHERE d.isPublic = true AND d.createdAt < :cursor "
+          + "AND ("
+          + " :#{#blockedUserIds == null} = true"
+          + " OR :#{#blockedUserIds.isEmpty()} = true"
+          + " OR d.user.id NOT IN (:blockedUserIds)"
+          + ") ORDER BY d.createdAt DESC")
+  List<Diary> findPublicDiariesWithCursorExcludingBlocked(
+      @Param("cursor") LocalDateTime cursor,
+      @Param("blockedUserIds") List<Long> blockedUserIds,
+      Pageable pageable);
+
   // 커서 기반 페이지네이션을 위한 메서드 (팔로잉 피드용)
   @Query(
       "SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user IN :followingUsers AND d.isPublic = true AND d.createdAt < :cursor ORDER BY d.createdAt DESC")
   List<Diary> findFollowingDiariesWithCursor(
       @Param("followingUsers") List<User> followingUsers,
       @Param("cursor") LocalDateTime cursor,
+      Pageable pageable);
+
+  @Query(
+      "SELECT d FROM Diary d JOIN FETCH d.user WHERE d.user IN :followingUsers AND d.isPublic = true AND d.createdAt < :cursor "
+          + "AND ("
+          + " :#{#blockedUserIds == null} = true"
+          + " OR :#{#blockedUserIds.isEmpty()} = true"
+          + " OR d.user.id NOT IN (:blockedUserIds)"
+          + ") ORDER BY d.createdAt DESC")
+  List<Diary> findFollowingDiariesWithCursorExcludingBlocked(
+      @Param("followingUsers") List<User> followingUsers,
+      @Param("cursor") LocalDateTime cursor,
+      @Param("blockedUserIds") List<Long> blockedUserIds,
       Pageable pageable);
 
   // ⭐⭐ 새로 추가: 리스트 제외용 메서드
@@ -106,4 +131,29 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
       nativeQuery = true)
   List<Long> findRandomPublicDiaryIdsExcluding(
       @Param("excludeIds") List<Long> excludeIds, @Param("limit") int limit);
+
+  @Query(
+      value =
+          """
+          SELECT d.diary_id
+          FROM diaries d
+          WHERE d.is_public = true
+          AND (
+              :#{#excludeIds == null} = true
+              OR :#{#excludeIds.isEmpty()} = true
+              OR d.diary_id NOT IN (:excludeIds)
+          )
+          AND (
+              :#{#blockedUserIds == null} = true
+              OR :#{#blockedUserIds.isEmpty()} = true
+              OR d.user_id NOT IN (:blockedUserIds)
+          )
+          ORDER BY RAND()
+          LIMIT :limit
+          """,
+      nativeQuery = true)
+  List<Long> findRandomPublicDiaryIdsExcludingAndBlocked(
+      @Param("excludeIds") List<Long> excludeIds,
+      @Param("blockedUserIds") List<Long> blockedUserIds,
+      @Param("limit") int limit);
 }
