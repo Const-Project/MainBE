@@ -90,7 +90,7 @@ public class AvatarService {
     notificationService.send(
         user,
         user,
-        NotificationType.POLLEN, // 임시로 POLLEN 사용하거나 신규 타입 필요, 여기서는 URL과 이미지가 중요
+        NotificationType.AVATAR_CREATED,
         "/garden/" + user.getId(),
         newAvatar.getImageUrl());
 

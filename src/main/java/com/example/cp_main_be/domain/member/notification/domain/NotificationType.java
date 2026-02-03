@@ -21,6 +21,7 @@ public enum NotificationType {
   POLLEN_AVAILABLE("pollen_available", "꽃가루가 쌓여있어요, 친구들에게 나눠봐요!", false),
   REPORT_PROCESSED("report_processed", "회원님의 신고가 처리되었습니다.", false),
   REPORT_RECEIVED("report_received", "누군가 회원님을 신고했습니다. 뻐꾸기가 지켜보고 있어요!", false),
+  AVATAR_CREATED("avatar_created", "새 아바타가 만들어졌어요!", false),
   SEED_DELIVERY("seed_delivery", "씨앗 배송이 시작되었어요!", false);
 
   private final String type;
