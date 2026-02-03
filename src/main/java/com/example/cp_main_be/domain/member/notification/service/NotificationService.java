@@ -20,9 +20,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,12 @@ public class NotificationService {
   private final EmitterRepository emitterRepository;
   private final NotificationRepository notificationRepository;
 
+  @Value("${notification.debug.enabled:false}")
+  private boolean notificationDebugEnabled;
+
+  @Value("${notification.debug.sample-rate:1.0}")
+  private double notificationDebugSampleRate;
+
   public SseEmitter subscribe(Long userId, String lastEventId) {
     String emitterId = makeTimeIncludeId(userId);
     SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(DEFAULT_TIMEOUT));
@@ -54,6 +62,12 @@ public class NotificationService {
       sendLostData(lastEventId, userId, emitterId, emitter);
     }
 
+    debugEvent(
+        "SSE_SUBSCRIBED",
+        "userId={}, emitterId={}, hasLastEventId={}",
+        userId,
+        emitterId,
+        hasLostData(lastEventId));
     return emitter;
   }
 
@@ -63,6 +77,23 @@ public class NotificationService {
       NotificationType notificationType,
       String url,
       String thumbnailUrl) {
+    if (!Boolean.TRUE.equals(receiver.getNotificationEnabled())) {
+      debugEvent(
+          "NOTIFICATION_SKIPPED",
+          "userId={}, type={}, reason=notificationDisabled",
+          receiver.getId(),
+          notificationType);
+      return;
+    }
+    if (notificationType.isMarketing() && !Boolean.TRUE.equals(receiver.getMarketingConsent())) {
+      debugEvent(
+          "NOTIFICATION_SKIPPED",
+          "userId={}, type={}, reason=marketingConsentDisabled",
+          receiver.getId(),
+          notificationType);
+      return;
+    }
+
     Notification notification =
         notificationRepository.save(
             createNotification(receiver, sender, notificationType, url, thumbnailUrl));
@@ -70,6 +101,13 @@ public class NotificationService {
     String eventId = receiverId + "_" + System.currentTimeMillis();
     Map<String, SseEmitter> emitters =
         emitterRepository.findAllEmitterStartWithByUserId(receiverId);
+    debugEvent(
+        "NOTIFICATION_CREATED",
+        "id={}, userId={}, type={}, emitters={}",
+        notification.getId(),
+        receiver.getId(),
+        notificationType,
+        emitters.size());
     emitters.forEach(
         (key, emitter) -> {
           emitterRepository.saveEventCache(key, notification);
@@ -81,6 +119,7 @@ public class NotificationService {
   private void sendNotification(SseEmitter emitter, String eventId, String emitterId, Object data) {
     try {
       emitter.send(SseEmitter.event().id(eventId).name("sse").data(data));
+      debugEvent("SSE_SENT", "emitterId={}, eventId={}", emitterId, eventId);
     } catch (IOException exception) {
       emitterRepository.deleteById(emitterId);
       log.error("SSE 연결 오류!", exception);
@@ -134,12 +173,22 @@ public class NotificationService {
   }
 
   @Transactional
-  public void readNotification(Long notificationId) {
+  public void readNotification(Long userId, Long notificationId) {
     Notification notification =
         notificationRepository
             .findById(notificationId)
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림입니다."));
+    if (!notification.getReceiver().getId().equals(userId)) {
+      debugEvent(
+          "READ_DENIED",
+          "notificationId={}, userId={}, receiverId={}",
+          notificationId,
+          userId,
+          notification.getReceiver().getId());
+      throw new IllegalArgumentException("알림을 읽을 권한이 없습니다.");
+    }
     notification.read();
+    debugEvent("READ_OK", "notificationId={}, userId={}", notificationId, userId);
   }
 
   public void registerOrUpdateDeviceToken(Long userId, NotificationTokenRequest request) {
@@ -183,6 +232,14 @@ public class NotificationService {
   }
 
   private void sendPushNotification(User receiver, Notification notification) {
+    if (!Boolean.TRUE.equals(receiver.getNotificationEnabled())) {
+      debugEvent(
+          "PUSH_SKIPPED",
+          "userId={}, type={}, reason=notificationDisabled",
+          receiver.getId(),
+          notification.getNotificationType());
+      return;
+    }
     Optional<DeviceToken> deviceTokenOptional = deviceTokenRepository.findByUser(receiver);
     if (deviceTokenOptional.isPresent()) {
       DeviceToken deviceToken = deviceTokenOptional.get();
@@ -195,16 +252,31 @@ public class NotificationService {
               .build();
       try {
         FirebaseMessaging.getInstance().send(message);
+        debugEvent(
+            "PUSH_SENT",
+            "userId={}, type={}, token={}",
+            receiver.getId(),
+            notification.getNotificationType(),
+            maskToken(deviceToken.getToken()));
         log.info("푸시 알림 전송 성공: {}", notification.getContent());
       } catch (FirebaseMessagingException e) {
         if ("UNREGISTERED".equals(e.getMessagingErrorCode().name())) {
-          log.warn("Device token is no longer valid. Deleting token: {}", deviceToken.getToken());
+          log.warn(
+              "Device token is no longer valid. Deleting token: {}",
+              maskToken(deviceToken.getToken()));
           deviceTokenRepository.delete(deviceToken);
         } else {
+          debugEvent(
+              "PUSH_FAILED",
+              "userId={}, type={}, token={}",
+              receiver.getId(),
+              notification.getNotificationType(),
+              maskToken(deviceToken.getToken()));
           log.error("푸시 알림 전송 실패", e);
         }
       }
     } else {
+      debugEvent("PUSH_SKIPPED", "userId={}, reason=missingToken", receiver.getId());
       log.warn("디바이스 토큰을 찾을 수 없어 푸시 알림을 전송할 수 없습니다. userId: {}", receiver.getId());
     }
   }
@@ -213,6 +285,13 @@ public class NotificationService {
   public void sendSunshineNotification() {
     List<User> users = userRepository.findAll(); // 모든 유저에게 보낼 경우
     for (User user : users) {
+      if (!Boolean.TRUE.equals(user.getNotificationEnabled())) {
+        debugEvent(
+            "SCHEDULED_SKIPPED",
+            "type=SUNSHINE, userId={}, reason=notificationDisabled",
+            user.getId());
+        continue;
+      }
       send(user, user, NotificationType.SUNSHINE, "/garden", null);
     }
     log.info("Sending sunshine notification at {}", LocalDateTime.now());
@@ -222,6 +301,13 @@ public class NotificationService {
   public void sendPollenAvailableNotification() {
     List<User> users = userRepository.findAll();
     for (User user : users) {
+      if (!Boolean.TRUE.equals(user.getNotificationEnabled())) {
+        debugEvent(
+            "SCHEDULED_SKIPPED",
+            "type=POLLEN_AVAILABLE, userId={}, reason=notificationDisabled",
+            user.getId());
+        continue;
+      }
       send(user, user, NotificationType.POLLEN_AVAILABLE, "/friends", null);
     }
     log.info("Sending pollen available notification at {}", LocalDateTime.now());
@@ -231,6 +317,13 @@ public class NotificationService {
   public void sendWateringNotification() {
     List<User> users = userRepository.findAll();
     for (User user : users) {
+      if (!Boolean.TRUE.equals(user.getNotificationEnabled())) {
+        debugEvent(
+            "SCHEDULED_SKIPPED",
+            "type=WATERING, userId={}, reason=notificationDisabled",
+            user.getId());
+        continue;
+      }
       // TODO: 식물 닉네임 가져오는 로직 필요
       String plantNickname = "당신의 식물";
       String content = String.format(NotificationType.WATERING.getMessageTemplate(), plantNickname);
@@ -246,5 +339,42 @@ public class NotificationService {
       sendPushNotification(user, notification);
     }
     log.info("Sending watering notification at {}", LocalDateTime.now());
+  }
+
+  private void debugEvent(String event, String message, Object... args) {
+    if (shouldDebug()) {
+      log.debug("event={}, " + message, prepend(event, args));
+    }
+  }
+
+  private Object[] prepend(Object first, Object[] rest) {
+    Object[] merged = new Object[rest.length + 1];
+    merged[0] = first;
+    System.arraycopy(rest, 0, merged, 1, rest.length);
+    return merged;
+  }
+
+  private boolean shouldDebug() {
+    if (!notificationDebugEnabled || !log.isDebugEnabled()) {
+      return false;
+    }
+    double rate = notificationDebugSampleRate;
+    if (rate >= 1.0d) {
+      return true;
+    }
+    if (rate <= 0.0d) {
+      return false;
+    }
+    return ThreadLocalRandom.current().nextDouble() < rate;
+  }
+
+  private String maskToken(String token) {
+    if (token == null || token.isBlank()) {
+      return "null";
+    }
+    if (token.length() <= 8) {
+      return "****";
+    }
+    return token.substring(0, 4) + "****" + token.substring(token.length() - 4);
   }
 }

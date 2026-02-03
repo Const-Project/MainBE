@@ -83,6 +83,7 @@ public class GardenService {
       throw new CustomApiException(ErrorCode.WATERING_COOL_DOWN);
     }
 
+    User owner = garden.getUser();
     garden.increaseWaterCount();
     wishTreeService.addPointsToWishTree(ownerId, WATERING_POINTS);
     garden.recordOwnerWateringTime(); // 주인이 물 준 시간 기록
@@ -107,6 +108,7 @@ public class GardenService {
 
     wishTreeService.addPointsToWishTree(actor.getId(), WATERING_POINTS);
     garden.increaseWaterCount();
+    garden.recordFriendWateringTime();
 
     LocalDateTime nowInSeoul = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 

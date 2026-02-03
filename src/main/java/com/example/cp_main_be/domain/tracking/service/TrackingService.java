@@ -10,6 +10,7 @@ import com.example.cp_main_be.domain.tracking.dto.TrackingReportResponse;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class TrackingService {
   private final UserRepository userRepository;
   private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
   private final UserDailyActivityLogRepository userDailyActivityLogRepository;
+  private static final ZoneId KOREA_ZONE = ZoneId.of("Asia/Seoul");
 
   public TrackingReportResponse getTrackingReport(Long userId) {
     User user =
@@ -30,7 +32,7 @@ public class TrackingService {
             .findById(userId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
-    LocalDate today = LocalDate.now();
+    LocalDate today = LocalDate.now(KOREA_ZONE);
     LocalDate twoWeeksAgo = today.minusDays(13); // 오늘 포함 14일
 
     // 1. 설문 답변 데이터 가져오기
