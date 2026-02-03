@@ -81,7 +81,10 @@ public class FollowService {
             member ->
                 FollowResponseDTO.builder()
                     .username(member.getNickname())
-                    .userImageUrl(member.getAvatarList().get(0).getImageUrl())
+                    .userImageUrl(
+                        member.getAvatarList().isEmpty()
+                            ? null
+                            : member.getAvatarList().get(0).getImageUrl())
                     .userId(member.getId())
                     .build())
         .toList();
@@ -101,7 +104,10 @@ public class FollowService {
             member ->
                 FollowResponseDTO.builder()
                     .username(member.getNickname())
-                    .userImageUrl(member.getAvatarList().get(0).getImageUrl())
+                    .userImageUrl(
+                        member.getAvatarList().isEmpty()
+                            ? null
+                            : member.getAvatarList().get(0).getImageUrl())
                     .userId(member.getId())
                     .build())
         .toList();
