@@ -20,10 +20,29 @@ public class BlockService {
             .findById(userIdToBlock)
             .orElseThrow(() -> new UserNotFoundException("차단할 사용자를 찾을 수 없습니다."));
 
-    // TODO: 이미 차단했는지, 자기 자신을 차단하는지 등 예외 처리
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(blockerUser, blockedUser)) {
+      throw new IllegalStateException("이미 차단한 사용자입니다.");
+    }
 
     UserBlock userBlock =
         UserBlock.builder().blockerUser(blockerUser).blockedUser(blockedUser).build();
     userBlockRepository.save(userBlock);
+  }
+
+  public void unblockUser(User blockerUser, Long userIdToUnblock) {
+    User blockedUser =
+        userRepository
+            .findById(userIdToUnblock)
+            .orElseThrow(() -> new UserNotFoundException("차단 해제할 사용자를 찾을 수 없습니다."));
+
+    if (!userBlockRepository.existsByBlockerUserAndBlockedUser(blockerUser, blockedUser)) {
+      throw new IllegalStateException("차단 관계가 존재하지 않습니다.");
+    }
+
+    userBlockRepository.deleteByBlockerUserAndBlockedUser(blockerUser, blockedUser);
+  }
+
+  public boolean isBlocked(User blockerUser, User blockedUser) {
+    return userBlockRepository.existsByBlockerUserAndBlockedUser(blockerUser, blockedUser);
   }
 }
