@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +27,12 @@ public class BlockController {
     blockService.blockUser(user, request.getUserIdToBlock());
     return ResponseEntity.ok(ApiResponse.success(null));
   }
-  // TODO: 차단 해제(DELETE) API 추가
+
+  @DeleteMapping
+  @Operation(summary = "사용자 차단 해제")
+  public ResponseEntity<ApiResponse<Void>> unblockUser(
+      @AuthenticationPrincipal User user, @RequestBody BlockUserRequest request) {
+    blockService.unblockUser(user, request.getUserIdToBlock());
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
 }
