@@ -1,5 +1,8 @@
 package com.example.cp_main_be.domain.mission.quiz.service;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
 import com.example.cp_main_be.domain.mission.quiz.domain.Quiz;
 import com.example.cp_main_be.domain.mission.quiz.domain.QuizOptions;
@@ -11,6 +14,8 @@ import com.example.cp_main_be.domain.mission.quiz.dto.QuizResponseDTO;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +31,13 @@ public class QuizService {
   private final QuizRepository quizRepository;
   private final QuizOptionsRepository quizOptionsRepository;
   private final UserDailyMissionService userDailyMissionService;
+  private final UserService userService;
 
   public QuizResponseDTO getQuiz(Long userDailyMissionId) {
     UserDailyMission userDailyMission = getUserDailyMission(userDailyMissionId);
+    validateOwnership(userDailyMission);
     DailyMissionMaster dailyMissionMaster = userDailyMission.getDailyMissionMaster();
+    validateQuizMissionType(dailyMissionMaster);
     Quiz quiz = getQuizByMissionId(dailyMissionMaster.getId());
     List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
 
@@ -115,17 +123,21 @@ public class QuizService {
     UserDailyMission userDailyMission =
         userDailyMissionRepository
             .findById(userDailyMissionId)
-            .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.MISSION_NOT_FOUND));
+    validateOwnership(userDailyMission);
     DailyMissionMaster dailyMissionMaster = userDailyMission.getDailyMissionMaster();
+    validateQuizMissionType(dailyMissionMaster);
     Quiz quiz = getQuizByMissionId(dailyMissionMaster.getId());
     List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
     // 선택한 선지 정보 불러오기
     QuizOptions selectedQuizOption =
-        quizOptionsRepository
-            .findById(request.getSelectedOptionId())
-            .orElseThrow(() -> new RuntimeException("해당하는 선지를 찾을 수 없습니다."));
+        quizOptions.stream()
+            .filter(option -> option.getId().equals(request.getSelectedOptionId()))
+            .findFirst()
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.INVALID_REQUEST, "해당하는 선지를 찾을 수 없습니다."));
     // 퀴즈 정답 확인
-    boolean isCorrect = quiz.getAnswerNumber().equals(request.getSelectedOptionId());
+    boolean isCorrect = selectedQuizOption.getOptionOrder() == quiz.getAnswerNumber();
 
     // 정답 정보 포함하여 DTO 생성
     List<CompletedQuizResponseDTO.CompletedQuizOptionResponseDTO> optionDTOs =
@@ -155,12 +167,25 @@ public class QuizService {
   private UserDailyMission getUserDailyMission(Long userDailyMissionId) {
     return userDailyMissionRepository
         .findById(userDailyMissionId)
-        .orElseThrow(() -> new RuntimeException("해당 ID를 갖는 미션이 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomApiException(ErrorCode.MISSION_NOT_FOUND));
   }
 
   private Quiz getQuizByMissionId(Long missionId) {
     return quizRepository
         .findByDailyMissionMaster_Id(missionId)
-        .orElseThrow(() -> new RuntimeException("퀴즈가 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomApiException(ErrorCode.QUIZ_NOT_FOUND));
+  }
+
+  private void validateOwnership(UserDailyMission userDailyMission) {
+    User currentUser = userService.getCurrentUser();
+    if (!userDailyMission.getUser().getId().equals(currentUser.getId())) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED);
+    }
+  }
+
+  private void validateQuizMissionType(DailyMissionMaster dailyMissionMaster) {
+    if (dailyMissionMaster.getMissionType() != MissionType.QUIZ) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "퀴즈 타입의 미션이 아닙니다.");
+    }
   }
 }
