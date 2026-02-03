@@ -20,6 +20,8 @@ import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
 import com.example.cp_main_be.domain.social.like.diary.repository.DiaryLikeRepository;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.dto.FeedItemResponse;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.Instant;
@@ -207,10 +209,16 @@ public class FeedService {
   }
 
   public RandomFeedSessionResponse getRandomFeedSessionNext(String sessionToken, int size) {
+    if (sessionToken == null || sessionToken.isBlank()) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "세션 토큰이 필요합니다.");
+    }
     RandomFeedSession session =
         randomFeedSessionRepository
             .find(sessionToken)
-            .orElseThrow(() -> new IllegalArgumentException("랜덤 피드 세션이 만료되었거나 존재하지 않습니다."));
+            .orElseThrow(
+                () ->
+                    new CustomApiException(
+                        ErrorCode.INVALID_REQUEST, "랜덤 피드 세션이 만료되었거나 존재하지 않습니다."));
 
     int safeSize = Math.max(1, size);
     List<FeedItemResponse> items = buildRandomSessionPage(session, safeSize);
@@ -255,6 +263,9 @@ public class FeedService {
   }
 
   private List<FeedItemResponse> buildRandomSessionPage(RandomFeedSession session, int size) {
+    if (size <= 0) {
+      return Collections.emptyList();
+    }
     int diaryRemaining = session.getDiaryIds().size() - session.getDiaryCursor();
     int avatarRemaining = session.getAvatarPostIds().size() - session.getAvatarPostCursor();
 
@@ -269,13 +280,17 @@ public class FeedService {
     int avatarFetch = Math.min(avatarRemaining, avatarSize);
 
     List<Long> diaryIds =
-        session
-            .getDiaryIds()
-            .subList(session.getDiaryCursor(), session.getDiaryCursor() + diaryFetch);
+        diaryFetch > 0
+            ? session
+                .getDiaryIds()
+                .subList(session.getDiaryCursor(), session.getDiaryCursor() + diaryFetch)
+            : Collections.emptyList();
     List<Long> avatarIds =
-        session
-            .getAvatarPostIds()
-            .subList(session.getAvatarPostCursor(), session.getAvatarPostCursor() + avatarFetch);
+        avatarFetch > 0
+            ? session
+                .getAvatarPostIds()
+                .subList(session.getAvatarPostCursor(), session.getAvatarPostCursor() + avatarFetch)
+            : Collections.emptyList();
 
     session.advanceDiaryCursor(diaryFetch);
     session.advanceAvatarPostCursor(avatarFetch);
