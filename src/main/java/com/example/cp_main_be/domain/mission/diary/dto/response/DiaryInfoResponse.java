@@ -56,9 +56,15 @@ public record DiaryInfoResponse(
   public record CommentResponseDTO(
       Long commentId, String profileImageUrl, String writer, String content) {
     public static CommentResponseDTO from(Comment comment) {
+      String profileImageUrl = null;
+      if (comment.getWriter() != null
+          && comment.getWriter().getAvatarList() != null
+          && !comment.getWriter().getAvatarList().isEmpty()) {
+        profileImageUrl = comment.getWriter().getAvatarList().get(0).getImageUrl();
+      }
       return new CommentResponseDTO(
           comment.getId(),
-          comment.getWriter().getAvatarList().get(0).getImageUrl(),
+          profileImageUrl,
           comment.getWriter().getNickname(),
           comment.getContent());
     }
