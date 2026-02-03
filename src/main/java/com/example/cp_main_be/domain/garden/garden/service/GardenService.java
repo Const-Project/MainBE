@@ -125,6 +125,11 @@ public class GardenService {
       throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
     }
 
+    if (!owner.getId().equals(actorId)
+        && !followRepository.existsByFollowerAndFollowing(actor, owner)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "팔로우한 사용자만 물 주기가 가능합니다.");
+    }
+
     if (owner.getId().equals(actorId)) {
       waterOwnGarden(actorId, garden);
     } else {

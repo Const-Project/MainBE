@@ -13,6 +13,7 @@ import com.example.cp_main_be.domain.member.user.domain.repository.UserRepositor
 import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
 import com.example.cp_main_be.domain.social.avatarpost.service.AvatarPostService;
+import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,7 @@ public class AvatarService {
   private final GardenRepository gardenRepository;
   private final AvatarPostService avatarPostService;
   private final UserBlockRepository userBlockRepository;
+  private final FollowRepository followRepository;
 
   // [수정] 새로운 아바타 생성 로직 구현
   public Avatar createAvatar(Long userId, String nickname, String imageUrl, Long masterId) {
@@ -116,6 +118,10 @@ public class AvatarService {
     if (userBlockRepository.existsByBlockerUserAndBlockedUser(receiver, sender)
         || userBlockRepository.existsByBlockerUserAndBlockedUser(sender, receiver)) {
       throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
+    if (!sender.getId().equals(receiver.getId())
+        && !followRepository.existsByFollowerAndFollowing(sender, receiver)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "팔로우한 사용자만 꽃가루를 줄 수 있습니다.");
     }
 
     // TODO: 꽃가루 관련 비즈니스 로직 추가
