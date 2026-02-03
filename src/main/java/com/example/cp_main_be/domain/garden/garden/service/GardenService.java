@@ -57,8 +57,9 @@ public class GardenService {
             .orElseThrow(() -> new IllegalArgumentException("Garden not found"));
 
     User owner = garden.getUser();
+    User viewer = owner;
     if (viewerId != null && !owner.getId().equals(viewerId)) {
-      User viewer =
+      viewer =
           userRepository
               .findById(viewerId)
               .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
@@ -73,7 +74,7 @@ public class GardenService {
 
     garden.recordAccess();
     // [추가] 마지막 방문 정원 ID 기록
-    garden.getUser().updateLastVisitedGarden(garden.getId());
+    viewer.updateLastVisitedGarden(garden.getId());
 
     return GardenResponse.from(garden);
   }
