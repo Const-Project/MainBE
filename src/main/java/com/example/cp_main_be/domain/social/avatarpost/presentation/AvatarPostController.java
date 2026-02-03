@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/avatar-posts")
+@RequestMapping("/api/v1/avatar-posts")
 @Tag(name = "아바타 포스트 API", description = "아바타 포스트 관련 기능을 제공합니다.")
 public class AvatarPostController {
 
