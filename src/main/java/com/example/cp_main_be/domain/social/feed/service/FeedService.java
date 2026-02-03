@@ -200,9 +200,10 @@ public class FeedService {
     randomFeedSessionRepository.save(token, session);
 
     List<FeedItemResponse> items = buildRandomSessionPage(session, safeSize);
-    boolean hasMore = hasMoreSessionItems(session);
+    int remaining = countSessionRemaining(session);
+    boolean hasMore = remaining > 0;
 
-    return new RandomFeedSessionResponse(token, items, hasMore);
+    return new RandomFeedSessionResponse(token, items, hasMore, remaining);
   }
 
   public RandomFeedSessionResponse getRandomFeedSessionNext(String sessionToken, int size) {
@@ -213,13 +214,14 @@ public class FeedService {
 
     int safeSize = Math.max(1, size);
     List<FeedItemResponse> items = buildRandomSessionPage(session, safeSize);
-    boolean hasMore = hasMoreSessionItems(session);
+    int remaining = countSessionRemaining(session);
+    boolean hasMore = remaining > 0;
 
     if (!hasMore) {
       randomFeedSessionRepository.delete(sessionToken);
     }
 
-    return new RandomFeedSessionResponse(sessionToken, items, hasMore);
+    return new RandomFeedSessionResponse(sessionToken, items, hasMore, remaining);
   }
 
   /** 시간순 정렬된 두 리스트를 병합하여 size개만 반환 */
@@ -304,9 +306,10 @@ public class FeedService {
     return feedItems;
   }
 
-  private boolean hasMoreSessionItems(RandomFeedSession session) {
-    return session.getDiaryCursor() < session.getDiaryIds().size()
-        || session.getAvatarPostCursor() < session.getAvatarPostIds().size();
+  private int countSessionRemaining(RandomFeedSession session) {
+    int diaryRemaining = session.getDiaryIds().size() - session.getDiaryCursor();
+    int avatarRemaining = session.getAvatarPostIds().size() - session.getAvatarPostCursor();
+    return Math.max(0, diaryRemaining) + Math.max(0, avatarRemaining);
   }
 
   /** ID 목록을 기반으로 엔티티와 관련 데이터(좋아요, 댓글 수)를 조회하고 FeedItemResponse로 매핑 */

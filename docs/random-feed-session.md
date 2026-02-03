@@ -24,7 +24,8 @@ Response body:
 {
   "sessionToken": "uuid",
   "items": [ ... ],
-  "hasMore": true
+  "hasMore": true,
+  "remaining": 120
 }
 ```
 
@@ -44,7 +45,8 @@ Response body:
 {
   "sessionToken": "uuid",
   "items": [ ... ],
-  "hasMore": false
+  "hasMore": false,
+  "remaining": 0
 }
 ```
 

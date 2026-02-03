@@ -9,11 +9,13 @@ public class RandomFeedSessionResponse {
   private final String sessionToken;
   private final List<FeedItemResponse> items;
   private final boolean hasMore;
+  private final int remaining;
 
   public RandomFeedSessionResponse(
-      String sessionToken, List<FeedItemResponse> items, boolean hasMore) {
+      String sessionToken, List<FeedItemResponse> items, boolean hasMore, int remaining) {
     this.sessionToken = sessionToken;
     this.items = items;
     this.hasMore = hasMore;
+    this.remaining = remaining;
   }
 }
