@@ -1,7 +1,5 @@
 package com.example.cp_main_be.domain.mission.user_daily_mission.service;
 
-import com.example.cp_main_be.domain.member.user.domain.User;
-import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.UserService;
 import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
 import com.example.cp_main_be.domain.mission.daily_mission_master.domain.DailyMissionMaster;
@@ -11,14 +9,9 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsR
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
-import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionPanelResponse;
-import com.example.cp_main_be.global.common.CustomApiException;
-import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.infra.S3Uploader;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +27,6 @@ public class UserDailyMissionService {
   private final QuizOptionsRepository quizOptionsRepository;
   private final QuizRepository quizRepository;
   private final UserService userService;
-  private final UserRepository userRepository;
 
   public DailyMissionResponseDTO getDailyMissions(Long userId) {
     List<UserDailyMission> dailyMissions = userDailyMissionRepository.findAllByUser_Id(userId);
@@ -91,52 +83,5 @@ public class UserDailyMissionService {
     return quizRepository
         .findByDailyMissionMaster_Id(missionId)
         .orElseThrow(() -> new RuntimeException("퀴즈가 존재하지 않습니다."));
-  }
-
-  // [새로 추가될 서비스 메서드]
-  public MissionPanelResponse getMissionPanelData(Long userId) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
-
-    // 1. 오늘의 미션 목록 조회 (N+1 방지)
-    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-    LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
-    List<UserDailyMission> todayMissions =
-        userDailyMissionRepository.findTodayMissionsWithMasterByUser(user, startOfDay, endOfDay);
-
-    List<MissionPanelResponse.DailyMissionStatusDto> missionDtos =
-        todayMissions.stream()
-            .map(
-                mission ->
-                    MissionPanelResponse.DailyMissionStatusDto.builder()
-                        .userDailyMissionId(mission.getId())
-                        .missionType(mission.getDailyMissionMaster().getMissionType().toString())
-                        .title(mission.getDailyMissionMaster().getTitle())
-                        .isCompleted(mission.isCompleted())
-                        .build())
-            .collect(Collectors.toList());
-
-    Integer count = 0;
-    for (MissionPanelResponse.DailyMissionStatusDto mission : missionDtos) {
-      if (mission.isCompleted()) count++;
-    }
-
-    // 2. 소망 나무 정보 조회
-    // TODO: WishTree 엔티티 및 Repository 구현 후 실제 데이터 조회 로직 필요
-    MissionPanelResponse.WishTreeDto wishTreeDto =
-        MissionPanelResponse.WishTreeDto.builder()
-            .currentStage("꽃") // 예시 데이터
-            .currentPoints(1200) // 예시 데이터
-            .requiredPointsForNextStage(1300) // 예시 데이터
-            .build();
-
-    // 3. 최종 응답 조립
-    return MissionPanelResponse.builder()
-        .todayMissionCount(count)
-        .dailyMissions(missionDtos)
-        .wishTree(wishTreeDto)
-        .build();
   }
 }
