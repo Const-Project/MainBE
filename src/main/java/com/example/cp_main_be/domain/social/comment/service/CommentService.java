@@ -11,6 +11,8 @@ import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRep
 import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
 import com.example.cp_main_be.domain.social.comment.dto.request.UpdateCommentRequest;
 import com.example.cp_main_be.domain.social.comment.dto.response.CommentResponse;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.event.CommentCreatedEvent;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -49,18 +51,16 @@ public class CommentService {
       Diary diary =
           diaryRepository
               .findById(targetId)
-              .orElseThrow(
-                  () -> new IllegalArgumentException("ID에 해당하는 일기를 찾을 수 없습니다: " + targetId));
+              .orElseThrow(() -> new CustomApiException(ErrorCode.DIARY_NOT_FOUND));
       commentBuilder.diary(diary);
     } else if ("AVATAR_POST".equalsIgnoreCase(targetType)) {
       AvatarPost avatarPost =
           avatarPostRepository
               .findById(targetId)
-              .orElseThrow(
-                  () -> new IllegalArgumentException("ID에 해당하는 아바타 포스트를 찾을 수 없습니다: " + targetId));
+              .orElseThrow(() -> new CustomApiException(ErrorCode.POST_NOT_FOUND));
       commentBuilder.avatarPost(avatarPost);
     } else {
-      throw new IllegalArgumentException("지원하지 않는 대상 타입입니다: " + targetType);
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "지원하지 않는 대상 타입입니다.");
     }
 
     // 4. 최종적으로 Comment 객체를 빌드하고 저장
@@ -78,10 +78,10 @@ public class CommentService {
     Comment comment =
         commentRepository
             .findById(commentId)
-            .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다.")); // TODO: Custom Exception
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND, "댓글을 찾을 수 없습니다."));
 
     if (!comment.getWriter().getId().equals(writerId)) {
-      throw new RuntimeException("댓글 작성자만 수정할 수 있습니다."); // TODO: Custom Exception
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "댓글 작성자만 수정할 수 있습니다.");
     }
 
     comment.setContent(request.getContent());
@@ -94,10 +94,10 @@ public class CommentService {
     Comment comment =
         commentRepository
             .findById(commentId)
-            .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다.")); // TODO: Custom Exception
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND, "댓글을 찾을 수 없습니다."));
 
     if (!comment.getWriter().getId().equals(writerId)) {
-      throw new RuntimeException("댓글 작성자만 삭제할 수 있습니다."); // TODO: Custom Exception
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "댓글 작성자만 삭제할 수 있습니다.");
     }
     commentRepository.delete(comment);
   }

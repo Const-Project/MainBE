@@ -52,7 +52,8 @@ public class GuestbookService {
     if (guestbookRepository
         .findByWriterAndOwnerAndCreatedAtBetween(writer, owner, startOfDay, endOfDay)
         .isPresent()) {
-      throw new RuntimeException("해당 사용자에게는 하루에 한 번만 방명록을 작성할 수 있습니다."); // TODO: Custom Exception
+      throw new CustomApiException(
+          ErrorCode.INVALID_REQUEST, "해당 사용자에게는 하루에 한 번만 방명록을 작성할 수 있습니다.");
     }
 
     Guestbook guestbook =

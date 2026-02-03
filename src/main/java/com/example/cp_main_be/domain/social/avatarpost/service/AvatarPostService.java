@@ -6,6 +6,8 @@ import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
 import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +25,7 @@ public class AvatarPostService {
     var post =
         avatarPostRepository
             .findByIdWithDetails(postId)
-            .orElseThrow(() -> new IllegalArgumentException("해당 포스트를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.POST_NOT_FOUND));
 
     // 2. 현재 사용자의 '좋아요' 여부를 확인합니다.
     boolean isLiked = false;
