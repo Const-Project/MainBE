@@ -10,8 +10,12 @@ import com.example.cp_main_be.domain.reports.domain.repository.ReportReasonRepos
 import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.dto.ReportRequestDto;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
+import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
+import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ public class ReportService {
   private final ReportReasonRepository reportReasonRepository;
   private final DiaryRepository diaryRepository; // Assuming Diary can be reported
   private final CommentRepository commentRepository; // Assuming Comment can be reported
+  private final AvatarPostRepository avatarPostRepository;
   private final com.example.cp_main_be.domain.member.notification.service.NotificationService
       notificationService; // [추가]
 
@@ -45,6 +50,18 @@ public class ReportService {
                         ReportReason.builder().reasonText(reportRequestDto.getReason()).build()));
 
     Long reportedUserId = findReportedUserId(reportRequestDto);
+
+    if (reporterId.equals(reportedUserId)) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "자기 자신을 신고할 수 없습니다.");
+    }
+
+    if (reportRepository.existsByUserAndTargetTypeAndTargetIdAndStatus(
+        reporter,
+        reportRequestDto.getTargetType(),
+        reportRequestDto.getTargetId(),
+        ReportStatus.PENDING)) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "이미 신고한 대상입니다.");
+    }
 
     Reports report =
         Reports.builder()
@@ -92,6 +109,12 @@ public class ReportService {
                 .findById(reportRequestDto.getTargetId())
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
         return comment.getWriter().getId();
+      case AVATAR_POST:
+        AvatarPost avatarPost =
+            avatarPostRepository
+                .findById(reportRequestDto.getTargetId())
+                .orElseThrow(() -> new IllegalArgumentException("Avatar post not found"));
+        return avatarPost.getUser().getId();
       case USER:
         return reportRequestDto.getTargetId(); // When reporting a user, targetId is the userId
       default:
