@@ -41,7 +41,7 @@ public class UserDailyMissionService {
     UserDailyMission userDailyMission =
         userDailyMissionRepository
             .findById(userDailyMissionId)
-            .orElseThrow(() -> new RuntimeException("미션을 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.MISSION_NOT_FOUND));
 
     String imageUrl = s3Uploader.upload(file, "mission-images");
 
@@ -76,12 +76,12 @@ public class UserDailyMissionService {
   private UserDailyMission getUserDailyMission(Long userDailyMissionId) {
     return userDailyMissionRepository
         .findById(userDailyMissionId)
-        .orElseThrow(() -> new RuntimeException("해당 ID를 갖는 미션이 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomApiException(ErrorCode.MISSION_NOT_FOUND));
   }
 
   private Quiz getQuizByMissionId(Long missionId) {
     return quizRepository
         .findByDailyMissionMaster_Id(missionId)
-        .orElseThrow(() -> new RuntimeException("퀴즈가 존재하지 않습니다."));
+        .orElseThrow(() -> new CustomApiException(ErrorCode.QUIZ_NOT_FOUND));
   }
 }
