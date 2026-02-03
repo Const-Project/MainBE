@@ -38,7 +38,11 @@ public class AuthService {
   @Transactional
   public TokenRefreshResponse refreshAccessToken(String incomingRefreshToken, String deviceId) {
     // 1) ~ 5) 까지의 검증 로직은 동일합니다.
-    if (!jwtTokenProvider.validateToken(incomingRefreshToken)) {
+    try {
+      if (!jwtTokenProvider.validateToken(incomingRefreshToken)) {
+        throw new CustomApiException(ErrorCode.INVALID_TOKEN);
+      }
+    } catch (Exception e) {
       throw new CustomApiException(ErrorCode.INVALID_TOKEN);
     }
     RefreshToken saved =
