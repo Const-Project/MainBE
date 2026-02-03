@@ -25,8 +25,9 @@ public class GardenController {
 
   @Operation(summary = "텃밭 슬롯 조회", description = "텃밭 슬롯을 조회합니다")
   @GetMapping("/{gardenId}")
-  public ResponseEntity<ApiResponse<GardenResponse>> getGarden(@PathVariable Long gardenId) {
-    GardenResponse gardenResponse = gardenService.findGardenById(gardenId);
+  public ResponseEntity<ApiResponse<GardenResponse>> getGarden(
+      @AuthenticationPrincipal User user, @PathVariable Long gardenId) {
+    GardenResponse gardenResponse = gardenService.findGardenById(gardenId, user.getId());
     return ResponseEntity.ok(ApiResponse.success(gardenResponse));
   }
 
