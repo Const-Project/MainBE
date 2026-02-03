@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.mission.diary.dto.response;
 
-import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,12 +29,7 @@ public record DiaryInfoResponse(
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
     String writerName = diary.getUser().getNickname();
 
-    List<Avatar> avatarList = diary.getUser().getAvatarList();
-
-    String profileImageUrl = null;
-    if (avatarList != null && !avatarList.isEmpty()) {
-      profileImageUrl = avatarList.get(0).getImageUrl();
-    }
+    String profileImageUrl = diary.getUser().getProfileImageUrl();
     return new DiaryInfoResponse(
         diary.getId(),
         diary.getUser().getId(),
@@ -56,12 +50,8 @@ public record DiaryInfoResponse(
   public record CommentResponseDTO(
       Long commentId, String profileImageUrl, String writer, String content) {
     public static CommentResponseDTO from(Comment comment) {
-      String profileImageUrl = null;
-      if (comment.getWriter() != null
-          && comment.getWriter().getAvatarList() != null
-          && !comment.getWriter().getAvatarList().isEmpty()) {
-        profileImageUrl = comment.getWriter().getAvatarList().get(0).getImageUrl();
-      }
+      String profileImageUrl =
+          comment.getWriter() != null ? comment.getWriter().getProfileImageUrl() : null;
       return new CommentResponseDTO(
           comment.getId(),
           profileImageUrl,
