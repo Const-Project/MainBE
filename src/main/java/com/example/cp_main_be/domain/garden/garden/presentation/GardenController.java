@@ -65,8 +65,10 @@ public class GardenController {
   @Operation(summary = "텃밭 배경화면 update", description = "텃밭의 배경화면을 수정한다.")
   @PutMapping("/{gardenId}/background/{backgroundId}")
   public ResponseEntity<ApiResponse<Void>> updateBackgroundImage(
-      @PathVariable Long gardenId, @PathVariable Long backgroundId) {
-    gardenService.updateGardenBackgroundImage(gardenId, backgroundId);
+      @AuthenticationPrincipal User user,
+      @PathVariable Long gardenId,
+      @PathVariable Long backgroundId) {
+    gardenService.updateGardenBackgroundImage(user.getId(), gardenId, backgroundId);
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 

@@ -256,11 +256,16 @@ public class GardenService {
   }
 
   @Transactional
-  public void updateGardenBackgroundImage(Long gardenId, Long backgroundId) {
+  public void updateGardenBackgroundImage(Long ownerId, Long gardenId, Long backgroundId) {
     Garden garden =
         gardenRepository
             .findById(gardenId)
             .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
+
+    // 소유자만 변경 가능
+    if (!garden.getUser().getId().equals(ownerId)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "텃밭 소유자만 변경할 수 있습니다.");
+    }
 
     GardenBackground newBackground =
         gardenBackgroundRepository
