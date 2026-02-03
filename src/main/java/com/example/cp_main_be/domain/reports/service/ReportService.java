@@ -18,7 +18,6 @@ import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
-import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,7 +41,7 @@ public class ReportService {
     User reporter =
         userRepository
             .findById(reporterId)
-            .orElseThrow(() -> new UserNotFoundException("유저를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
     ReportReason reason =
         reportReasonRepository
@@ -84,7 +83,7 @@ public class ReportService {
     User reportedUser =
         userRepository
             .findById(reportedUserId)
-            .orElseThrow(() -> new UserNotFoundException("신고 대상자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
     // [추가] 신고한 사용자가 신고 대상자를 즉시 차단 (노출 차단 목적)
     if (!userBlockRepository.existsByBlockerUserAndBlockedUser(reporter, reportedUser)) {
@@ -111,24 +110,24 @@ public class ReportService {
         Diary diary =
             diaryRepository
                 .findById(reportRequestDto.getTargetId())
-                .orElseThrow(() -> new IllegalArgumentException("Diary not found"));
+                .orElseThrow(() -> new CustomApiException(ErrorCode.DIARY_NOT_FOUND));
         return diary.getUser().getId();
       case COMMENT:
         Comment comment =
             commentRepository
                 .findById(reportRequestDto.getTargetId())
-                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+                .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND, "댓글을 찾을 수 없습니다."));
         return comment.getWriter().getId();
       case AVATAR_POST:
         AvatarPost avatarPost =
             avatarPostRepository
                 .findById(reportRequestDto.getTargetId())
-                .orElseThrow(() -> new IllegalArgumentException("Avatar post not found"));
+                .orElseThrow(() -> new CustomApiException(ErrorCode.POST_NOT_FOUND));
         return avatarPost.getUser().getId();
       case USER:
         return reportRequestDto.getTargetId(); // When reporting a user, targetId is the userId
       default:
-        throw new IllegalArgumentException("Invalid report target type");
+        throw new CustomApiException(ErrorCode.INVALID_REQUEST, "지원하지 않는 신고 대상입니다.");
     }
   }
 }
