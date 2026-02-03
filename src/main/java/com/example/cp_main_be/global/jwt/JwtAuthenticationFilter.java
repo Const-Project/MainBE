@@ -60,8 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
       } catch (Exception e) {
         logger.warn("Token validation failed: {}", e.getMessage());
-        // 모든 토큰 관련 오류를 INVALID_TOKEN으로 처리
-        throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN, e);
+        // 인증이 필요한 요청은 이후 필터에서 401 처리되므로 여기서는 예외를 던지지 않는다.
       }
     }
 
