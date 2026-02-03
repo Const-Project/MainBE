@@ -23,9 +23,9 @@ public record DiaryInfoResponse(
     @JsonProperty("isPublic") boolean isPublic) {
 
   // [수정] 생성자에서 likeCount를 직접 받도록 변경
-  public static DiaryInfoResponse from(Diary diary, boolean isLiked, long likeCount) {
-    List<CommentResponseDTO> commentDTOs =
-        diary.getComments().stream().map(CommentResponseDTO::from).toList();
+  public static DiaryInfoResponse from(
+      Diary diary, boolean isLiked, long likeCount, List<Comment> comments) {
+    List<CommentResponseDTO> commentDTOs = comments.stream().map(CommentResponseDTO::from).toList();
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
     String writerName = diary.getUser().getNickname();
 

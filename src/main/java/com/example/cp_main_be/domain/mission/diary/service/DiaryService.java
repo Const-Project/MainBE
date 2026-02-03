@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.mission.diary.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.mission.diary.dto.request.CreateDiaryRequest;
@@ -30,6 +31,7 @@ public class DiaryService {
   private final DiaryRepository diaryRepository;
   private final DiaryImageRepository diaryImageRepository;
   private final DiaryLikeRepository diaryLikeRepository;
+  private final UserBlockRepository userBlockRepository;
   private final WishTreeService wishTreeService;
 
   public Long createDiary(User user, CreateDiaryRequest request) {
@@ -95,7 +97,21 @@ public class DiaryService {
     }
 
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO의 팩토리 메서드로 변환하여 반환합니다.
-    return DiaryInfoResponse.from(diary, isLiked, diaryLikeRepository.countByDiary(diary));
+    List<Long> blockedUserIds =
+        currentUser != null
+            ? userBlockRepository.findBlockedUserIdsByBlocker(currentUser)
+            : Collections.emptyList();
+
+    List<com.example.cp_main_be.domain.social.comment.domain.Comment> comments =
+        diary.getComments().stream()
+            .filter(
+                comment ->
+                    comment.getWriter() == null
+                        || !blockedUserIds.contains(comment.getWriter().getId()))
+            .toList();
+
+    return DiaryInfoResponse.from(
+        diary, isLiked, diaryLikeRepository.countByDiary(diary), comments);
   }
 
   // 내 일기 목록 조회 (읽기 전용)

@@ -21,9 +21,8 @@ public record PostInfoResponse(
     LocalDateTime updatedAt,
     @JsonProperty("isPublic") boolean isPublic) {
 
-  public static PostInfoResponse from(AvatarPost post, boolean isLiked) {
-    List<CommentResponseDTO> commentDTOs =
-        post.getComments().stream().map(CommentResponseDTO::from).toList();
+  public static PostInfoResponse from(AvatarPost post, boolean isLiked, List<Comment> comments) {
+    List<CommentResponseDTO> commentDTOs = comments.stream().map(CommentResponseDTO::from).toList();
     String writerName = post.getUser().getNickname();
     String profileImageUrl = post.getUser().getProfileImageUrl();
     return new PostInfoResponse(

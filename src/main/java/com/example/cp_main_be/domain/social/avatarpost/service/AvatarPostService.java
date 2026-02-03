@@ -2,12 +2,15 @@ package com.example.cp_main_be.domain.social.avatarpost.service;
 
 import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.avatarpost.dto.PostInfoResponse;
 import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import java.util.Collections;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +22,7 @@ public class AvatarPostService {
 
   private final AvatarPostRepository avatarPostRepository;
   private final AvatarPostLikeRepository avatarPostLikeRepository;
+  private final UserBlockRepository userBlockRepository;
 
   public PostInfoResponse getAvatarPostInfo(Long postId, User currentUser) {
     // 1. N+1 문제를 해결하기 위해 연관된 엔티티(작성자, 댓글, 댓글 작성자)를 함께 조회합니다.
@@ -33,12 +37,24 @@ public class AvatarPostService {
       isLiked = avatarPostLikeRepository.existsByUserAndAvatarPost(currentUser, post);
     }
 
+    List<Long> blockedUserIds =
+        currentUser != null
+            ? userBlockRepository.findBlockedUserIdsByBlocker(currentUser)
+            : Collections.emptyList();
+    List<com.example.cp_main_be.domain.social.comment.domain.Comment> comments =
+        post.getComments().stream()
+            .filter(
+                comment ->
+                    comment.getWriter() == null
+                        || !blockedUserIds.contains(comment.getWriter().getId()))
+            .toList();
+
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO로 변환하여 반환합니다.
-    return PostInfoResponse.from(post, isLiked);
+    return PostInfoResponse.from(post, isLiked, comments);
   }
 
   public PostInfoResponse createAvatarPost(Avatar avatar, User currentUser) {
     AvatarPost avatarPost = avatarPostRepository.save(AvatarPost.from(avatar, currentUser));
-    return PostInfoResponse.from(avatarPost, true);
+    return PostInfoResponse.from(avatarPost, true, avatarPost.getComments());
   }
 }
