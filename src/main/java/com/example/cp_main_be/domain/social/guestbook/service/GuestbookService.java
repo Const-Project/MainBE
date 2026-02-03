@@ -17,6 +17,7 @@ import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class GuestbookService {
   private final NotificationService notificationService;
   private final UserService userService;
   private final WishTreeService wishTreeService;
+  private static final ZoneId KOREA_ZONE = ZoneId.of("Asia/Seoul");
 
   public void createGuestbook(Long writerId, Long ownerId, GuestbookRequest request) {
     User writer =
@@ -46,8 +48,9 @@ public class GuestbookService {
             .orElseThrow(() -> new UserNotFoundException("방명록 소유자 사용자를 찾을 수 없습니다."));
 
     // 1일 1회 제한 로직
-    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-    LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+    LocalDate today = LocalDate.now(KOREA_ZONE);
+    LocalDateTime startOfDay = today.atStartOfDay();
+    LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
 
     if (guestbookRepository
         .findByWriterAndOwnerAndCreatedAtBetween(writer, owner, startOfDay, endOfDay)
