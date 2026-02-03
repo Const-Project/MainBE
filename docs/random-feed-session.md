@@ -51,7 +51,10 @@ Response body:
 ```
 
 ## Notes
-- Session is stored in-memory and expires after 30 minutes.
+- Session is stored in-memory by default and expires after 30 minutes.
+- To enable Redis storage, set:
+  - `random.feed.session.store=redis`
+  - Configure `spring.data.redis.*` as usual.
 - When `hasMore=false`, the session is removed.
 - Random pool size = `size * 5`.
 - Blocked users are excluded at session creation.

@@ -15,7 +15,7 @@ import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedScrollResponse;
 import com.example.cp_main_be.domain.social.feed.dto.response.RandomFeedSessionResponse;
 import com.example.cp_main_be.domain.social.feed.session.RandomFeedSession;
-import com.example.cp_main_be.domain.social.feed.session.RandomFeedSessionRepository;
+import com.example.cp_main_be.domain.social.feed.session.RandomFeedSessionStore;
 import com.example.cp_main_be.domain.social.follow.domain.Follow;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
@@ -46,7 +46,7 @@ public class FeedService {
   private final DiaryLikeRepository diaryLikeRepository;
   private final AvatarPostLikeRepository avatarPostLikeRepository;
   private final CommentRepository commentRepository;
-  private final RandomFeedSessionRepository randomFeedSessionRepository;
+  private final RandomFeedSessionStore randomFeedSessionRepository;
 
   private static final int RANDOM_POOL_MULTIPLIER = 5;
   private static final int SESSION_TTL_MINUTES = 30;

@@ -2,13 +2,19 @@ package com.example.cp_main_be.domain.social.feed.session;
 
 import java.time.Instant;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class RandomFeedSession {
-  private final List<Long> diaryIds;
-  private final List<Long> avatarPostIds;
+  private List<Long> diaryIds;
+  private List<Long> avatarPostIds;
   private int diaryCursor;
   private int avatarPostCursor;
-  private final Instant expiresAt;
+  private Instant expiresAt;
 
   public RandomFeedSession(
       List<Long> diaryIds,
@@ -23,31 +29,11 @@ public class RandomFeedSession {
     this.expiresAt = expiresAt;
   }
 
-  public List<Long> getDiaryIds() {
-    return diaryIds;
-  }
-
-  public List<Long> getAvatarPostIds() {
-    return avatarPostIds;
-  }
-
-  public int getDiaryCursor() {
-    return diaryCursor;
-  }
-
-  public int getAvatarPostCursor() {
-    return avatarPostCursor;
-  }
-
   public void advanceDiaryCursor(int delta) {
     this.diaryCursor += delta;
   }
 
   public void advanceAvatarPostCursor(int delta) {
     this.avatarPostCursor += delta;
-  }
-
-  public Instant getExpiresAt() {
-    return expiresAt;
   }
 }

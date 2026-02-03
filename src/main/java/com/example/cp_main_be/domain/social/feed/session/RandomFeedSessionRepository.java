@@ -7,10 +7,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RandomFeedSessionRepository {
+@ConditionalOnProperty(
+    name = "random.feed.session.store",
+    havingValue = "memory",
+    matchIfMissing = true)
+public class RandomFeedSessionRepository implements RandomFeedSessionStore {
   private final Map<String, RandomFeedSession> sessions = new ConcurrentHashMap<>();
   private final ScheduledExecutorService cleaner = Executors.newSingleThreadScheduledExecutor();
 
@@ -18,10 +23,12 @@ public class RandomFeedSessionRepository {
     cleaner.scheduleAtFixedRate(this::cleanup, 1, 1, TimeUnit.MINUTES);
   }
 
+  @Override
   public void save(String token, RandomFeedSession session) {
     sessions.put(token, session);
   }
 
+  @Override
   public Optional<RandomFeedSession> find(String token) {
     RandomFeedSession session = sessions.get(token);
     if (session == null) {
@@ -34,6 +41,7 @@ public class RandomFeedSessionRepository {
     return Optional.of(session);
   }
 
+  @Override
   public void delete(String token) {
     sessions.remove(token);
   }
