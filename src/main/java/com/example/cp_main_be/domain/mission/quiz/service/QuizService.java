@@ -16,6 +16,9 @@ import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repositor
 import com.example.cp_main_be.domain.mission.user_daily_mission.service.UserDailyMissionService;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -60,62 +63,49 @@ public class QuizService {
         .build();
   }
 
-  //  // 새로운 메서드 - 완료된 퀴즈 결과 조회 (정답 정보 포함)
-  //  public CompletedQuizResponseDTO getCompletedQuizResult(Long userDailyMissionId) {
-  //    UserQuizMission userDailyMission = (UserQuizMission)
-  // getUserDailyMission(userDailyMissionId);
-  //
-  //    // 답안을 제출하지 않은 미션은 결과 조회 불가
-  //    if (userDailyMission.getSelectedOptionId() == null) {
-  //      throw new RuntimeException("답안을 제출하지 않은 미션의 결과는 조회할 수 없습니다.");
-  //    }
-  //
-  //    DailyMissionMaster dailyMissionMaster = userDailyMission.getDailyMissionMaster();
-  //    Quiz quiz = getQuizByMissionId(dailyMissionMaster.getId());
-  //    List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
-  //
-  //    // 사용자가 선택한 답안 정보
-  //    Long userSelectedOptionId = userDailyMission.getSelectedOptionId();
-  //
-  //    // 정답 여부 계산 (엔티티에 저장되지 않으므로 다시 계산)
-  //    boolean isCorrect =
-  //        quizOptions.stream()
-  //            .anyMatch(option -> option.getId().equals(userSelectedOptionId) &&
-  // option.isCorrect());
-  //
-  //    // 사용자가 선택한 답안 번호 계산 (엔티티에 저장되지 않으므로 역계산)
-  //    Integer userSelectedAnswerNumber = null;
-  //    for (QuizOptions option : quizOptions) {
-  //      if (option.getId().equals(userSelectedOptionId)) {
-  //        userSelectedAnswerNumber = option.getOptionOrder();
-  //        break;
-  //      }
-  //    }
-  //
-  //    // 정답 정보 포함하여 DTO 생성
-  //    List<CompletedQuizResponseDTO.CompletedQuizOptionResponseDTO> optionDTOs =
-  //        quizOptions.stream()
-  //            .map(
-  //                option ->
-  //                    CompletedQuizResponseDTO.CompletedQuizOptionResponseDTO.builder()
-  //                        .id(option.getId())
-  //                        .text(option.getOptionText())
-  //                        .isAnswer(option.isCorrect()) // 정답 여부
-  //                        .isSelected(option.getId().equals(userSelectedOptionId))
-  //                        .optionOrder(option.getOptionOrder())
-  //                        .build())
-  //            .collect(Collectors.toList());
-  //
-  //    return CompletedQuizResponseDTO.builder()
-  //        .quizType(quiz.getQuizType())
-  //        .quizQuestion(quiz.getQuizQuestion())
-  //        .quizOptions(optionDTOs)
-  //        .missionId(dailyMissionMaster.getId())
-  //        .isCorrect(isCorrect)
-  //        .selectedOptionId(userSelectedOptionId)
-  //        .selectedAnswerNumber(userSelectedAnswerNumber)
-  //        .build();
-  //  }
+  public CompletedQuizResponseDTO getCompletedQuizResult(Long userDailyMissionId) {
+    UserDailyMission userDailyMission = getUserDailyMission(userDailyMissionId);
+    validateOwnership(userDailyMission);
+
+    if (userDailyMission.getSelectedAnswerNumber() == null) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "아직 제출하지 않은 퀴즈입니다.");
+    }
+
+    LocalDate missionDate = userDailyMission.getCreatedAt().toLocalDate();
+    LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+    if (!missionDate.equals(today)) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "오늘의 퀴즈 결과만 조회할 수 있습니다.");
+    }
+
+    DailyMissionMaster dailyMissionMaster = userDailyMission.getDailyMissionMaster();
+    validateQuizMissionType(dailyMissionMaster);
+    Quiz quiz = getQuizByMissionId(dailyMissionMaster.getId());
+    List<QuizOptions> quizOptions = quizOptionsRepository.findAllByQuizId(quiz.getId());
+
+    Integer selectedAnswerNumber = userDailyMission.getSelectedAnswerNumber();
+
+    List<CompletedQuizResponseDTO.CompletedQuizOptionResponseDTO> optionDTOs =
+        quizOptions.stream()
+            .map(
+                option ->
+                    CompletedQuizResponseDTO.CompletedQuizOptionResponseDTO.builder()
+                        .id(option.getId())
+                        .text(option.getOptionText())
+                        .isAnswer(option.getOptionOrder() == quiz.getAnswerNumber())
+                        .isSelected(option.getOptionOrder().equals(selectedAnswerNumber))
+                        .optionOrder(option.getOptionOrder())
+                        .build())
+            .toList();
+
+    return CompletedQuizResponseDTO.builder()
+        .quizType(quiz.getQuizType())
+        .quizQuestion(quiz.getQuizQuestion())
+        .quizOptions(optionDTOs)
+        .missionId(dailyMissionMaster.getId())
+        .isCorrect(Boolean.TRUE.equals(userDailyMission.getIsQuizCorrect()))
+        .selectedAnswerNumber(selectedAnswerNumber)
+        .build();
+  }
 
   // 퀴즈 제출 API
   public CompletedQuizResponseDTO summitQuizAnswer(
@@ -125,6 +115,9 @@ public class QuizService {
             .findById(userDailyMissionId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.MISSION_NOT_FOUND));
     validateOwnership(userDailyMission);
+    if (userDailyMission.getSelectedAnswerNumber() != null) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "이미 제출한 퀴즈입니다.");
+    }
     DailyMissionMaster dailyMissionMaster = userDailyMission.getDailyMissionMaster();
     validateQuizMissionType(dailyMissionMaster);
     Quiz quiz = getQuizByMissionId(dailyMissionMaster.getId());
@@ -138,6 +131,11 @@ public class QuizService {
                 () -> new CustomApiException(ErrorCode.INVALID_REQUEST, "해당하는 선지를 찾을 수 없습니다."));
     // 퀴즈 정답 확인
     boolean isCorrect = selectedQuizOption.getOptionOrder() == quiz.getAnswerNumber();
+
+    userDailyMission.setSelectedAnswerNumber(selectedQuizOption.getOptionOrder());
+    userDailyMission.setIsQuizCorrect(isCorrect);
+    userDailyMission.setCompleted(true);
+    userDailyMission.setCompletedAt(LocalDateTime.now(ZoneId.of("Asia/Seoul")));
 
     // 정답 정보 포함하여 DTO 생성
     List<CompletedQuizResponseDTO.CompletedQuizOptionResponseDTO> optionDTOs =
