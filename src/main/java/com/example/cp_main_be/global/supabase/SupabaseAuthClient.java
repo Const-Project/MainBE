@@ -2,6 +2,7 @@ package com.example.cp_main_be.global.supabase;
 
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
@@ -39,6 +40,6 @@ public class SupabaseAuthClient {
             HttpStatusCode::isError,
             response -> Mono.error(new CustomApiException(ErrorCode.INVALID_REQUEST)))
         .bodyToMono(SupabaseUserResponse.class)
-        .block();
+        .block(Duration.ofSeconds(5));
   }
 }

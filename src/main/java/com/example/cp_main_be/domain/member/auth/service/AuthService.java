@@ -96,10 +96,14 @@ public class AuthService {
     return issueTokens(savedUser, true, deviceId);
   }
 
-  @Transactional
   public AnonymousRegistrationResponse loginWithSupabase(String accessToken, String deviceId) {
-    SupabaseUserResponse supabaseUser = supabaseAuthClient.fetchUser(accessToken);
+    SupabaseUserResponse supabaseUser = fetchSupabaseUser(accessToken);
+    return loginWithSupabaseTransactional(supabaseUser, deviceId);
+  }
 
+  @Transactional
+  public AnonymousRegistrationResponse loginWithSupabaseTransactional(
+      SupabaseUserResponse supabaseUser, String deviceId) {
     String oauthSubject = supabaseUser.getId();
     String oauthProvider = extractProvider(supabaseUser);
     if (oauthSubject == null || oauthProvider == null || oauthProvider.isBlank()) {
@@ -119,13 +123,14 @@ public class AuthService {
     }
 
     String nickname = buildUniqueNickname(supabaseUser);
+    String email = resolveEmail(supabaseUser);
     UUID newUuid = UUID.randomUUID();
 
     User newUser =
         User.builder()
             .uuid(newUuid)
             .nickname(nickname)
-            .email(supabaseUser.getEmail())
+            .email(email)
             .profileImageUrl(extractProfileImageUrl(supabaseUser))
             .oauthProvider(oauthProvider)
             .oauthSubject(oauthSubject)
@@ -265,6 +270,11 @@ public class AuthService {
       sanitized = "user";
     }
 
+    int baseMaxLength = 249;
+    if (sanitized.length() > baseMaxLength) {
+      sanitized = sanitized.substring(0, baseMaxLength);
+    }
+
     String candidate = sanitized;
     int attempts = 0;
     while (userRepository.existsByNickname(candidate) && attempts < 5) {
@@ -289,5 +299,17 @@ public class AuthService {
 
   private String randomSuffix() {
     return UUID.randomUUID().toString().replace("-", "").substring(0, 6);
+  }
+
+  private SupabaseUserResponse fetchSupabaseUser(String accessToken) {
+    return supabaseAuthClient.fetchUser(accessToken);
+  }
+
+  private String resolveEmail(SupabaseUserResponse supabaseUser) {
+    String email = supabaseUser.getEmail();
+    if (email == null || email.isBlank()) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST);
+    }
+    return email;
   }
 }

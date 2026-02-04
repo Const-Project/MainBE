@@ -44,7 +44,7 @@ public class AuthController {
   @Operation(summary = "Supabase 소셜 로그인", description = "Supabase OAuth 토큰을 우리 서비스 토큰으로 교환합니다.")
   @PostMapping("/supabase")
   public ResponseEntity<ApiResponse<AnonymousRegistrationResponse>> loginWithSupabase(
-      @RequestBody SupabaseLoginRequest request,
+      @Valid @RequestBody SupabaseLoginRequest request,
       @RequestHeader(value = "X-Client-Device-Id", required = false) String deviceId) {
 
     AnonymousRegistrationResponse response =
