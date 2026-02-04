@@ -7,7 +7,10 @@ import com.example.cp_main_be.domain.member.daily_question.domain.repository.Dai
 import com.example.cp_main_be.domain.member.notification.domain.repository.NotificationRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.mission.daily_mission_master.MissionType;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
 import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
@@ -34,6 +37,7 @@ public class HomeService {
   private final DiaryRepository diaryRepository;
   private final UserQuizRepository userQuizRepository;
   private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
+  private final UserDailyMissionRepository userDailyMissionRepository;
   private static final ZoneId KOREA_ZONE = ZoneId.of("Asia/Seoul");
 
   private LocalDateTime getStartOfCurrentSunlightDay() {
@@ -159,9 +163,22 @@ public class HomeService {
 
     boolean isDiaryCompleted =
         diaryRepository.existsByUserAndCreatedAtBetween(user, startOfDay, endOfDay);
+    List<UserDailyMission> todayMissions =
+        userDailyMissionRepository.findTodayMissionsWithMasterByUser(user, startOfDay, endOfDay);
+
     boolean isQuizCompleted =
-        userQuizRepository.existsByUserAndIsCompletedIsTrueAndCreatedAtBetween(
-            user, startOfDay, endOfDay);
+        todayMissions.stream()
+            .filter(mission -> mission.getDailyMissionMaster().getMissionType() == MissionType.QUIZ)
+            .anyMatch(UserDailyMission::isCompleted);
+
+    boolean isQuizResultAvailable =
+        todayMissions.stream()
+            .filter(mission -> mission.getDailyMissionMaster().getMissionType() == MissionType.QUIZ)
+            .anyMatch(
+                mission ->
+                    mission.getCompletedAt() != null
+                        && mission.getCompletedAt().toLocalDate().equals(today)
+                        && mission.getSelectedAnswerNumber() != null);
     boolean isCheckingCompleted =
         dailyQuestionAnswerRepository.existsByUserAndAnsweredDate(user, today);
 
@@ -237,6 +254,7 @@ public class HomeService {
         .isDairyCompleted(isDiaryCompleted)
         .isQuizCompleted(isQuizCompleted)
         .isCheckingCompleted(isCheckingCompleted)
+        .isQuizResultAvailable(isQuizResultAvailable)
         .wishTree(wishTreeDto)
         .build();
   }
