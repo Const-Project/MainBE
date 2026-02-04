@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.member.auth.presentation;
 
 import com.example.cp_main_be.domain.member.auth.dto.request.RegistrationRequest;
+import com.example.cp_main_be.domain.member.auth.dto.request.SupabaseLoginRequest;
 import com.example.cp_main_be.domain.member.auth.dto.response.AnonymousRegistrationResponse;
 import com.example.cp_main_be.domain.member.auth.dto.response.TokenRefreshResponse;
 import com.example.cp_main_be.domain.member.auth.service.AuthService;
@@ -37,6 +38,17 @@ public class AuthController {
       @RequestHeader(value = "X-Client-Device-Id", required = false) String deviceId) {
 
     AnonymousRegistrationResponse response = authService.registerNewUser(request, deviceId);
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(summary = "Supabase 소셜 로그인", description = "Supabase OAuth 토큰을 우리 서비스 토큰으로 교환합니다.")
+  @PostMapping("/supabase")
+  public ResponseEntity<ApiResponse<AnonymousRegistrationResponse>> loginWithSupabase(
+      @RequestBody SupabaseLoginRequest request,
+      @RequestHeader(value = "X-Client-Device-Id", required = false) String deviceId) {
+
+    AnonymousRegistrationResponse response =
+        authService.loginWithSupabase(request.getAccessToken(), deviceId);
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 }
