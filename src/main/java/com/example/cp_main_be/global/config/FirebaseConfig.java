@@ -1,5 +1,7 @@
 package com.example.cp_main_be.global.config;
 
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
@@ -85,7 +87,7 @@ public class FirebaseConfig {
     } catch (Exception e) {
       log.error("[DEBUG_FIREBASE] 🚨 초기화 중 예외 발생", e);
       // 배포 로그 확인을 위해 에러를 다시 던짐
-      throw new RuntimeException("Firebase 초기화 실패", e);
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "Firebase 초기화 실패");
     }
     log.info("=================================================================");
   }

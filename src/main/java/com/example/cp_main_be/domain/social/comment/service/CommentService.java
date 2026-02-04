@@ -15,7 +15,6 @@ import com.example.cp_main_be.domain.social.comment.dto.response.CommentResponse
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.event.CommentCreatedEvent;
-import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -39,7 +38,8 @@ public class CommentService {
     User writer =
         userRepository
             .findById(writerId)
-            .orElseThrow(() -> new UserNotFoundException("작성자 사용자를 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "작성자 사용자를 찾을 수 없습니다."));
 
     // 2. Comment 빌더 준비
     Comment.CommentBuilder commentBuilder =
@@ -121,7 +121,8 @@ public class CommentService {
       targetId = comment.getAvatarPost().getId();
       targetType = "AVATAR_POST";
     } else {
-      throw new IllegalStateException("Comment must be linked to either Diary or AvatarPost");
+      throw new CustomApiException(
+          ErrorCode.INVALID_REQUEST, "댓글은 DIARY 또는 AVATAR_POST에 연결되어야 합니다.");
     }
 
     return CommentResponse.from(comment, targetId, targetType);
