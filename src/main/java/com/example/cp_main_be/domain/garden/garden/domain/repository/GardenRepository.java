@@ -22,5 +22,7 @@ public interface GardenRepository extends JpaRepository<Garden, Long> {
   // 유저의 해금된 정원 개수 세기
   long countByUserAndIsLockedIsFalse(User user);
 
+  Optional<Garden> findFirstByUserAndIsLockedIsFalseOrderBySlotNumberAsc(User user);
+
   Optional<Garden> findFirstByUserAndIsLockedIsFalseAndAvatarIsNullOrderBySlotNumberAsc(User user);
 }

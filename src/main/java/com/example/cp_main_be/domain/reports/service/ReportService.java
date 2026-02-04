@@ -2,8 +2,7 @@ package com.example.cp_main_be.domain.reports.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-import com.example.cp_main_be.domain.member.userblock.UserBlock;
-import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
+import com.example.cp_main_be.domain.member.userblock.BlockService;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.reports.domain.ReportReason;
@@ -33,7 +32,7 @@ public class ReportService {
   private final DiaryRepository diaryRepository; // Assuming Diary can be reported
   private final CommentRepository commentRepository; // Assuming Comment can be reported
   private final AvatarPostRepository avatarPostRepository;
-  private final UserBlockRepository userBlockRepository;
+  private final BlockService blockService;
   private final com.example.cp_main_be.domain.member.notification.service.NotificationService
       notificationService; // [추가]
 
@@ -86,10 +85,9 @@ public class ReportService {
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
     // [추가] 신고한 사용자가 신고 대상자를 즉시 차단 (노출 차단 목적)
-    if (!userBlockRepository.existsByBlockerUserAndBlockedUser(reporter, reportedUser)) {
-      UserBlock userBlock =
-          UserBlock.builder().blockerUser(reporter).blockedUser(reportedUser).build();
-      userBlockRepository.save(userBlock);
+    // 차단 시 상호 팔로우 해제까지 처리
+    if (!blockService.isBlocked(reporter, reportedUser)) {
+      blockService.blockUser(reporter, reportedUserId);
     }
 
     notificationService.send(
@@ -100,8 +98,15 @@ public class ReportService {
         null // 썸네일 없음
         );
 
-    // TODO: Implement logic to hide content from the reporter
-    // TODO: Implement logic to block the user if a user is reported
+    // 신고자에게 접수 완료 알림 발송
+    notificationService.send(
+        reporter,
+        null, // sender는 null (익명/시스템)
+        com.example.cp_main_be.domain.member.notification.domain.NotificationType.REPORT_SUBMITTED,
+        "/reports/" + report.getId(),
+        null);
+
+    // 신고 직후 차단 처리로 신고 대상자 콘텐츠가 신고자에게 숨겨짐
   }
 
   private Long findReportedUserId(ReportRequestDto reportRequestDto) {

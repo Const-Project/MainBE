@@ -17,6 +17,7 @@ import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepos
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AvatarService {
 
-  private static final Long AI_AVATAR_MASTER_ID = 9999L;
   private final AvatarRepository avatarRepository;
   private final UserRepository userRepository;
   private final AvatarMasterRepository avatarMasterRepository; // [추가] AvatarMaster 조회 위해 주입
@@ -35,6 +35,9 @@ public class AvatarService {
   private final AvatarPostService avatarPostService;
   private final UserBlockRepository userBlockRepository;
   private final FollowRepository followRepository;
+
+  @Value("${avatar.master.ai-id:9999}")
+  private Long aiAvatarMasterId;
 
   // [수정] 새로운 아바타 생성 로직 구현
   public Avatar createAvatar(Long userId, String nickname, String imageUrl, Long masterId) {
@@ -46,18 +49,15 @@ public class AvatarService {
     AvatarMaster master;
     if (masterId != null) {
       // 1. 기존 목록에서 선택한 경우: 전달받은 masterId로 AvatarMaster를 찾습니다.
-      // TODO: 'masterId + 2'와 같은 매직 넘버 로직은 위험합니다.
-      // 프론트엔드에서 전달하는 ID와 DB의 ID가 일치하도록 데이터 정합성을 맞추거나,
-      // 이 로직에 대한 명확한 주석과 문서화가 필요합니다.
       master =
           avatarMasterRepository
               .findById(masterId)
               .orElseThrow(() -> new CustomApiException(ErrorCode.AVATAR_MASTER_NOT_FOUND));
     } else {
-      // 2. AI로 생성한 경우: 약속된 AI_AVATAR_MASTER_ID로 AvatarMaster를 찾습니다.
+      // 2. AI로 생성한 경우: 설정된 AI 아바타 마스터 ID로 AvatarMaster를 찾습니다.
       master =
           avatarMasterRepository
-              .findById(AI_AVATAR_MASTER_ID)
+              .findById(aiAvatarMasterId)
               .orElseThrow(
                   () ->
                       new CustomApiException(

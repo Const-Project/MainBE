@@ -3,7 +3,8 @@ package com.example.cp_main_be.domain.member.userblock;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
-import com.example.cp_main_be.global.exception.UserNotFoundException;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +21,11 @@ public class BlockService {
     User blockedUser =
         userRepository
             .findById(userIdToBlock)
-            .orElseThrow(() -> new UserNotFoundException("차단할 사용자를 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "차단할 사용자를 찾을 수 없습니다."));
 
     if (userBlockRepository.existsByBlockerUserAndBlockedUser(blockerUser, blockedUser)) {
-      throw new IllegalStateException("이미 차단한 사용자입니다.");
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "이미 차단한 사용자입니다.");
     }
 
     // 차단 시 상호 팔로우 관계 제거
@@ -39,10 +41,11 @@ public class BlockService {
     User blockedUser =
         userRepository
             .findById(userIdToUnblock)
-            .orElseThrow(() -> new UserNotFoundException("차단 해제할 사용자를 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "차단 해제할 사용자를 찾을 수 없습니다."));
 
     if (!userBlockRepository.existsByBlockerUserAndBlockedUser(blockerUser, blockedUser)) {
-      throw new IllegalStateException("차단 관계가 존재하지 않습니다.");
+      throw new CustomApiException(ErrorCode.NOT_FOUND, "차단 관계가 존재하지 않습니다.");
     }
 
     userBlockRepository.deleteByBlockerUserAndBlockedUser(blockerUser, blockedUser);

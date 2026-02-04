@@ -10,7 +10,6 @@ import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepos
 import com.example.cp_main_be.domain.social.follow.dto.FollowResponseDTO;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
-import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,11 +29,13 @@ public class FollowService {
     User follower =
         userRepository
             .findById(followerId)
-            .orElseThrow(() -> new UserNotFoundException("팔로워 사용자를 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "팔로워 사용자를 찾을 수 없습니다."));
     User following =
         userRepository
             .findById(followingId)
-            .orElseThrow(() -> new UserNotFoundException("팔로잉할 사용자를 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "팔로잉할 사용자를 찾을 수 없습니다."));
 
     if (follower.getId().equals(following.getId()))
       throw new CustomApiException(ErrorCode.SELF_FOLLOWING_UNABLE);
@@ -43,7 +44,7 @@ public class FollowService {
       throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단 상태에서는 팔로우할 수 없습니다.");
     }
     if (followRepository.existsByFollowerAndFollowing(follower, following)) {
-      throw new RuntimeException("이미 팔로우한 사용자입니다."); // TODO: Custom Exception
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "이미 팔로우한 사용자입니다.");
     }
 
     Follow follow = Follow.builder().follower(follower).following(following).build();
@@ -58,11 +59,13 @@ public class FollowService {
     User follower =
         userRepository
             .findById(followerId)
-            .orElseThrow(() -> new UserNotFoundException("팔로워 사용자를 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "팔로워 사용자를 찾을 수 없습니다."));
     User following =
         userRepository
             .findById(followingId)
-            .orElseThrow(() -> new UserNotFoundException("언팔로우할 사용자를 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "언팔로우할 사용자를 찾을 수 없습니다."));
 
     if (userBlockRepository.existsByBlockerUserAndBlockedUser(following, follower)
         || userBlockRepository.existsByBlockerUserAndBlockedUser(follower, following)) {
@@ -72,8 +75,7 @@ public class FollowService {
     Follow follow =
         followRepository
             .findByFollowerAndFollowing(follower, following)
-            .orElseThrow(
-                () -> new RuntimeException("팔로우 관계를 찾을 수 없습니다.")); // TODO: Custom Exception
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND, "팔로우 관계를 찾을 수 없습니다."));
     followRepository.delete(follow);
   }
 
@@ -82,7 +84,7 @@ public class FollowService {
     User user =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
     List<User> userList =
         followRepository.findByFollowing(user).stream().map(Follow::getFollower).toList();
@@ -106,7 +108,7 @@ public class FollowService {
     User user =
         userRepository
             .findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다."));
     List<User> userList =
         followRepository.findByFollower(user).stream().map(Follow::getFollowing).toList();
 

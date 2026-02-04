@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,12 +30,15 @@ public class AvatarController {
   private final ImageProcessingService imageProcessingService;
   private final AvatarPostService avatarPostService;
 
+  @Value("${avatar.master.ai-id:9999}")
+  private Long aiAvatarMasterId;
+
   @Operation(summary = "선택 가능한 아바타 종류 조회")
   @GetMapping("/masters") // 엔드포인트 변경
   public ResponseEntity<ApiResponse<List<AvatarMasterResponse>>> getSelectableAvatarMasters() {
     // AvatarMaster 목록을 조회
     List<AvatarMaster> masters = avatarMasterRepository.findAll();
-    masters.removeIf(master -> master.getId() == 9999);
+    masters.removeIf(master -> aiAvatarMasterId != null && aiAvatarMasterId.equals(master.getId()));
     // DTO로 변환하여 반환
     List<AvatarMasterResponse> response = masters.stream().map(AvatarMasterResponse::from).toList();
     return ResponseEntity.ok(ApiResponse.success(response));

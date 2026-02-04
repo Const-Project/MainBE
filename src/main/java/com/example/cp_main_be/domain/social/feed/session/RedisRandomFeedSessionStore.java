@@ -1,5 +1,7 @@
 package com.example.cp_main_be.domain.social.feed.session;
 
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
@@ -29,7 +31,7 @@ public class RedisRandomFeedSessionStore implements RandomFeedSessionStore {
               1, Duration.between(java.time.Instant.now(), session.getExpiresAt()).getSeconds());
       redisTemplate.opsForValue().set(key, payload, Duration.ofSeconds(ttlSeconds));
     } catch (JsonProcessingException e) {
-      throw new IllegalStateException("랜덤 피드 세션 직렬화에 실패했습니다.", e);
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "랜덤 피드 세션 직렬화에 실패했습니다.");
     }
   }
 
@@ -43,7 +45,7 @@ public class RedisRandomFeedSessionStore implements RandomFeedSessionStore {
     try {
       return Optional.of(objectMapper.readValue(payload, RandomFeedSession.class));
     } catch (JsonProcessingException e) {
-      throw new IllegalStateException("랜덤 피드 세션 역직렬화에 실패했습니다.", e);
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "랜덤 피드 세션 역직렬화에 실패했습니다.");
     }
   }
 
