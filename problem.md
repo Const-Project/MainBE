@@ -17,7 +17,7 @@
 
 ---
 
-## 1. N+1 쿼리 - FollowService 팔로워/팔로잉 조회 🔴
+## ~~1. N+1 쿼리 - FollowService 팔로워/팔로잉 조회 🔴~~ **해결 완료**
 
 ### 위치
 - **파일**: `src/main/java/com/example/cp_main_be/domain/social/follow/service/FollowService.java`
