@@ -19,9 +19,11 @@ import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
 import com.example.cp_main_be.domain.reports.enums.ReportStatus;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
+import com.example.cp_main_be.global.event.ReportProcessedEvent;
 import com.example.cp_main_be.global.infra.S3Uploader;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,6 +40,7 @@ public class AdminService {
   private final ReportRepository reportRepository;
   private final S3Uploader s3Uploader;
   private final QuizRepository quizRepository;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
   public AdminResponseDTO.CreateQuizResponseDTO createQuiz(
@@ -181,7 +184,13 @@ public class AdminService {
         reportRepository
             .findById(reportId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.REPORT_NOT_FOUND));
+    if (report.getStatus() == reportStatus) {
+      return report;
+    }
     report.setStatus(reportStatus);
+    if (reportStatus != ReportStatus.PENDING) {
+      eventPublisher.publishEvent(new ReportProcessedEvent(report));
+    }
     return report;
   }
 

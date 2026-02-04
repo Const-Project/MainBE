@@ -1,6 +1,8 @@
 package com.example.cp_main_be.domain.mission.daily_keywords.domain;
 
 import com.example.cp_main_be.domain.admin.dto.AdminRequestDTO;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.*;
@@ -33,6 +35,6 @@ public class DailyKeywords {
     if (requestDTO.getKeyword() != null && requestDTO.getKeywordDate() != null) {
       this.keyword = requestDTO.getKeyword();
       this.keywordDate = requestDTO.getKeywordDate();
-    } else throw new IllegalStateException("누락된 속성이 존재합니다");
+    } else throw new CustomApiException(ErrorCode.INVALID_REQUEST, "누락된 속성이 존재합니다.");
   }
 }

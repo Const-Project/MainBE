@@ -7,6 +7,7 @@ import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
+import com.example.cp_main_be.domain.reports.domain.Reports;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
 import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
@@ -100,7 +101,7 @@ public class NotificationEventListener {
     Guestbook guestBook = event.getGuestbook();
     User sender = guestBook.getWriter();
     User receiver = guestBook.getOwner(); // Assuming Guestbook is on a Garden
-    String url = "/garden/" + receiver.getId();
+    String url = "/users/" + receiver.getId();
 
     if (!sender.getId().equals(receiver.getId())) {
       notificationService.send(receiver, sender, NotificationType.GUESTBOOK, url, null);
@@ -113,7 +114,7 @@ public class NotificationEventListener {
     Follow follow = event.getFollow();
     User sender = follow.getFollower();
     User receiver = follow.getFollowing();
-    String url = "/user/" + sender.getId();
+    String url = "/users/" + sender.getId();
 
     notificationService.send(receiver, sender, NotificationType.FOLLOW, url, null);
   }
@@ -128,5 +129,19 @@ public class NotificationEventListener {
     wishTreeService.addPointsToWishTree(sender.getId(), 2L);
 
     notificationService.send(receiver, sender, NotificationType.WATERING_BY_FRIEND, url, null);
+  }
+
+  @EventListener
+  @Transactional
+  public void handleReportProcessedEvent(ReportProcessedEvent event) {
+    Reports report = event.getReport();
+    User receiver = report.getUser();
+    if (receiver == null) {
+      log.warn(
+          "Report processed notification skipped: missing reporter. reportId={}", report.getId());
+      return;
+    }
+    String url = "/reports/" + report.getId();
+    notificationService.send(receiver, null, NotificationType.REPORT_PROCESSED, url, null);
   }
 }

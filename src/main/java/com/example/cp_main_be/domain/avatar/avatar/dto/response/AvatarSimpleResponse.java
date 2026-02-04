@@ -12,6 +12,9 @@ public class AvatarSimpleResponse {
   private String imageUrl;
 
   public static AvatarSimpleResponse from(Avatar avatar) {
+    if (avatar == null) {
+      return null;
+    }
     return AvatarSimpleResponse.builder()
         .id(avatar.getId())
         .name(avatar.getNickname())

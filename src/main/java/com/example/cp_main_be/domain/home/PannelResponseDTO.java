@@ -13,6 +13,7 @@ public class PannelResponseDTO {
   Boolean isDairyCompleted;
   Boolean isCheckingCompleted;
   Boolean isQuizCompleted;
+  Boolean isQuizResultAvailable;
   WishTreeDto wishTree;
 
   @Getter

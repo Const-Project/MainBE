@@ -10,11 +10,14 @@ import com.example.cp_main_be.domain.member.notification.domain.NotificationType
 import com.example.cp_main_be.domain.member.notification.service.NotificationService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeRepository;
 import com.example.cp_main_be.domain.social.avatarpost.service.AvatarPostService;
+import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AvatarService {
 
-  private static final Long AI_AVATAR_MASTER_ID = 9999L;
   private final AvatarRepository avatarRepository;
   private final UserRepository userRepository;
   private final AvatarMasterRepository avatarMasterRepository; // [추가] AvatarMaster 조회 위해 주입
@@ -31,6 +33,11 @@ public class AvatarService {
   private final WishTreeRepository wishTreeRepository;
   private final GardenRepository gardenRepository;
   private final AvatarPostService avatarPostService;
+  private final UserBlockRepository userBlockRepository;
+  private final FollowRepository followRepository;
+
+  @Value("${avatar.master.ai-id:9999}")
+  private Long aiAvatarMasterId;
 
   // [수정] 새로운 아바타 생성 로직 구현
   public Avatar createAvatar(Long userId, String nickname, String imageUrl, Long masterId) {
@@ -42,18 +49,15 @@ public class AvatarService {
     AvatarMaster master;
     if (masterId != null) {
       // 1. 기존 목록에서 선택한 경우: 전달받은 masterId로 AvatarMaster를 찾습니다.
-      // TODO: 'masterId + 2'와 같은 매직 넘버 로직은 위험합니다.
-      // 프론트엔드에서 전달하는 ID와 DB의 ID가 일치하도록 데이터 정합성을 맞추거나,
-      // 이 로직에 대한 명확한 주석과 문서화가 필요합니다.
       master =
           avatarMasterRepository
               .findById(masterId)
               .orElseThrow(() -> new CustomApiException(ErrorCode.AVATAR_MASTER_NOT_FOUND));
     } else {
-      // 2. AI로 생성한 경우: 약속된 AI_AVATAR_MASTER_ID로 AvatarMaster를 찾습니다.
+      // 2. AI로 생성한 경우: 설정된 AI 아바타 마스터 ID로 AvatarMaster를 찾습니다.
       master =
           avatarMasterRepository
-              .findById(AI_AVATAR_MASTER_ID)
+              .findById(aiAvatarMasterId)
               .orElseThrow(
                   () ->
                       new CustomApiException(
@@ -88,7 +92,7 @@ public class AvatarService {
     notificationService.send(
         user,
         user,
-        NotificationType.POLLEN, // 임시로 POLLEN 사용하거나 신규 타입 필요, 여기서는 URL과 이미지가 중요
+        NotificationType.AVATAR_CREATED,
         "/garden/" + user.getId(),
         newAvatar.getImageUrl());
 
@@ -110,6 +114,15 @@ public class AvatarService {
 
     Avatar avatar = findAvatarById(avatarId);
     User receiver = avatar.getUser();
+
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(receiver, sender)
+        || userBlockRepository.existsByBlockerUserAndBlockedUser(sender, receiver)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
+    if (!sender.getId().equals(receiver.getId())
+        && !followRepository.existsByFollowerAndFollowing(sender, receiver)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "팔로우한 사용자만 꽃가루를 줄 수 있습니다.");
+    }
 
     // TODO: 꽃가루 관련 비즈니스 로직 추가
 

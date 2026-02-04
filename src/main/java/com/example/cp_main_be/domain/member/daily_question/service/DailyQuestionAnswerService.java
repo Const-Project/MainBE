@@ -5,6 +5,8 @@ import com.example.cp_main_be.domain.member.daily_question.domain.repository.Dai
 import com.example.cp_main_be.domain.member.daily_question.dto.DailyQuestionAnswerRequest;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,7 @@ public class DailyQuestionAnswerService {
 
     // 사용자가 오늘 이미 답변했는지 확인
     if (dailyQuestionAnswerRepository.existsByUserAndAnsweredDate(user, today)) {
-      throw new IllegalStateException("User has already answered today's question.");
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "이미 오늘의 질문에 답변했습니다.");
     }
 
     DailyQuestionAnswer answer =

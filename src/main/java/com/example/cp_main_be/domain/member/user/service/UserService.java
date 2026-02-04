@@ -12,6 +12,7 @@ import com.example.cp_main_be.domain.member.user.dto.response.FollowStatus;
 import com.example.cp_main_be.domain.member.user.dto.response.LevelStatusResponseDto;
 import com.example.cp_main_be.domain.member.user.dto.response.UserGardenDetailResponse;
 import com.example.cp_main_be.domain.member.user.dto.response.UserProfileResponse;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService; // [추가] WishTreeService 임포트
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
@@ -39,6 +40,7 @@ public class UserService {
   private final AvatarRepository avatarRepository;
   private final FriendWateringLogRepository friendWateringLogRepository;
   private final FollowRepository followRepository;
+  private final UserBlockRepository userBlockRepository;
   private final WishTreeService wishTreeService; // [추가] WishTreeService 주입
 
   // [수정] 경험치 추가 로직을 WishTreeService에 위임
@@ -179,6 +181,11 @@ public class UserService {
         userRepository
             .findByIdWithGardensAndAvatars(profileUserId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(currentUser, profileUser)
+        || userBlockRepository.existsByBlockerUserAndBlockedUser(profileUser, currentUser)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
 
     String profileImageUrl =
         profileUser.getGardens().stream()

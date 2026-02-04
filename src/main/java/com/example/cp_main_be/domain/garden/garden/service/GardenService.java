@@ -10,7 +10,9 @@ import com.example.cp_main_be.domain.garden.wateringlog.domain.FriendWateringLog
 import com.example.cp_main_be.domain.garden.wateringlog.domain.repository.FriendWateringLogRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
+import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.event.WishTreeEvolvedEvent;
@@ -42,21 +44,67 @@ public class GardenService {
   private final GardenBackgroundRepository gardenBackgroundRepository;
   private final UserRepository userRepository;
   private final FriendWateringLogRepository friendWateringLogRepository;
+  private final FollowRepository followRepository;
+  private final UserBlockRepository userBlockRepository;
   private final com.example.cp_main_be.domain.member.log.domain.repository
           .UserDailyActivityLogRepository
       userDailyActivityLogRepository;
 
-  public GardenResponse findGardenById(Long gardenId) {
+  public GardenResponse findGardenById(Long gardenId, Long viewerId) {
     Garden garden =
         gardenRepository
             .findById(gardenId)
             .orElseThrow(() -> new IllegalArgumentException("Garden not found"));
 
+    User owner = garden.getUser();
+    User viewer = owner;
+    if (viewerId != null && !owner.getId().equals(viewerId)) {
+      viewer =
+          userRepository
+              .findById(viewerId)
+              .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+      if (userBlockRepository.existsByBlockerUserAndBlockedUser(owner, viewer)
+          || userBlockRepository.existsByBlockerUserAndBlockedUser(viewer, owner)) {
+        throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+      }
+      if (!followRepository.existsByFollowerAndFollowing(viewer, owner)) {
+        throw new CustomApiException(ErrorCode.ACCESS_DENIED, "팔로우한 사용자만 정원을 볼 수 있습니다.");
+      }
+    }
+
     garden.recordAccess();
     // [추가] 마지막 방문 정원 ID 기록
-    garden.getUser().updateLastVisitedGarden(garden.getId());
+    viewer.updateLastVisitedGarden(garden.getId());
 
     return GardenResponse.from(garden);
+  }
+
+  @Transactional(readOnly = true)
+  public List<GardenResponse> getUnlockedGardensForUser(Long viewerId, Long targetUserId) {
+    User targetUser =
+        userRepository
+            .findByIdWithGardensAndAvatars(targetUserId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+
+    if (!targetUser.getId().equals(viewerId)) {
+      User viewer =
+          userRepository
+              .findById(viewerId)
+              .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+      if (userBlockRepository.existsByBlockerUserAndBlockedUser(targetUser, viewer)
+          || userBlockRepository.existsByBlockerUserAndBlockedUser(viewer, targetUser)) {
+        throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+      }
+      if (!followRepository.existsByFollowerAndFollowing(viewer, targetUser)) {
+        throw new CustomApiException(ErrorCode.ACCESS_DENIED, "팔로우한 사용자만 정원을 볼 수 있습니다.");
+      }
+    }
+
+    return targetUser.getGardens().stream()
+        .filter(garden -> !garden.isLocked())
+        .sorted(java.util.Comparator.comparing(Garden::getSlotNumber))
+        .map(GardenResponse::from)
+        .toList();
   }
 
   @Transactional
@@ -67,6 +115,21 @@ public class GardenService {
             .orElseThrow(() -> new CustomApiException(ErrorCode.GARDEN_NOT_FOUND));
 
     User owner = garden.getUser();
+    User actor =
+        userRepository
+            .findById(actorId)
+            .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+
+    if (!owner.getId().equals(actorId)
+        && (userBlockRepository.existsByBlockerUserAndBlockedUser(owner, actor)
+            || userBlockRepository.existsByBlockerUserAndBlockedUser(actor, owner))) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
+
+    if (!owner.getId().equals(actorId)
+        && !followRepository.existsByFollowerAndFollowing(actor, owner)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "팔로우한 사용자만 물 주기가 가능합니다.");
+    }
 
     if (owner.getId().equals(actorId)) {
       waterOwnGarden(actorId, garden);
@@ -193,11 +256,16 @@ public class GardenService {
   }
 
   @Transactional
-  public void updateGardenBackgroundImage(Long gardenId, Long backgroundId) {
+  public void updateGardenBackgroundImage(Long ownerId, Long gardenId, Long backgroundId) {
     Garden garden =
         gardenRepository
             .findById(gardenId)
             .orElseThrow(() -> new IllegalArgumentException("해당 텃밭을 찾을 수 없습니다."));
+
+    // 소유자만 변경 가능
+    if (!garden.getUser().getId().equals(ownerId)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "텃밭 소유자만 변경할 수 있습니다.");
+    }
 
     GardenBackground newBackground =
         gardenBackgroundRepository
