@@ -40,3 +40,6 @@ out/
 # Firebase
 src/main/resources/napulnapul-d9572-firebase-adminsdk-fbsvc-0a2757f074.json
 
+
+.env
+.env.properties
