@@ -39,7 +39,6 @@ class RedisRandomFeedSessionStoreTest {
     objectMapper.registerModule(new JavaTimeModule());
     objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-    when(redisTemplate.opsForValue()).thenReturn(valueOps);
     store = new RedisRandomFeedSessionStore(redisTemplate, objectMapper);
   }
 
@@ -50,6 +49,7 @@ class RedisRandomFeedSessionStoreTest {
     RandomFeedSession session =
         new RandomFeedSession(List.of(1L, 2L), List.of(10L), 0, 0, Instant.now().plusSeconds(300));
 
+    when(redisTemplate.opsForValue()).thenReturn(valueOps);
     store.save(token, session);
 
     verify(valueOps)
@@ -65,6 +65,7 @@ class RedisRandomFeedSessionStoreTest {
             List.of(3L, 4L), List.of(20L, 21L), 1, 2, Instant.now().plusSeconds(600));
     String json = objectMapper.writeValueAsString(session);
 
+    when(redisTemplate.opsForValue()).thenReturn(valueOps);
     when(valueOps.get("random_feed_session:" + token)).thenReturn(json);
 
     Optional<RandomFeedSession> result = store.find(token);

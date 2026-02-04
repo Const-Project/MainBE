@@ -13,7 +13,6 @@ import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDaily
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTree;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
-import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import java.time.LocalDate;
@@ -35,7 +34,6 @@ public class HomeService {
   private final UserRepository userRepository;
   private final NotificationRepository notificationRepository;
   private final DiaryRepository diaryRepository;
-  private final UserQuizRepository userQuizRepository;
   private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
   private final UserDailyMissionRepository userDailyMissionRepository;
   private static final ZoneId KOREA_ZONE = ZoneId.of("Asia/Seoul");
@@ -163,16 +161,16 @@ public class HomeService {
 
     boolean isDiaryCompleted =
         diaryRepository.existsByUserAndCreatedAtBetween(user, startOfDay, endOfDay);
-    List<UserDailyMission> todayMissions =
+    List<UserDailyMission> todayMissionEntities =
         userDailyMissionRepository.findTodayMissionsWithMasterByUser(user, startOfDay, endOfDay);
 
     boolean isQuizCompleted =
-        todayMissions.stream()
+        todayMissionEntities.stream()
             .filter(mission -> mission.getDailyMissionMaster().getMissionType() == MissionType.QUIZ)
             .anyMatch(UserDailyMission::isCompleted);
 
     boolean isQuizResultAvailable =
-        todayMissions.stream()
+        todayMissionEntities.stream()
             .filter(mission -> mission.getDailyMissionMaster().getMissionType() == MissionType.QUIZ)
             .anyMatch(
                 mission ->
@@ -217,9 +215,22 @@ public class HomeService {
 
     boolean isDiaryCompleted =
         diaryRepository.existsByUserAndCreatedAtBetween(user, startOfDay, endOfDay);
+    List<UserDailyMission> todayMissionEntities =
+        userDailyMissionRepository.findTodayMissionsWithMasterByUser(user, startOfDay, endOfDay);
+
     boolean isQuizCompleted =
-        userQuizRepository.existsByUserAndIsCompletedIsTrueAndCreatedAtBetween(
-            user, startOfDay, endOfDay);
+        todayMissionEntities.stream()
+            .filter(mission -> mission.getDailyMissionMaster().getMissionType() == MissionType.QUIZ)
+            .anyMatch(UserDailyMission::isCompleted);
+
+    boolean isQuizResultAvailable =
+        todayMissionEntities.stream()
+            .filter(mission -> mission.getDailyMissionMaster().getMissionType() == MissionType.QUIZ)
+            .anyMatch(
+                mission ->
+                    mission.getCompletedAt() != null
+                        && mission.getCompletedAt().toLocalDate().equals(today)
+                        && mission.getSelectedAnswerNumber() != null);
     boolean isCheckingCompleted =
         dailyQuestionAnswerRepository.existsByUserAndAnsweredDate(user, today);
 

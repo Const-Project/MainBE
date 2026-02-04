@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -95,10 +96,10 @@ public class QuizService {
                         .id(option.getId())
                         .text(option.getOptionText())
                         .isAnswer(option.getOptionOrder() == quiz.getAnswerNumber())
-                        .isSelected(option.getOptionOrder().equals(selectedAnswerNumber))
+                        .isSelected(Objects.equals(option.getOptionOrder(), selectedAnswerNumber))
                         .optionOrder(option.getOptionOrder())
                         .build())
-            .toList();
+            .collect(Collectors.toList());
 
     return CompletedQuizResponseDTO.builder()
         .quizType(quiz.getQuizType())
@@ -152,7 +153,7 @@ public class QuizService {
                         .isSelected(option.getId().equals(request.getSelectedOptionId()))
                         .optionOrder(option.getOptionOrder())
                         .build())
-            .toList();
+            .collect(Collectors.toList());
 
     return CompletedQuizResponseDTO.builder()
         .quizType(quiz.getQuizType())

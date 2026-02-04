@@ -46,14 +46,11 @@ class QuizServiceTest {
     Long userDailyMissionId = 100L;
     User currentUser = User.builder().id(1L).build();
     User owner = User.builder().id(2L).build();
-    DailyMissionMaster dailyMissionMaster =
-        DailyMissionMaster.builder().id(10L).missionType(MissionType.QUIZ).build();
     UserDailyMission userDailyMission = org.mockito.Mockito.mock(UserDailyMission.class);
 
     given(userDailyMissionRepository.findById(userDailyMissionId))
         .willReturn(Optional.of(userDailyMission));
     given(userDailyMission.getUser()).willReturn(owner);
-    given(userDailyMission.getDailyMissionMaster()).willReturn(dailyMissionMaster);
     given(userService.getCurrentUser()).willReturn(currentUser);
 
     CustomApiException exception =
@@ -86,6 +83,7 @@ class QuizServiceTest {
     given(userDailyMissionRepository.findById(userDailyMissionId))
         .willReturn(Optional.of(userDailyMission));
     given(userDailyMission.getUser()).willReturn(currentUser);
+    given(userDailyMission.getSelectedAnswerNumber()).willReturn(null);
     given(userDailyMission.getDailyMissionMaster()).willReturn(dailyMissionMaster);
     given(userService.getCurrentUser()).willReturn(currentUser);
     given(quizRepository.findByDailyMissionMaster_Id(dailyMissionMaster.getId()))
@@ -124,6 +122,7 @@ class QuizServiceTest {
     given(userDailyMissionRepository.findById(userDailyMissionId))
         .willReturn(Optional.of(userDailyMission));
     given(userDailyMission.getUser()).willReturn(currentUser);
+    given(userDailyMission.getSelectedAnswerNumber()).willReturn(null);
     given(userDailyMission.getDailyMissionMaster()).willReturn(dailyMissionMaster);
     given(userService.getCurrentUser()).willReturn(currentUser);
     given(quizRepository.findByDailyMissionMaster_Id(dailyMissionMaster.getId()))

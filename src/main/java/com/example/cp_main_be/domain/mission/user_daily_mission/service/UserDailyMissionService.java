@@ -9,6 +9,8 @@ import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizOptionsR
 import com.example.cp_main_be.domain.mission.quiz.domain.repository.QuizRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.UserDailyMission;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.infra.S3Uploader;
 import java.time.LocalDateTime;
 import java.util.List;
