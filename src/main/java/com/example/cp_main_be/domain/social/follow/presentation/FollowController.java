@@ -45,6 +45,7 @@ public class FollowController {
     return ResponseEntity.ok(ApiResponse.success(followResponseDTOS));
   }
 
+
   @Operation(summary = "팔로잉 조회", description = "팔로우하는 유저 목록을 조회합니다")
   @GetMapping("/{userId}/following")
   public ResponseEntity<ApiResponse<List<FollowResponseDTO>>> getFollowing(

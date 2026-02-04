@@ -87,7 +87,9 @@ public class FollowService {
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
     List<User> userList =
-        followRepository.findByFollowing(user).stream().map(Follow::getFollower).toList();
+        followRepository.findByFollowingWithFollowerAndAvatars(user).stream()
+            .map(Follow::getFollower)
+            .toList();
 
     return userList.stream()
         .map(
@@ -109,8 +111,11 @@ public class FollowService {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "사용자를 찾을 수 없습니다."));
+
     List<User> userList =
-        followRepository.findByFollower(user).stream().map(Follow::getFollowing).toList();
+        followRepository.findByFollowerWithFollowingAndAvatars(user).stream()
+            .map(Follow::getFollowing)
+            .toList();
 
     return userList.stream()
         .map(
