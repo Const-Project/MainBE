@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -53,12 +52,8 @@ class FollowServiceTest {
 
   private User createUserWithAvatar(Long id, String nickname, String avatarImageUrl) {
     User user = createUser(id, nickname);
-    Avatar avatar = Avatar.builder()
-        .id(1L)
-        .nickname("avatar")
-        .imageUrl(avatarImageUrl)
-        .user(user)
-        .build();
+    Avatar avatar =
+        Avatar.builder().id(1L).nickname("avatar").imageUrl(avatarImageUrl).user(user).build();
     user.getAvatarList().add(avatar);
     return user;
   }
@@ -76,10 +71,10 @@ class FollowServiceTest {
       User follower1 = createUserWithAvatar(2L, "follower1", "http://image1.com");
       User follower2 = createUserWithAvatar(3L, "follower2", "http://image2.com");
 
-      List<Follow> follows = Arrays.asList(
-          Follow.builder().follower(follower1).following(user).build(),
-          Follow.builder().follower(follower2).following(user).build()
-      );
+      List<Follow> follows =
+          Arrays.asList(
+              Follow.builder().follower(follower1).following(user).build(),
+              Follow.builder().follower(follower2).following(user).build());
 
       given(userRepository.findById(userId)).willReturn(Optional.of(user));
       given(followRepository.findByFollowingWithFollowerAndAvatars(user)).willReturn(follows);
@@ -108,9 +103,7 @@ class FollowServiceTest {
       User user = createUser(userId, "user");
       User follower1 = createUser(2L, "follower1");
 
-      List<Follow> follows = List.of(
-          Follow.builder().follower(follower1).following(user).build()
-      );
+      List<Follow> follows = List.of(Follow.builder().follower(follower1).following(user).build());
 
       given(userRepository.findById(userId)).willReturn(Optional.of(user));
       given(followRepository.findByFollowingWithFollowerAndAvatars(user)).willReturn(follows);
@@ -170,10 +163,10 @@ class FollowServiceTest {
       User following1 = createUserWithAvatar(2L, "following1", "http://image1.com");
       User following2 = createUserWithAvatar(3L, "following2", "http://image2.com");
 
-      List<Follow> follows = Arrays.asList(
-          Follow.builder().follower(user).following(following1).build(),
-          Follow.builder().follower(user).following(following2).build()
-      );
+      List<Follow> follows =
+          Arrays.asList(
+              Follow.builder().follower(user).following(following1).build(),
+              Follow.builder().follower(user).following(following2).build());
 
       given(userRepository.findById(userId)).willReturn(Optional.of(user));
       given(followRepository.findByFollowerWithFollowingAndAvatars(user)).willReturn(follows);
@@ -202,9 +195,7 @@ class FollowServiceTest {
       User user = createUser(userId, "user");
       User following1 = createUser(2L, "following1");
 
-      List<Follow> follows = List.of(
-          Follow.builder().follower(user).following(following1).build()
-      );
+      List<Follow> follows = List.of(Follow.builder().follower(user).following(following1).build());
 
       given(userRepository.findById(userId)).willReturn(Optional.of(user));
       given(followRepository.findByFollowerWithFollowingAndAvatars(user)).willReturn(follows);
