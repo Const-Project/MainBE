@@ -60,6 +60,11 @@ logging:
       springframework:
         security: TRACE
 
+random:
+  feed:
+    session:
+      store: memory
+
 notification:
   debug:
     enabled: false
@@ -79,6 +84,10 @@ spring:
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
@@ -116,6 +125,10 @@ spring:
     show-sql: false # 운영 로그 지저분해짐 방지
   security:
     debug: false
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 springdoc:
   swagger-ui:

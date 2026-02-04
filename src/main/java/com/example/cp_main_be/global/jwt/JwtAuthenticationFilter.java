@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     if (token == null) {
       logger.warn("Token is null. No Authorization header or accessToken cookie found.");
     } else {
-      logger.info("Token found: {}", token);
+      logger.info("Token found.");
 
       try {
         // validateToken에서 예외가 발생하면 바로 catch로 넘어감
@@ -60,8 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
       } catch (Exception e) {
         logger.warn("Token validation failed: {}", e.getMessage());
-        // 모든 토큰 관련 오류를 INVALID_TOKEN으로 처리
-        throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN, e);
+        // 인증이 필요한 요청은 이후 필터에서 401 처리되므로 여기서는 예외를 던지지 않는다.
       }
     }
 

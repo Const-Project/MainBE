@@ -1,6 +1,5 @@
 package com.example.cp_main_be.domain.mission.diary.dto.response;
 
-import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -24,18 +23,13 @@ public record DiaryInfoResponse(
     @JsonProperty("isPublic") boolean isPublic) {
 
   // [수정] 생성자에서 likeCount를 직접 받도록 변경
-  public static DiaryInfoResponse from(Diary diary, boolean isLiked, long likeCount) {
-    List<CommentResponseDTO> commentDTOs =
-        diary.getComments().stream().map(CommentResponseDTO::from).toList();
+  public static DiaryInfoResponse from(
+      Diary diary, boolean isLiked, long likeCount, List<Comment> comments) {
+    List<CommentResponseDTO> commentDTOs = comments.stream().map(CommentResponseDTO::from).toList();
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
     String writerName = diary.getUser().getNickname();
 
-    List<Avatar> avatarList = diary.getUser().getAvatarList();
-
-    String profileImageUrl = null;
-    if (avatarList != null && !avatarList.isEmpty()) {
-      profileImageUrl = avatarList.get(0).getImageUrl();
-    }
+    String profileImageUrl = diary.getUser().getProfileImageUrl();
     return new DiaryInfoResponse(
         diary.getId(),
         diary.getUser().getId(),
@@ -56,9 +50,11 @@ public record DiaryInfoResponse(
   public record CommentResponseDTO(
       Long commentId, String profileImageUrl, String writer, String content) {
     public static CommentResponseDTO from(Comment comment) {
+      String profileImageUrl =
+          comment.getWriter() != null ? comment.getWriter().getProfileImageUrl() : null;
       return new CommentResponseDTO(
           comment.getId(),
-          comment.getWriter().getAvatarList().get(0).getImageUrl(),
+          profileImageUrl,
           comment.getWriter().getNickname(),
           comment.getContent());
     }

@@ -46,10 +46,35 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
   List<AvatarPost> findByCreatedAtBeforeOrderByCreatedAtDesc(
       LocalDateTime cursor, Pageable pageable);
 
+  @Query(
+      "SELECT ap FROM AvatarPost ap JOIN FETCH ap.user WHERE ap.createdAt < :cursor "
+          + "AND ("
+          + " :#{#blockedUserIds == null} = true"
+          + " OR :#{#blockedUserIds.isEmpty()} = true"
+          + " OR ap.user.id NOT IN (:blockedUserIds)"
+          + ") ORDER BY ap.createdAt DESC")
+  List<AvatarPost> findByCreatedAtBeforeAndUserIdNotInOrderByCreatedAtDesc(
+      @Param("cursor") LocalDateTime cursor,
+      @Param("blockedUserIds") List<Long> blockedUserIds,
+      Pageable pageable);
+
   // 커서 기반 페이지네이션을 위한 메서드 (팔로잉 피드용)
   @EntityGraph(attributePaths = {"user"})
   List<AvatarPost> findByUserInAndCreatedAtBeforeOrderByCreatedAtDesc(
       List<User> followingUsers, LocalDateTime cursor, Pageable pageable);
+
+  @Query(
+      "SELECT ap FROM AvatarPost ap JOIN FETCH ap.user WHERE ap.user IN :followingUsers AND ap.createdAt < :cursor "
+          + "AND ("
+          + " :#{#blockedUserIds == null} = true"
+          + " OR :#{#blockedUserIds.isEmpty()} = true"
+          + " OR ap.user.id NOT IN (:blockedUserIds)"
+          + ") ORDER BY ap.createdAt DESC")
+  List<AvatarPost> findByUserInAndUserIdNotInAndCreatedAtBeforeOrderByCreatedAtDesc(
+      @Param("followingUsers") List<User> followingUsers,
+      @Param("blockedUserIds") List<Long> blockedUserIds,
+      @Param("cursor") LocalDateTime cursor,
+      Pageable pageable);
 
   // AvatarPostRepository.java
   @Query(
@@ -68,4 +93,28 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
       nativeQuery = true)
   List<Long> findRandomPublicAvatarPostIdsExcluding(
       @Param("excludeIds") List<Long> excludeIds, @Param("limit") int limit);
+
+  @Query(
+      value =
+          """
+          SELECT ap.id
+          FROM avatar_post ap
+          WHERE (
+              :#{#excludeIds == null} = true
+              OR :#{#excludeIds.isEmpty()} = true
+              OR ap.id NOT IN (:excludeIds)
+          )
+          AND (
+              :#{#blockedUserIds == null} = true
+              OR :#{#blockedUserIds.isEmpty()} = true
+              OR ap.user_id NOT IN (:blockedUserIds)
+          )
+          ORDER BY RAND()
+          LIMIT :limit
+          """,
+      nativeQuery = true)
+  List<Long> findRandomPublicAvatarPostIdsExcludingAndBlocked(
+      @Param("excludeIds") List<Long> excludeIds,
+      @Param("blockedUserIds") List<Long> blockedUserIds,
+      @Param("limit") int limit);
 }

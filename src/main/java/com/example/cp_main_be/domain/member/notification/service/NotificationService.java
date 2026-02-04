@@ -1,5 +1,7 @@
 package com.example.cp_main_be.domain.member.notification.service;
 
+import com.example.cp_main_be.domain.garden.garden.domain.Garden;
+import com.example.cp_main_be.domain.garden.garden.domain.repository.GardenRepository;
 import com.example.cp_main_be.domain.member.notification.domain.DeviceToken;
 import com.example.cp_main_be.domain.member.notification.domain.Notification;
 import com.example.cp_main_be.domain.member.notification.domain.NotificationType;
@@ -40,6 +42,7 @@ public class NotificationService {
 
   private final DeviceTokenRepository deviceTokenRepository;
   private final UserRepository userRepository;
+  private final GardenRepository gardenRepository;
   private final EmitterRepository emitterRepository;
   private final NotificationRepository notificationRepository;
 
@@ -324,8 +327,7 @@ public class NotificationService {
             user.getId());
         continue;
       }
-      // TODO: 식물 닉네임 가져오는 로직 필요
-      String plantNickname = "당신의 식물";
+      String plantNickname = resolvePlantNickname(user);
       String content = String.format(NotificationType.WATERING.getMessageTemplate(), plantNickname);
       Notification notification =
           Notification.builder()
@@ -339,6 +341,31 @@ public class NotificationService {
       sendPushNotification(user, notification);
     }
     log.info("Sending watering notification at {}", LocalDateTime.now());
+  }
+
+  private String resolvePlantNickname(User user) {
+    String fallback = "당신의 식물";
+    Garden garden = null;
+    Long lastVisitedGardenId = user.getLastVisitedGardenId();
+    if (lastVisitedGardenId != null) {
+      garden =
+          gardenRepository
+              .findById(lastVisitedGardenId)
+              .filter(g -> g.getUser().getId().equals(user.getId()))
+              .orElse(null);
+    }
+    if (garden == null) {
+      garden =
+          gardenRepository.findFirstByUserAndIsLockedIsFalseOrderBySlotNumberAsc(user).orElse(null);
+    }
+    if (garden == null || garden.getAvatar() == null) {
+      return fallback;
+    }
+    String nickname = garden.getAvatar().getNickname();
+    if (nickname == null || nickname.isBlank()) {
+      return fallback;
+    }
+    return nickname;
   }
 
   private void debugEvent(String event, String message, Object... args) {

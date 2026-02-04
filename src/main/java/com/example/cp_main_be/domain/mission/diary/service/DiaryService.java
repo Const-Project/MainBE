@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.mission.diary.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.mission.diary.dto.request.CreateDiaryRequest;
@@ -30,6 +31,7 @@ public class DiaryService {
   private final DiaryRepository diaryRepository;
   private final DiaryImageRepository diaryImageRepository;
   private final DiaryLikeRepository diaryLikeRepository;
+  private final UserBlockRepository userBlockRepository;
   private final WishTreeService wishTreeService;
 
   public Long createDiary(User user, CreateDiaryRequest request) {
@@ -82,6 +84,13 @@ public class DiaryService {
             .findByIdWithDetails(diaryId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.DIARY_NOT_FOUND));
 
+    if (currentUser != null
+        && (userBlockRepository.existsByBlockerUserAndBlockedUser(currentUser, diary.getUser())
+            || userBlockRepository.existsByBlockerUserAndBlockedUser(
+                diary.getUser(), currentUser))) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단된 사용자입니다.");
+    }
+
     // 비공개 글 접근 제어: 비로그인 또는 작성자 외 사용자는 차단
     if (!diary.isPublic()) {
       if (currentUser == null || !diary.getUser().getId().equals(currentUser.getId())) {
@@ -95,7 +104,21 @@ public class DiaryService {
     }
 
     // 3. 조회된 엔티티와 '좋아요' 여부를 DTO의 팩토리 메서드로 변환하여 반환합니다.
-    return DiaryInfoResponse.from(diary, isLiked, diaryLikeRepository.countByDiary(diary));
+    List<Long> blockedUserIds =
+        currentUser != null
+            ? userBlockRepository.findBlockedUserIdsByBlocker(currentUser)
+            : Collections.emptyList();
+
+    List<com.example.cp_main_be.domain.social.comment.domain.Comment> comments =
+        diary.getComments().stream()
+            .filter(
+                comment ->
+                    comment.getWriter() == null
+                        || !blockedUserIds.contains(comment.getWriter().getId()))
+            .toList();
+
+    return DiaryInfoResponse.from(
+        diary, isLiked, diaryLikeRepository.countByDiary(diary), comments);
   }
 
   // 내 일기 목록 조회 (읽기 전용)

@@ -1,5 +1,7 @@
 package com.example.cp_main_be.domain.member.user.presentation;
 
+import com.example.cp_main_be.domain.garden.garden.dto.response.GardenResponse;
+import com.example.cp_main_be.domain.garden.garden.service.GardenService;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
@@ -26,6 +28,7 @@ public class UserController {
 
   private final UserService userService;
   private final UserRepository userRepository;
+  private final GardenService gardenService;
 
   //    @DeleteMapping("/register/nickname")
   //    public ResponseEntity<Void> delete(@RequestBody @Valid UserRequest userRequest) {
@@ -97,5 +100,13 @@ public class UserController {
       @PathVariable("userId") Long targetUserId, @AuthenticationPrincipal User user) {
     return ResponseEntity.ok(
         ApiResponse.success(userService.getUserProfile(user.getId(), targetUserId)));
+  }
+
+  @Operation(summary = "유저 정원 목록 조회", description = "팔로우한 유저의 해금된 정원 목록을 조회합니다")
+  @GetMapping("/{userId}/gardens")
+  public ResponseEntity<ApiResponse<List<GardenResponse>>> getUserGardens(
+      @PathVariable("userId") Long targetUserId, @AuthenticationPrincipal User user) {
+    return ResponseEntity.ok(
+        ApiResponse.success(gardenService.getUnlockedGardensForUser(user.getId(), targetUserId)));
   }
 }

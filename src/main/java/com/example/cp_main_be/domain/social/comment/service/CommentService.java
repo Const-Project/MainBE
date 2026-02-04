@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.social.comment.service;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
@@ -11,8 +12,9 @@ import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRep
 import com.example.cp_main_be.domain.social.comment.dto.request.CommentRequest;
 import com.example.cp_main_be.domain.social.comment.dto.request.UpdateCommentRequest;
 import com.example.cp_main_be.domain.social.comment.dto.response.CommentResponse;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.event.CommentCreatedEvent;
-import com.example.cp_main_be.global.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class CommentService {
   private final UserRepository userRepository;
   private final DiaryRepository diaryRepository; // Diary Repository 주입
   private final AvatarPostRepository avatarPostRepository; // AvatarPost Repository 주입
+  private final UserBlockRepository userBlockRepository;
   private final ApplicationEventPublisher eventPublisher;
 
   @Transactional
@@ -35,7 +38,8 @@ public class CommentService {
     User writer =
         userRepository
             .findById(writerId)
-            .orElseThrow(() -> new UserNotFoundException("작성자 사용자를 찾을 수 없습니다."));
+            .orElseThrow(
+                () -> new CustomApiException(ErrorCode.USER_NOT_FOUND, "작성자 사용자를 찾을 수 없습니다."));
 
     // 2. Comment 빌더 준비
     Comment.CommentBuilder commentBuilder =
@@ -49,18 +53,22 @@ public class CommentService {
       Diary diary =
           diaryRepository
               .findById(targetId)
-              .orElseThrow(
-                  () -> new IllegalArgumentException("ID에 해당하는 일기를 찾을 수 없습니다: " + targetId));
+              .orElseThrow(() -> new CustomApiException(ErrorCode.DIARY_NOT_FOUND));
+      if (userBlockRepository.existsByBlockerUserAndBlockedUser(diary.getUser(), writer)) {
+        throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단한 사용자에게 댓글을 달 수 없습니다.");
+      }
       commentBuilder.diary(diary);
     } else if ("AVATAR_POST".equalsIgnoreCase(targetType)) {
       AvatarPost avatarPost =
           avatarPostRepository
               .findById(targetId)
-              .orElseThrow(
-                  () -> new IllegalArgumentException("ID에 해당하는 아바타 포스트를 찾을 수 없습니다: " + targetId));
+              .orElseThrow(() -> new CustomApiException(ErrorCode.POST_NOT_FOUND));
+      if (userBlockRepository.existsByBlockerUserAndBlockedUser(avatarPost.getUser(), writer)) {
+        throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단한 사용자에게 댓글을 달 수 없습니다.");
+      }
       commentBuilder.avatarPost(avatarPost);
     } else {
-      throw new IllegalArgumentException("지원하지 않는 대상 타입입니다: " + targetType);
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "지원하지 않는 대상 타입입니다.");
     }
 
     // 4. 최종적으로 Comment 객체를 빌드하고 저장
@@ -78,10 +86,10 @@ public class CommentService {
     Comment comment =
         commentRepository
             .findById(commentId)
-            .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다.")); // TODO: Custom Exception
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND, "댓글을 찾을 수 없습니다."));
 
     if (!comment.getWriter().getId().equals(writerId)) {
-      throw new RuntimeException("댓글 작성자만 수정할 수 있습니다."); // TODO: Custom Exception
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "댓글 작성자만 수정할 수 있습니다.");
     }
 
     comment.setContent(request.getContent());
@@ -94,10 +102,10 @@ public class CommentService {
     Comment comment =
         commentRepository
             .findById(commentId)
-            .orElseThrow(() -> new RuntimeException("댓글을 찾을 수 없습니다.")); // TODO: Custom Exception
+            .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND, "댓글을 찾을 수 없습니다."));
 
     if (!comment.getWriter().getId().equals(writerId)) {
-      throw new RuntimeException("댓글 작성자만 삭제할 수 있습니다."); // TODO: Custom Exception
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "댓글 작성자만 삭제할 수 있습니다.");
     }
     commentRepository.delete(comment);
   }
@@ -113,7 +121,8 @@ public class CommentService {
       targetId = comment.getAvatarPost().getId();
       targetType = "AVATAR_POST";
     } else {
-      throw new IllegalStateException("Comment must be linked to either Diary or AvatarPost");
+      throw new CustomApiException(
+          ErrorCode.INVALID_REQUEST, "댓글은 DIARY 또는 AVATAR_POST에 연결되어야 합니다.");
     }
 
     return CommentResponse.from(comment, targetId, targetType);

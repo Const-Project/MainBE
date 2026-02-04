@@ -40,9 +40,8 @@ public class CommentController {
       @AuthenticationPrincipal User writer,
       @PathVariable Long commentId,
       @RequestBody @Valid UpdateCommentRequest request) {
-    commentService.updateComment(commentId, writer.getId(), request);
-    return ResponseEntity.ok(
-        ApiResponse.success(commentService.updateComment(commentId, writer.getId(), request)));
+    CommentResponse response = commentService.updateComment(commentId, writer.getId(), request);
+    return ResponseEntity.ok(ApiResponse.success(response));
   }
 
   @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다")

@@ -2,8 +2,11 @@ package com.example.cp_main_be.domain.social.feed.presentation;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.feed.dto.request.RandomFeedRequest;
+import com.example.cp_main_be.domain.social.feed.dto.request.RandomFeedSessionNextRequest;
+import com.example.cp_main_be.domain.social.feed.dto.request.RandomFeedSessionStartRequest;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedResponse;
 import com.example.cp_main_be.domain.social.feed.dto.response.FeedScrollResponse;
+import com.example.cp_main_be.domain.social.feed.dto.response.RandomFeedSessionResponse;
 import com.example.cp_main_be.domain.social.feed.service.FeedService;
 import com.example.cp_main_be.global.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,6 +52,7 @@ public class FeedController {
 
     FeedScrollResponse response =
         feedService.getRandomFeed(
+            user.getUuid(),
             request.getExcludeDiaryIds() != null
                 ? request.getExcludeDiaryIds()
                 : Collections.emptyList(),
@@ -57,6 +61,24 @@ public class FeedController {
                 : Collections.emptyList(),
             request.getSize());
 
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(summary = "랜덤 피드 세션 시작", description = "랜덤 피드 세션을 시작합니다")
+  @PostMapping("/random/session")
+  public ResponseEntity<ApiResponse<RandomFeedSessionResponse>> startRandomFeedSession(
+      @AuthenticationPrincipal User user, @RequestBody RandomFeedSessionStartRequest request) {
+    RandomFeedSessionResponse response =
+        feedService.startRandomFeedSession(user.getUuid(), request.getSize());
+    return ResponseEntity.ok(ApiResponse.success(response));
+  }
+
+  @Operation(summary = "랜덤 피드 세션 다음 페이지", description = "랜덤 피드 세션의 다음 페이지를 불러옵니다")
+  @PostMapping("/random/next")
+  public ResponseEntity<ApiResponse<RandomFeedSessionResponse>> getRandomFeedSessionNext(
+      @RequestBody RandomFeedSessionNextRequest request) {
+    RandomFeedSessionResponse response =
+        feedService.getRandomFeedSessionNext(request.getSessionToken(), request.getSize());
     return ResponseEntity.ok(ApiResponse.success(response));
   }
 }

@@ -20,7 +20,7 @@ public class AuthController {
 
   private final AuthService authService;
 
-  @Operation(summary = "액세스 토큰 재발급", description = "리프레시 토큰으로 새로운 액세스/리프레시 토큰을 발급(롤링)합니다.")
+  @Operation(summary = "액세스 토큰 재발급", description = "리프레시 토큰으로 새로운 액세스 토큰을 발급합니다.")
   @PostMapping("/refresh")
   public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshAccessToken(
       @RequestHeader("X-Refresh-Token") String refreshToken,

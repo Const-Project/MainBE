@@ -1,6 +1,8 @@
 package com.example.cp_main_be.global.infra;
 
 import com.example.cp_main_be.domain.avatar.image.ImageUploader;
+import com.example.cp_main_be.global.common.CustomApiException;
+import com.example.cp_main_be.global.common.ErrorCode;
 import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
@@ -48,7 +50,7 @@ public class S3Uploader implements ImageUploader {
           .toExternalForm();
 
     } catch (IOException e) {
-      throw new IllegalArgumentException("파일 업로드에 실패했습니다: " + e.getMessage());
+      throw new CustomApiException(ErrorCode.UPLOAD_FAILED, "파일 업로드에 실패했습니다.");
     }
   }
 
@@ -66,7 +68,7 @@ public class S3Uploader implements ImageUploader {
       s3Client.deleteObject(deleteObjectRequest);
 
     } catch (Exception e) {
-      throw new RuntimeException("파일 삭제에 실패했습니다: " + e.getMessage());
+      throw new CustomApiException(ErrorCode.UPLOAD_FAILED, "파일 삭제에 실패했습니다.");
     }
   }
 
@@ -78,7 +80,7 @@ public class S3Uploader implements ImageUploader {
       // 경로의 맨 앞 '/' 문자 제거
       return path.substring(1);
     } catch (Exception e) {
-      throw new IllegalArgumentException("잘못된 형식의 URL입니다: " + imageUrl);
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "잘못된 형식의 URL입니다.");
     }
   }
 }

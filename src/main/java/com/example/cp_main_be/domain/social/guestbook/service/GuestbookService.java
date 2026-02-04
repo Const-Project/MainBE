@@ -5,6 +5,7 @@ import com.example.cp_main_be.domain.member.notification.service.NotificationSer
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.social.guestbook.domain.Guestbook;
 import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
@@ -16,6 +17,7 @@ import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -29,9 +31,11 @@ public class GuestbookService {
 
   private final GuestbookRepository guestbookRepository;
   private final UserRepository userRepository;
+  private final UserBlockRepository userBlockRepository;
   private final NotificationService notificationService;
   private final UserService userService;
   private final WishTreeService wishTreeService;
+  private static final ZoneId KOREA_ZONE = ZoneId.of("Asia/Seoul");
 
   public void createGuestbook(Long writerId, Long ownerId, GuestbookRequest request) {
     User writer =
@@ -43,14 +47,20 @@ public class GuestbookService {
             .findById(ownerId)
             .orElseThrow(() -> new UserNotFoundException("방명록 소유자 사용자를 찾을 수 없습니다."));
 
+    if (userBlockRepository.existsByBlockerUserAndBlockedUser(owner, writer)) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "차단한 사용자에게 방명록을 작성할 수 없습니다.");
+    }
+
     // 1일 1회 제한 로직
-    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-    LocalDateTime endOfDay = LocalDate.now().atTime(LocalTime.MAX);
+    LocalDate today = LocalDate.now(KOREA_ZONE);
+    LocalDateTime startOfDay = today.atStartOfDay();
+    LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
 
     if (guestbookRepository
         .findByWriterAndOwnerAndCreatedAtBetween(writer, owner, startOfDay, endOfDay)
         .isPresent()) {
-      throw new RuntimeException("해당 사용자에게는 하루에 한 번만 방명록을 작성할 수 있습니다."); // TODO: Custom Exception
+      throw new CustomApiException(
+          ErrorCode.INVALID_REQUEST, "해당 사용자에게는 하루에 한 번만 방명록을 작성할 수 있습니다.");
     }
 
     Guestbook guestbook =
@@ -62,7 +72,7 @@ public class GuestbookService {
     // 자기 자신에게는 알림을 보내지 않음
     if (!writerId.equals(ownerId)) {
       notificationService.send(
-          owner, writer, NotificationType.GUESTBOOK, "/guestbooks/" + ownerId, null);
+          owner, writer, NotificationType.GUESTBOOK, "/users/" + ownerId, null);
     }
   }
 
@@ -76,8 +86,11 @@ public class GuestbookService {
                   .findById(userId)
                   .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND)));
 
+    List<Long> blockedUserIds = userBlockRepository.findBlockedUserIdsByBlocker(user);
+
     // 비어있는 리스트에 stream()을 호출해도 예외가 발생하지 않고 비어있는 stream이 반환됩니다.
     return guestbookList.stream()
+        .filter(guestbook -> !blockedUserIds.contains(guestbook.getWriter().getId()))
         .map(
             guestbook ->
                 GuestbookResponse.builder()

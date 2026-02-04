@@ -101,11 +101,8 @@ public class ImageProcessingService {
       return result.getImageUrl();
 
     } catch (Exception e) {
-      // 실패 시 폴백 URL 리스트에서 랜덤으로 하나를 선택하여 반환
-      log.warn("AI 아바타 생성 실패. 폴백 이미지 URL을 반환합니다. 원인: {}", e.getMessage());
-      String fallbackUrl = FALLBACK_IMAGE_URLS.get(random.nextInt(FALLBACK_IMAGE_URLS.size()));
-      log.info("선택된 폴백 이미지 URL: {}", fallbackUrl);
-      return fallbackUrl;
+      log.warn("AI 아바타 생성 실패. 요청을 실패로 처리합니다. 원인: {}", e.getMessage());
+      throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
     }
   }
 
@@ -153,10 +150,8 @@ public class ImageProcessingService {
       return imageUrl;
 
     } catch (Exception e) {
-      log.warn("AI 아바타 생성 실패. 폴백 이미지 URL을 반환합니다. 원인: {}", e.getMessage());
-      String fallbackUrl = FALLBACK_IMAGE_URLS.get(random.nextInt(FALLBACK_IMAGE_URLS.size()));
-      log.info("선택된 폴백 이미지 URL: {}", fallbackUrl);
-      return fallbackUrl;
+      log.warn("AI 아바타 생성 실패. 요청을 실패로 처리합니다. 원인: {}", e.getMessage());
+      throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
     }
   }
 

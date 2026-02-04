@@ -126,7 +126,9 @@ public class User implements UserDetails {
 
   public void decrementUnlockableGardenCount() {
     if (this.unlockableGardenCount == null || this.unlockableGardenCount <= 0) {
-      throw new IllegalStateException("unlockableGardenCount는 0보다 작을 수 없습니다.");
+      throw new com.example.cp_main_be.global.common.CustomApiException(
+          com.example.cp_main_be.global.common.ErrorCode.INVALID_REQUEST,
+          "unlockableGardenCount는 0보다 작을 수 없습니다.");
     }
     this.unlockableGardenCount--;
   }
