@@ -36,6 +36,7 @@ public class SecurityConfig {
                 authorize
                     .requestMatchers(
                         "/api/v1/auth/signup",
+                        "/api/v1/auth/supabase",
                         "/api/v1/auth/refresh",
                         "/api/v1/policy",
                         "/swagger-ui/**", // Swagger UI 페이지

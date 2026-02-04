@@ -53,6 +53,12 @@ public class User implements UserDetails {
 
   private String profileImageUrl;
 
+  @Column(name = "oauth_provider")
+  private String oauthProvider;
+
+  @Column(name = "oauth_subject")
+  private String oauthSubject;
+
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
   private List<Avatar> avatarList = new ArrayList<>();

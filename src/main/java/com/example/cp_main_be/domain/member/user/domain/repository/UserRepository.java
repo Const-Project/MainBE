@@ -25,4 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
   Optional<User> findByIdWithGardensAndAvatars(@Param("userId") Long userId);
 
   Boolean existsByNickname(String nickname);
+
+  Optional<User> findByOauthProviderAndOauthSubject(String oauthProvider, String oauthSubject);
 }

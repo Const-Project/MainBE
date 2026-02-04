@@ -13,9 +13,13 @@ import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.jwt.JwtTokenProvider;
+import com.example.cp_main_be.global.supabase.SupabaseAuthClient;
+import com.example.cp_main_be.global.supabase.SupabaseUserResponse;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -33,6 +37,7 @@ public class AuthService {
   private final Logger logger = LoggerFactory.getLogger(AuthService.class);
   private final WishTreeService wishTreeService;
   private final GardenRepository gardenRepository;
+  private final SupabaseAuthClient supabaseAuthClient;
 
   /** 리프레시 토큰으로 액세스 토큰 재발급 + (권장) 리프레시 토큰 롤링 */
   @Transactional
@@ -87,45 +92,50 @@ public class AuthService {
             .gardens(new ArrayList<>())
             .build();
 
-    // 1. 사용자를 먼저 저장합니다.
-    User savedUser = userRepository.save(newUser);
+    User savedUser = saveAndInitializeUser(newUser);
+    return issueTokens(savedUser, true, deviceId);
+  }
 
-    Garden firstGarden =
-        Garden.builder().user(savedUser).slotNumber(1).isLocked(false).build(); // 1번은 기본 해금
-    Garden secondGarden =
-        Garden.builder().user(savedUser).slotNumber(2).isLocked(true).build(); // 2번은 잠김
-    Garden thirdGarden =
-        Garden.builder().user(savedUser).slotNumber(3).isLocked(true).build(); // 3번은 잠김
-    Garden fourthGarden =
-        Garden.builder().user(savedUser).slotNumber(4).isLocked(true).build(); // 4번은 잠김
+  @Transactional
+  public AnonymousRegistrationResponse loginWithSupabase(String accessToken, String deviceId) {
+    SupabaseUserResponse supabaseUser = supabaseAuthClient.fetchUser(accessToken);
 
-    gardenRepository.saveAll(List.of(firstGarden, secondGarden, thirdGarden, fourthGarden));
+    String oauthSubject = supabaseUser.getId();
+    String oauthProvider = extractProvider(supabaseUser);
+    if (oauthSubject == null || oauthProvider == null || oauthProvider.isBlank()) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST);
+    }
 
-    // 2. 위시트리 관련 로직을 수행합니다.
-    // 만약 여기서 예외가 발생하면, 위에서 저장한 newUser까지 모두 롤백됩니다.
-    wishTreeService.addPointsToWishTree(savedUser.getId(), 0L);
+    Optional<User> existing =
+        userRepository.findByOauthProviderAndOauthSubject(oauthProvider, oauthSubject);
 
-    // 3. 모든 것이 성공했을 때만 토큰을 생성하고 저장합니다.
-    String accessToken = jwtTokenProvider.generateAccessToken(newUuid.toString());
-    String refreshToken = jwtTokenProvider.generateRefreshToken(newUuid.toString());
-    LocalDateTime expiry = jwtTokenProvider.getExpirationLocalDateTime(refreshToken);
+    if (existing.isPresent()) {
+      User user = existing.get();
+      boolean updated = applyProfileUpdates(user, supabaseUser);
+      if (updated) {
+        userRepository.save(user);
+      }
+      return issueTokens(user, false, deviceId);
+    }
 
-    RefreshToken rt =
-        RefreshToken.builder()
-            .token(refreshToken)
-            .userUuid(newUuid)
-            .expiresAt(expiry)
-            .deviceId(deviceId)
+    String nickname = buildUniqueNickname(supabaseUser);
+    UUID newUuid = UUID.randomUUID();
+
+    User newUser =
+        User.builder()
+            .uuid(newUuid)
+            .nickname(nickname)
+            .email(supabaseUser.getEmail())
+            .profileImageUrl(extractProfileImageUrl(supabaseUser))
+            .oauthProvider(oauthProvider)
+            .oauthSubject(oauthSubject)
+            .avatarList(new ArrayList<>())
+            .diaries(new ArrayList<>())
+            .gardens(new ArrayList<>())
             .build();
-    refreshTokenRepository.save(rt);
 
-    return AnonymousRegistrationResponse.builder()
-        .accessToken(accessToken)
-        .refreshToken(refreshToken)
-        .userId(savedUser.getId()) // save() 후 반환된 객체의 ID 사용
-        .nickname(nickname)
-        .isNewUser(true)
-        .build();
+    User savedUser = saveAndInitializeUser(newUser);
+    return issueTokens(savedUser, true, deviceId);
   }
 
   /** 특정 리프레시 토큰 무효화(로그아웃) */
@@ -141,5 +151,143 @@ public class AuthService {
   /** 만료된 리프레시 토큰 청소 (스케쥴러로 주기적으로 호출) */
   public void purgeExpiredTokens() {
     refreshTokenRepository.deleteAllByExpiresAtBefore(LocalDateTime.now());
+  }
+
+  private User saveAndInitializeUser(User newUser) {
+    User savedUser = userRepository.save(newUser);
+
+    Garden firstGarden =
+        Garden.builder().user(savedUser).slotNumber(1).isLocked(false).build(); // 1번은 기본 해금
+    Garden secondGarden =
+        Garden.builder().user(savedUser).slotNumber(2).isLocked(true).build(); // 2번은 잠김
+    Garden thirdGarden =
+        Garden.builder().user(savedUser).slotNumber(3).isLocked(true).build(); // 3번은 잠김
+    Garden fourthGarden =
+        Garden.builder().user(savedUser).slotNumber(4).isLocked(true).build(); // 4번은 잠김
+
+    gardenRepository.saveAll(List.of(firstGarden, secondGarden, thirdGarden, fourthGarden));
+    wishTreeService.addPointsToWishTree(savedUser.getId(), 0L);
+
+    return savedUser;
+  }
+
+  private AnonymousRegistrationResponse issueTokens(User user, boolean isNewUser, String deviceId) {
+    String accessToken = jwtTokenProvider.generateAccessToken(user.getUuid().toString());
+    String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUuid().toString());
+    LocalDateTime expiry = jwtTokenProvider.getExpirationLocalDateTime(refreshToken);
+
+    RefreshToken rt =
+        RefreshToken.builder()
+            .token(refreshToken)
+            .userUuid(user.getUuid())
+            .expiresAt(expiry)
+            .deviceId(deviceId)
+            .build();
+    refreshTokenRepository.save(rt);
+
+    return AnonymousRegistrationResponse.builder()
+        .accessToken(accessToken)
+        .refreshToken(refreshToken)
+        .userId(user.getId())
+        .nickname(user.getNickname())
+        .isNewUser(isNewUser)
+        .build();
+  }
+
+  private String extractProvider(SupabaseUserResponse supabaseUser) {
+    Map<String, Object> appMetadata = supabaseUser.getAppMetadata();
+    if (appMetadata == null) {
+      return null;
+    }
+    Object provider = appMetadata.get("provider");
+    if (provider instanceof String providerStr && !providerStr.isBlank()) {
+      return providerStr;
+    }
+    Object providers = appMetadata.get("providers");
+    if (providers instanceof List<?> providerList && !providerList.isEmpty()) {
+      Object first = providerList.get(0);
+      if (first instanceof String firstProvider && !firstProvider.isBlank()) {
+        return firstProvider;
+      }
+    }
+    return null;
+  }
+
+  private boolean applyProfileUpdates(User user, SupabaseUserResponse supabaseUser) {
+    boolean updated = false;
+
+    if (user.getEmail() == null && supabaseUser.getEmail() != null) {
+      user.setEmail(supabaseUser.getEmail());
+      updated = true;
+    }
+
+    String profileImageUrl = extractProfileImageUrl(supabaseUser);
+    if (user.getProfileImageUrl() == null && profileImageUrl != null) {
+      user.setProfileImageUrl(profileImageUrl);
+      updated = true;
+    }
+
+    return updated;
+  }
+
+  private String extractProfileImageUrl(SupabaseUserResponse supabaseUser) {
+    Map<String, Object> userMetadata = supabaseUser.getUserMetadata();
+    if (userMetadata == null) {
+      return null;
+    }
+    Object avatarUrl = userMetadata.get("avatar_url");
+    if (avatarUrl instanceof String avatarStr && !avatarStr.isBlank()) {
+      return avatarStr;
+    }
+    Object pictureUrl = userMetadata.get("picture");
+    if (pictureUrl instanceof String pictureStr && !pictureStr.isBlank()) {
+      return pictureStr;
+    }
+    return null;
+  }
+
+  private String buildUniqueNickname(SupabaseUserResponse supabaseUser) {
+    String base = "user";
+    Map<String, Object> userMetadata = supabaseUser.getUserMetadata();
+    if (userMetadata != null) {
+      base =
+          firstNonBlank(
+              userMetadata, "nickname", "name", "full_name", "preferred_username", "user_name");
+    }
+
+    if (base == null || base.isBlank()) {
+      base = "user";
+    }
+
+    String sanitized = base.replaceAll("\\s+", "");
+    sanitized = sanitized.replaceAll("[^a-zA-Z0-9._-]", "");
+    if (sanitized.isBlank()) {
+      sanitized = "user";
+    }
+
+    String candidate = sanitized;
+    int attempts = 0;
+    while (userRepository.existsByNickname(candidate) && attempts < 5) {
+      candidate = sanitized + randomSuffix();
+      attempts++;
+    }
+    if (userRepository.existsByNickname(candidate)) {
+      candidate = "user" + randomSuffix();
+    }
+    return candidate;
+  }
+
+  private String firstNonBlank(Map<String, Object> metadata, String... keys) {
+    for (String key : keys) {
+      Object value = metadata.get(key);
+      if (value instanceof String str && !str.isBlank()) {
+        return str;
+      }
+    }
+    return null;
+  }
+
+  private String randomSuffix() {
+    return UUID.randomUUID().toString().replace("-", "").substring(0, 6);
   }
 }
