@@ -6,5 +6,6 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RealQuizRepostitory extends JpaRepository<RealQuiz, Long> {
+
   List<RealQuiz> findAllByQuizType(QuizType quizType);
 }

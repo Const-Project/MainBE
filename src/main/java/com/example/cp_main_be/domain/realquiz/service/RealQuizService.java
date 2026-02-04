@@ -123,11 +123,11 @@ public class RealQuizService {
     }
     // 퀴즈가 할당된 경우
     else {
-      RealQuiz realQuiz =
-          realQuizRepostitory
-              .findById(userQuiz.getRealQuiz().getId())
-              .orElseThrow(() -> new QuizNotFoundException("퀴즈가 존재하지 않습니다."));
-      return transformToRealQuizResponseDTO(realQuiz);
+      RealQuiz realQuiz = userQuiz.getRealQuiz();
+      if(realQuiz.getQuizType().equals(quizType))
+        return transformToRealQuizResponseDTO(realQuiz);
+      else
+        throw new QuizNotFoundException("해당하는 타입의 퀴즈가 없습니다.");
     }
   }
 
