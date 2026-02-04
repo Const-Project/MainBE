@@ -71,7 +71,10 @@ public class QuizService {
       throw new CustomApiException(ErrorCode.INVALID_REQUEST, "아직 제출하지 않은 퀴즈입니다.");
     }
 
-    LocalDate missionDate = userDailyMission.getCreatedAt().toLocalDate();
+    if (userDailyMission.getCompletedAt() == null) {
+      throw new CustomApiException(ErrorCode.INVALID_REQUEST, "아직 제출하지 않은 퀴즈입니다.");
+    }
+    LocalDate missionDate = userDailyMission.getCompletedAt().toLocalDate();
     LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
     if (!missionDate.equals(today)) {
       throw new CustomApiException(ErrorCode.INVALID_REQUEST, "오늘의 퀴즈 결과만 조회할 수 있습니다.");
