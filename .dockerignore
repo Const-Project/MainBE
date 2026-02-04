@@ -5,3 +5,5 @@ out
 target
 .idea
 *.md
+.env
+.env.properties
