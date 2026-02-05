@@ -4,6 +4,7 @@ import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,12 @@ public class RedisRandomFeedSessionStore implements RandomFeedSessionStore {
 
   private final StringRedisTemplate redisTemplate;
   private final ObjectMapper objectMapper;
+
+  @PostConstruct
+  void logInitialized() {
+    org.slf4j.LoggerFactory.getLogger(RedisRandomFeedSessionStore.class)
+        .info("RandomFeedSessionStore initialized with REDIS backend");
+  }
 
   @Override
   public void save(String token, RandomFeedSession session) {
