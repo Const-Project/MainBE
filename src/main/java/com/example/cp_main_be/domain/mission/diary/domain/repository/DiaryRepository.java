@@ -43,11 +43,12 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
       @Param("endDate") LocalDateTime endDate);
 
   @Query(
-      "SELECT new com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay(DAY(d.createdAt), COUNT(d.id)) "
+      "SELECT new com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay("
+          + "CAST(FUNCTION('date_part', 'day', d.createdAt) AS int), COUNT(d.id)) "
           + "FROM Diary d "
           + "WHERE d.user = :user "
           + "  AND d.createdAt BETWEEN :startDate AND :endDate "
-          + "GROUP BY DAY(d.createdAt)")
+          + "GROUP BY CAST(FUNCTION('date_part', 'day', d.createdAt) AS int)")
   List<MissionCountPerDay> findCompletedCountsPerDay(
       @Param("user") User user,
       @Param("startDate") LocalDateTime startDate,
@@ -56,8 +57,8 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
   @Query(
       "SELECT d FROM Diary d "
           + "WHERE d.user = :user "
-          + "  AND YEAR(d.createdAt) = :year "
-          + "  AND MONTH(d.createdAt) = :month "
+          + "  AND CAST(FUNCTION('date_part', 'year', d.createdAt) AS int) = :year "
+          + "  AND CAST(FUNCTION('date_part', 'month', d.createdAt) AS int) = :month "
           + "ORDER BY d.createdAt DESC")
   List<Diary> findByUserAndYearAndMonth(
       @Param("user") User user, @Param("year") int year, @Param("month") int month);
