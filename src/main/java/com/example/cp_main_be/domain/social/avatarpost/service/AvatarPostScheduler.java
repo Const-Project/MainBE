@@ -32,7 +32,13 @@ public class AvatarPostScheduler {
               randomAvatar.getUser().getNickname(), randomAvatar.getNickname());
 
       // 3. 새로운 AvatarPost 생성 및 저장
-      AvatarPost newPost = AvatarPost.builder().avatar(randomAvatar).caption(caption).build();
+      AvatarPost newPost =
+          AvatarPost.builder()
+              .avatar(randomAvatar)
+              .user(randomAvatar.getUser())
+              .imageUrl(randomAvatar.getImageUrl())
+              .caption(caption)
+              .build();
       avatarPostRepository.save(newPost);
     }
   }
