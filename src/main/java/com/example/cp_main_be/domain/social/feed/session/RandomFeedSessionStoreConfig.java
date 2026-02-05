@@ -1,5 +1,6 @@
 package com.example.cp_main_be.domain.social.feed.session;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -11,6 +12,17 @@ import org.springframework.core.env.Environment;
 public class RandomFeedSessionStoreConfig {
 
   private static final Logger log = LoggerFactory.getLogger(RandomFeedSessionStoreConfig.class);
+  private final Environment environment;
+
+  public RandomFeedSessionStoreConfig(Environment environment) {
+    this.environment = environment;
+  }
+
+  @PostConstruct
+  void logStoreProperty() {
+    String store = environment.getProperty("random.feed.session.store");
+    log.info("random.feed.session.store property={}", store);
+  }
 
   @Bean
   @ConditionalOnMissingBean(RandomFeedSessionStore.class)
