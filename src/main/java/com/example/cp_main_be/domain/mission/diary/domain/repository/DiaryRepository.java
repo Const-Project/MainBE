@@ -65,7 +65,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
   @Query(
       value =
           "SELECT d.diary_id FROM diaries d WHERE d.is_public = true "
-              + "AND (:excludePostId IS NULL OR d.diary_id <> :excludePostId) ORDER BY RAND()",
+              + "AND (:excludePostId IS NULL OR d.diary_id <> :excludePostId) ORDER BY RANDOM()",
       nativeQuery = true)
   List<Long> findRandomPublicDiaryIds(
       @Param("excludePostId") Long excludePostId, Pageable pageable);
@@ -125,7 +125,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
               OR :#{#excludeIds.isEmpty()} = true
               OR d.diary_id NOT IN (:excludeIds)
           )
-          ORDER BY RAND()
+          ORDER BY RANDOM()
           LIMIT :limit
           """,
       nativeQuery = true)
@@ -148,7 +148,7 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
               OR :#{#blockedUserIds.isEmpty()} = true
               OR d.user_id NOT IN (:blockedUserIds)
           )
-          ORDER BY RAND()
+          ORDER BY RANDOM()
           LIMIT :limit
           """,
       nativeQuery = true)

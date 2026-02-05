@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 public interface AvatarRepository extends JpaRepository<Avatar, Long> {
 
   @Query(
-      value = "SELECT * FROM avatar WHERE is_default_avatar = false ORDER BY RAND() LIMIT 1",
+      value = "SELECT * FROM avatar WHERE is_default_avatar = false ORDER BY RANDOM() LIMIT 1",
       nativeQuery = true)
   Avatar findRandomAvatar();
 }

@@ -30,7 +30,7 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
   // [추가] 랜덤으로 아바타 포스트 ID 목록을 조회하는 쿼리 (MySQL 기준)
   // AvatarPost에는 isPublic 필드가 없으므로 모든 포스트를 대상으로 합니다.
   @Query(
-      value = "SELECT ap.id FROM avatar_post ap WHERE ap.id != :excludePostId ORDER BY RAND()",
+      value = "SELECT ap.id FROM avatar_post ap WHERE ap.id != :excludePostId ORDER BY RANDOM()",
       nativeQuery = true)
   List<Long> findRandomPublicAvatarPostIds(
       @Param("excludePostId") Long excludePostId, Pageable pageable);
@@ -87,7 +87,7 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
               OR :#{#excludeIds.isEmpty()} = true
               OR ap.id NOT IN (:excludeIds)
           )
-          ORDER BY RAND()
+          ORDER BY RANDOM()
           LIMIT :limit
           """,
       nativeQuery = true)
@@ -109,7 +109,7 @@ public interface AvatarPostRepository extends JpaRepository<AvatarPost, Long> {
               OR :#{#blockedUserIds.isEmpty()} = true
               OR ap.user_id NOT IN (:blockedUserIds)
           )
-          ORDER BY RAND()
+          ORDER BY RANDOM()
           LIMIT :limit
           """,
       nativeQuery = true)
