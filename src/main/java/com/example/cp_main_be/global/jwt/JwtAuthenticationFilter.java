@@ -9,10 +9,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +31,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final UserRepository userRepository;
   private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
   private final CustomUserDetailsService customUserDetailsService;
+
+  @Value("${user.last-accessed.update-minutes:10}")
+  private long lastAccessedUpdateMinutes;
 
   @Override
   protected void doFilterInternal(
@@ -46,6 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (jwtTokenProvider.validateToken(token)) {
           logger.info("Token validation successful.");
           String uuidStr = jwtTokenProvider.getUuidFromToken(token);
+          UUID uuid = UUID.fromString(uuidStr);
 
           // UserDetailsService를 통해 사용자 정보 로드
           UserDetails userDetails = customUserDetailsService.loadUserByUsername(uuidStr);
@@ -57,6 +65,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                   userDetails.getAuthorities()); // UserDetails에서 직접 권한 목록을 가져옴
 
           SecurityContextHolder.getContext().setAuthentication(authentication);
+
+          userRepository
+              .findByUuid(uuid)
+              .ifPresent(
+                  user -> {
+                    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+                    LocalDateTime lastAccessedAt = user.getLastAccessedAt();
+                    if (lastAccessedAt == null
+                        || lastAccessedAt.isBefore(now.minusMinutes(lastAccessedUpdateMinutes))) {
+                      user.updateLastAccessedAt(now);
+                      userRepository.save(user);
+                    }
+                  });
         }
       } catch (Exception e) {
         logger.warn("Token validation failed: {}", e.getMessage());

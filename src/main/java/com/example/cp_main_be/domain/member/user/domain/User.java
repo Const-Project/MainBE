@@ -33,8 +33,15 @@ public class User implements UserDetails {
   @Column(name = "last_visited_garden_id")
   private Long lastVisitedGardenId;
 
+  @Column(name = "last_accessed_at")
+  private LocalDateTime lastAccessedAt;
+
   public void updateLastVisitedGarden(Long gardenId) {
     this.lastVisitedGardenId = gardenId;
+  }
+
+  public void updateLastAccessedAt(LocalDateTime accessedAt) {
+    this.lastAccessedAt = accessedAt;
   }
 
   @Column(unique = true)

@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.member.user.domain.repository;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
   Boolean existsByNickname(String nickname);
 
   Optional<User> findByOauthProviderAndOauthSubject(String oauthProvider, String oauthSubject);
+
+  long countByLastAccessedAtBetween(LocalDateTime start, LocalDateTime end);
 }

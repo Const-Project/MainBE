@@ -21,4 +21,9 @@ public interface UserDailyActivityLogRepository extends JpaRepository<UserDailyA
       @Param("user") User user,
       @Param("startDate") LocalDate startDate,
       @Param("endDate") LocalDate endDate);
+
+  @Query(
+      "SELECT COUNT(DISTINCT l.user.id) FROM UserDailyActivityLog l WHERE l.date BETWEEN :startDate AND :endDate")
+  long countDistinctActiveUserIds(
+      @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

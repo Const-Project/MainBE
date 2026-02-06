@@ -70,6 +70,10 @@ notification:
     enabled: false
     sample-rate: 1.0
 
+user:
+  last-accessed:
+    update-minutes: 10
+
 ---
 # ==========================================
 # Local Profile (로컬 Supabase 연결)

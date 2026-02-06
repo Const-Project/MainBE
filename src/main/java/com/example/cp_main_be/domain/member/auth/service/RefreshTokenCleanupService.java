@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ public class RefreshTokenCleanupService {
 
   /** 매일 새벽 3시에 만료된 리프레시 토큰 정리 */
   @Scheduled(cron = "0 0 3 * * *")
+  @Transactional
   public void cleanupExpiredTokens() {
     int beforeCount = (int) refreshTokenRepository.count();
     refreshTokenRepository.deleteAllByExpiresAtBefore(LocalDateTime.now());

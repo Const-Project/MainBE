@@ -17,12 +17,18 @@ import com.example.cp_main_be.global.exception.UserNotFoundException;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
+import io.micrometer.core.instrument.Gauge;
+import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,12 +51,40 @@ public class NotificationService {
   private final GardenRepository gardenRepository;
   private final EmitterRepository emitterRepository;
   private final NotificationRepository notificationRepository;
+  private final MeterRegistry meterRegistry;
 
   @Value("${notification.debug.enabled:false}")
   private boolean notificationDebugEnabled;
 
   @Value("${notification.debug.sample-rate:1.0}")
   private double notificationDebugSampleRate;
+
+  private final AtomicLong deviceTokenMissingCount = new AtomicLong(0L);
+  private final AtomicLong deviceTokenTotalUsers = new AtomicLong(0L);
+  private final AtomicLong deviceTokenHasTokenCount = new AtomicLong(0L);
+  private final AtomicReference<Double> deviceTokenMissingRatio = new AtomicReference<>(0.0d);
+
+  @PostConstruct
+  void registerMetrics() {
+    Gauge.builder("notification.device_token.users", deviceTokenMissingCount, AtomicLong::get)
+        .tag("status", "missing")
+        .tag("window", "7d")
+        .register(meterRegistry);
+    Gauge.builder("notification.device_token.users", deviceTokenTotalUsers, AtomicLong::get)
+        .tag("status", "total")
+        .tag("window", "7d")
+        .register(meterRegistry);
+    Gauge.builder("notification.device_token.users", deviceTokenHasTokenCount, AtomicLong::get)
+        .tag("status", "has_token")
+        .tag("window", "7d")
+        .register(meterRegistry);
+    Gauge.builder(
+            "notification.device_token.missing.ratio",
+            deviceTokenMissingRatio,
+            AtomicReference::get)
+        .tag("window", "7d")
+        .register(meterRegistry);
+  }
 
   public SseEmitter subscribe(Long userId, String lastEventId) {
     String emitterId = makeTimeIncludeId(userId);
@@ -280,7 +314,7 @@ public class NotificationService {
       }
     } else {
       debugEvent("PUSH_SKIPPED", "userId={}, reason=missingToken", receiver.getId());
-      log.warn("디바이스 토큰을 찾을 수 없어 푸시 알림을 전송할 수 없습니다. userId: {}", receiver.getId());
+      log.debug("푸시 스킵: 디바이스 토큰 없음. userId={}", receiver.getId());
     }
   }
 
@@ -298,6 +332,27 @@ public class NotificationService {
       send(user, user, NotificationType.SUNSHINE, "/garden", null);
     }
     log.info("Sending sunshine notification at {}", LocalDateTime.now());
+  }
+
+  @Scheduled(cron = "0 0 * * * *")
+  public void updateDeviceTokenMetrics() {
+    LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+    LocalDateTime startDate = now.minusDays(7);
+    long totalUsers = userRepository.countByLastAccessedAtBetween(startDate, now);
+    long tokenUsers = deviceTokenRepository.countDistinctActiveUserIdsWithToken(startDate, now);
+    long missing = Math.max(0L, totalUsers - tokenUsers);
+    double ratio = totalUsers == 0L ? 0.0d : (double) missing / (double) totalUsers;
+    deviceTokenTotalUsers.set(totalUsers);
+    deviceTokenMissingCount.set(missing);
+    deviceTokenHasTokenCount.set(totalUsers - missing);
+    deviceTokenMissingRatio.set(ratio);
+    debugEvent(
+        "DEVICE_TOKEN_METRICS_UPDATED",
+        "totalUsers={}, tokenUsers={}, missing={}, ratio={}",
+        totalUsers,
+        tokenUsers,
+        missing,
+        ratio);
   }
 
   @Scheduled(cron = "0 0 12 * * *")
