@@ -1,20 +1,39 @@
 package com.example.cp_main_be.global.config;
 
+import java.net.URI;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
 @Configuration
 public class AwsConfig {
 
+  @Value("${cloudflare.r2.endpoint}")
+  private String endpoint;
+
+  @Value("${cloudflare.r2.access-key}")
+  private String accessKey;
+
+  @Value("${cloudflare.r2.secret-key}")
+  private String secretKey;
+
   @Bean
   public S3Client s3Client() {
-    // AWS SDK가 EC2 환경임을 자동으로 감지하고,
-    // 연결된 IAM 역할(ec2-aws)의 권한을 자동으로 사용합니다.
-    // 우리는 리전만 지정해주면 됩니다.
+    /*
+     * 한글 주석:
+     * 일기 이미지는 S3 호환 스토리지(R2)로 업로드하므로
+     * application.yml에 선언된 endpoint와 자격증명을 클라이언트에 명시적으로 주입해야 한다.
+     */
     return S3Client.builder()
-        .region(Region.AP_NORTHEAST_2) // 서울 리전
+        .endpointOverride(URI.create(endpoint))
+        .credentialsProvider(
+            StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+        .region(Region.AP_NORTHEAST_2)
+        .forcePathStyle(true)
         .build();
   }
 }
