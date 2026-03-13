@@ -184,6 +184,11 @@ public class HomeService {
                         && mission.getSelectedAnswerNumber() != null);
     boolean isCheckingCompleted =
         dailyQuestionAnswerRepository.existsByUserAndAnsweredDate(user, today);
+    /*
+     * 한글 주석:
+     * 홈에서 완료된 일기 미션을 눌렀을 때 작성 화면이 아니라
+     * 오늘 작성한 최신 일기 상세로 바로 이동할 수 있도록 ID를 함께 내려준다.
+     */
     Long todayDiaryId =
         diaryRepository
             .findTopByUserAndCreatedAtBetweenOrderByCreatedAtDesc(user, startOfDay, endOfDay)

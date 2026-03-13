@@ -103,6 +103,11 @@ public class RealQuizService {
     LocalDate today = LocalDate.now(KOREA_ZONE);
     LocalDateTime startOfDay = today.atStartOfDay();
     LocalDateTime endOfDay = today.atTime(23, 59, 59);
+    /*
+     * 한글 주석:
+     * 실시간 퀴즈는 하루에 한 문제만 유지해야 하므로
+     * 타입과 무관하게 오늘 가장 마지막으로 할당된 퀴즈를 재사용한다.
+     */
     UserQuiz userQuiz =
         userQuizRepository
             .findTopByUserAndCreatedAtBetweenOrderByCreatedAtDesc(user, startOfDay, endOfDay)
@@ -152,6 +157,11 @@ public class RealQuizService {
                 user, realQuiz, startOfDay, endOfDay)
             .orElseThrow(() -> new RuntimeException("오늘 할당 된 퀴즈가 없습니다."));
 
+    /*
+     * 한글 주석:
+     * 이미 제출한 퀴즈는 같은 결과를 그대로 반환해
+     * 재진입/중복 요청 시 보상과 상태가 다시 반영되지 않게 막는다.
+     */
     if (Boolean.TRUE.equals(userQuiz.getIsCompleted())
         && userQuiz.getSelectedOptionOrder() != null) {
       return buildAnswerResponse(realQuiz, userQuiz.getSelectedOptionOrder());
@@ -174,6 +184,11 @@ public class RealQuizService {
     List<RealQuizOption> quizOptions = realQuizOptionRepository.findAllByRealQuiz(realQuiz);
     List<RealQuizResponseDTO.RealQuizOptionResponseDTO> result =
         transformToRealQuizOptionResponseDTO(quizOptions);
+    /*
+     * 한글 주석:
+     * 퀴즈 조회 응답 자체에 완료 여부, 선택한 선지, 해설을 같이 담아야
+     * 앱이 화면 재진입 후에도 이전 풀이 상태를 그대로 복원할 수 있다.
+     */
     boolean isCompleted =
         userQuiz != null
             && Boolean.TRUE.equals(userQuiz.getIsCompleted())
