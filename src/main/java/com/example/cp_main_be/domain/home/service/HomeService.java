@@ -265,17 +265,25 @@ public class HomeService {
     long expForNextLevelStart = currentStageEnum.getRequiredPointsForNextStage();
     long expInCurrentLevel = totalPoints - expForCurrentLevelStart;
     long expNeededForLevelUp = expForNextLevelStart - expForCurrentLevelStart;
+    long normalizedExpInCurrentLevel = Math.max(0, expInCurrentLevel);
+    long clampedExpInCurrentLevel =
+        Math.min(normalizedExpInCurrentLevel, Math.max(expNeededForLevelUp, 0));
 
+    /*
+     * 한글 주석:
+     * 소망 나무 게이지는 현재 단계 안에서만 0~100%로 보여줘야 하므로
+     * 누적 경험치를 현재 단계 구간으로 정규화한 뒤 최솟값/최댓값을 한 번 더 고정한다.
+     */
     long progressPercent =
         (expNeededForLevelUp > 0)
-            ? (long) (((double) expInCurrentLevel / expNeededForLevelUp) * 100)
+            ? (long) (((double) clampedExpInCurrentLevel / expNeededForLevelUp) * 100)
             : 100;
 
     PannelResponseDTO.WishTreeDto wishTreeDto =
         PannelResponseDTO.WishTreeDto.builder()
             .currentStage(currentStageEnum.getKoreanName())
             .nextStage(nextStageEnum != null ? nextStageEnum.getKoreanName() : "")
-            .currentPoints(expInCurrentLevel)
+            .currentPoints(clampedExpInCurrentLevel)
             .requiredPointsForNextStage(expNeededForLevelUp)
             .progressPercent(progressPercent)
             .build();
