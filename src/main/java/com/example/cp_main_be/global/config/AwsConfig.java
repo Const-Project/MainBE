@@ -9,10 +9,13 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Configuration
 @Slf4j
 public class AwsConfig {
+  private static final Region R2_REGION = Region.of("auto");
 
   @Value("${cloudflare.r2.endpoint}")
   private String endpoint;
@@ -39,14 +42,39 @@ public class AwsConfig {
         "R2 config accessKeyPrefix={}",
         accessKey != null && accessKey.length() >= 4 ? accessKey.substring(0, 4) : "null-or-short");
     log.info("R2 config secretKeyPresent={}", secretKey != null && !secretKey.isBlank());
-    log.info("R2 config region={}", Region.AP_NORTHEAST_2);
+    log.info("R2 config region={}", R2_REGION);
 
-    return S3Client.builder()
-        .endpointOverride(URI.create(endpoint))
-        .credentialsProvider(
-            StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
-        .region(Region.AP_NORTHEAST_2)
-        .forcePathStyle(true)
-        .build();
+    S3Client s3Client =
+        S3Client.builder()
+            .endpointOverride(URI.create(endpoint))
+            .credentialsProvider(
+                StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+            .region(R2_REGION)
+            .forcePathStyle(true)
+            .build();
+
+    try {
+      s3Client.headBucket(HeadBucketRequest.builder().bucket(bucket).build());
+      log.info("R2 headBucket success bucket={}", bucket);
+    } catch (S3Exception e) {
+      log.error(
+          "R2 headBucket failed bucket={}, statusCode={}, errorCode={}, requestId={}, extendedRequestId={}, message={}",
+          bucket,
+          e.statusCode(),
+          e.awsErrorDetails() != null ? e.awsErrorDetails().errorCode() : null,
+          e.requestId(),
+          e.extendedRequestId(),
+          e.awsErrorDetails() != null ? e.awsErrorDetails().errorMessage() : e.getMessage(),
+          e);
+    } catch (Exception e) {
+      log.error(
+          "R2 headBucket failed bucket={}, exceptionType={}, message={}",
+          bucket,
+          e.getClass().getName(),
+          e.getMessage(),
+          e);
+    }
+
+    return s3Client;
   }
 }

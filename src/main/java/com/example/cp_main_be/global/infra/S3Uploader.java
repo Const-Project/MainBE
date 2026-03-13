@@ -14,6 +14,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +59,18 @@ public class S3Uploader implements ImageUploader {
           .getUrl(builder -> builder.bucket(bucket).key(uniqueFileName))
           .toExternalForm();
 
+    } catch (S3Exception e) {
+      log.error(
+          "R2 upload failed bucket={}, key={}, statusCode={}, errorCode={}, requestId={}, extendedRequestId={}, message={}",
+          bucket,
+          uniqueFileName,
+          e.statusCode(),
+          e.awsErrorDetails() != null ? e.awsErrorDetails().errorCode() : null,
+          e.requestId(),
+          e.extendedRequestId(),
+          e.awsErrorDetails() != null ? e.awsErrorDetails().errorMessage() : e.getMessage(),
+          e);
+      throw new CustomApiException(ErrorCode.UPLOAD_FAILED, "파일 업로드에 실패했습니다.");
     } catch (Exception e) {
       log.error(
           "R2 upload failed bucket={}, key={}, exceptionType={}, message={}",
