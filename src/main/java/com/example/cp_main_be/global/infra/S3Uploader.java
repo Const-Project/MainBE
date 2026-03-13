@@ -3,10 +3,10 @@ package com.example.cp_main_be.global.infra;
 import com.example.cp_main_be.domain.avatar.image.ImageUploader;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
-import java.io.IOException;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class S3Uploader implements ImageUploader {
 
   // SDK v2 클라이언트를 주입받습니다.
@@ -42,6 +43,13 @@ public class S3Uploader implements ImageUploader {
               .contentType(file.getContentType())
               .build();
 
+      log.info(
+          "R2 upload start bucket={}, key={}, contentType={}, size={}",
+          bucket,
+          uniqueFileName,
+          file.getContentType(),
+          file.getSize());
+
       s3Client.putObject(
           putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
@@ -50,7 +58,14 @@ public class S3Uploader implements ImageUploader {
           .getUrl(builder -> builder.bucket(bucket).key(uniqueFileName))
           .toExternalForm();
 
-    } catch (IOException e) {
+    } catch (Exception e) {
+      log.error(
+          "R2 upload failed bucket={}, key={}, exceptionType={}, message={}",
+          bucket,
+          uniqueFileName,
+          e.getClass().getName(),
+          e.getMessage(),
+          e);
       throw new CustomApiException(ErrorCode.UPLOAD_FAILED, "파일 업로드에 실패했습니다.");
     }
   }
