@@ -19,6 +19,7 @@ import com.example.cp_main_be.global.exception.QuizNotFoundException;
 import com.example.cp_main_be.global.exception.UserNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Random;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class RealQuizService {
+  private static final ZoneId KOREA_ZONE = ZoneId.of("Asia/Seoul");
 
   private final RealQuizRepostitory realQuizRepostitory;
   private final RealQuizOptionRepository realQuizOptionRepository;
@@ -98,18 +100,20 @@ public class RealQuizService {
   }
 
   public RealQuizResponseDTO getRealQuiz(User user, QuizType quizType) {
-
-    LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-    LocalDateTime endOfDay = LocalDate.now().atTime(23, 59, 59);
+    LocalDate today = LocalDate.now(KOREA_ZONE);
+    LocalDateTime startOfDay = today.atStartOfDay();
+    LocalDateTime endOfDay = today.atTime(23, 59, 59);
     UserQuiz userQuiz =
-        userQuizRepository.findAllTodayUserQuizByUser(user, startOfDay, endOfDay).stream()
-            .findFirst()
+        userQuizRepository
+            .findTopByUserAndCreatedAtBetweenOrderByCreatedAtDesc(user, startOfDay, endOfDay)
             .orElse(null);
 
     // 퀴즈가 할당되지 않은 경우
     if (userQuiz == null) {
       List<RealQuiz> realQuizList = realQuizRepostitory.findAllByQuizType(quizType);
-      if (realQuizList == null) throw new QuizNotFoundException("불러올 퀴즈가 존재하지 않습니다");
+      if (realQuizList == null || realQuizList.isEmpty()) {
+        throw new QuizNotFoundException("불러올 퀴즈가 존재하지 않습니다");
+      }
       Random random = new Random();
       int rand = random.nextInt(realQuizList.size());
       RealQuiz realQuiz = realQuizList.get(rand);
@@ -118,7 +122,7 @@ public class RealQuizService {
       userQuiz = UserQuiz.builder().realQuiz(realQuiz).user(user).isCompleted(false).build();
       userQuizRepository.save(userQuiz);
 
-      return transformToRealQuizResponseDTO(realQuiz);
+      return transformToRealQuizResponseDTO(realQuiz, userQuiz);
 
     }
     // 퀴즈가 할당된 경우
@@ -127,12 +131,16 @@ public class RealQuizService {
           realQuizRepostitory
               .findById(userQuiz.getRealQuiz().getId())
               .orElseThrow(() -> new QuizNotFoundException("퀴즈가 존재하지 않습니다."));
-      return transformToRealQuizResponseDTO(realQuiz);
+      return transformToRealQuizResponseDTO(realQuiz, userQuiz);
     }
   }
 
   public RealQuizAnswerResponseDTO getRealQuizAnswer(
       Long quizId, RealQuizAnswerRequestDTO requestDTO, User user) {
+    LocalDate today = LocalDate.now(KOREA_ZONE);
+    LocalDateTime startOfDay = today.atStartOfDay();
+    LocalDateTime endOfDay = today.atTime(23, 59, 59);
+
     RealQuiz realQuiz =
         realQuizRepostitory
             .findById(quizId)
@@ -140,9 +148,17 @@ public class RealQuizService {
 
     UserQuiz userQuiz =
         userQuizRepository
-            .findByUser(user)
-            .orElseThrow(() -> new RuntimeException("할당 된 퀴즈가 없습니다."));
+            .findTopByUserAndRealQuizAndCreatedAtBetweenOrderByCreatedAtDesc(
+                user, realQuiz, startOfDay, endOfDay)
+            .orElseThrow(() -> new RuntimeException("오늘 할당 된 퀴즈가 없습니다."));
+
+    if (Boolean.TRUE.equals(userQuiz.getIsCompleted())
+        && userQuiz.getSelectedOptionOrder() != null) {
+      return buildAnswerResponse(realQuiz, userQuiz.getSelectedOptionOrder());
+    }
+
     userQuiz.setIsCompleted(true);
+    userQuiz.setSelectedOptionOrder(requestDTO.getSelectedOptionOrder());
 
     boolean isCorrect = realQuiz.getAnswerNumber().equals(requestDTO.getSelectedOptionOrder());
 
@@ -150,29 +166,43 @@ public class RealQuizService {
       wishTreeService.addPointsToWishTree(user.getId(), 15L);
     }
 
+    return buildAnswerResponse(realQuiz, requestDTO.getSelectedOptionOrder());
+  }
+
+  // RealQuiz를 응답 형식으로 변경
+  private RealQuizResponseDTO transformToRealQuizResponseDTO(RealQuiz realQuiz, UserQuiz userQuiz) {
+    List<RealQuizOption> quizOptions = realQuizOptionRepository.findAllByRealQuiz(realQuiz);
+    List<RealQuizResponseDTO.RealQuizOptionResponseDTO> result =
+        transformToRealQuizOptionResponseDTO(quizOptions);
+    boolean isCompleted =
+        userQuiz != null
+            && Boolean.TRUE.equals(userQuiz.getIsCompleted())
+            && userQuiz.getSelectedOptionOrder() != null;
+    Integer selectedOptionNumber = isCompleted ? userQuiz.getSelectedOptionOrder() : null;
+
+    return RealQuizResponseDTO.builder()
+        .quizId(realQuiz.getId())
+        .quizType(realQuiz.getQuizType())
+        .quizQuestion(realQuiz.getQuizQuestion())
+        .isCompleted(isCompleted)
+        .selectedOptionNumber(selectedOptionNumber)
+        .answerNumber(isCompleted ? realQuiz.getAnswerNumber() : null)
+        .isCorrect(isCompleted ? realQuiz.getAnswerNumber().equals(selectedOptionNumber) : null)
+        .answerDescription(isCompleted ? realQuiz.getAnswerDescription() : null)
+        .quizOptions(result)
+        .build();
+  }
+
+  private RealQuizAnswerResponseDTO buildAnswerResponse(
+      RealQuiz realQuiz, Integer selectedOptionOrder) {
     return RealQuizAnswerResponseDTO.builder()
         .answerDescription(realQuiz.getAnswerDescription())
-        .selectedOptionNumber(requestDTO.getSelectedOptionOrder())
-        .isCorrect(realQuiz.getAnswerNumber().equals(requestDTO.getSelectedOptionOrder()))
+        .selectedOptionNumber(selectedOptionOrder)
+        .isCorrect(realQuiz.getAnswerNumber().equals(selectedOptionOrder))
         .isCompleted(true)
         .answerNumber(realQuiz.getAnswerNumber())
         .quizType(realQuiz.getQuizType())
         .quizQuestion(realQuiz.getQuizQuestion())
-        .build();
-  }
-
-  // RealQuiz를 응답 형식으로 변경
-  private RealQuizResponseDTO transformToRealQuizResponseDTO(RealQuiz realQuiz) {
-    List<RealQuizOption> quizOptions = realQuizOptionRepository.findAllByRealQuiz(realQuiz);
-    List<RealQuizResponseDTO.RealQuizOptionResponseDTO> result =
-        transformToRealQuizOptionResponseDTO(quizOptions);
-    return RealQuizResponseDTO.builder()
-        .quizId(realQuiz.getId())
-        .quizType(realQuiz.getQuizType())
-        .answerNumber(realQuiz.getAnswerNumber())
-        .quizQuestion(realQuiz.getQuizQuestion())
-        .answerDescription(realQuiz.getAnswerDescription())
-        .quizOptions(result)
         .build();
   }
 

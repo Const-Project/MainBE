@@ -15,9 +15,11 @@ public class RealQuizResponseDTO {
   private Long quizId;
   private String quizQuestion;
   private QuizType quizType;
-  private Integer answerNumber;
-  private String answerDescription;
   private Boolean isCompleted;
+  private Integer selectedOptionNumber;
+  private Integer answerNumber;
+  private Boolean isCorrect;
+  private String answerDescription;
   private List<RealQuizOptionResponseDTO> quizOptions;
 
   @Getter

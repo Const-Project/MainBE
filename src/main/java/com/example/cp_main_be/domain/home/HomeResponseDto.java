@@ -12,6 +12,7 @@ public class HomeResponseDto {
   private final UserInfo userInfo;
   private final List<GardenSummaryInfo> gardenSummaries; // 본인의 모든 정원 목록
   private final List<MissionInfo> todayMissions;
+  private final Long todayDiaryId;
 
   // private final ActivityInfo activityInfo; // 주간 미션 상태
 

@@ -27,5 +27,8 @@ public class UserQuiz {
 
   @Column @Builder.Default private Boolean isCompleted = false;
 
+  @Column(name = "selected_option_order")
+  private Integer selectedOptionOrder;
+
   @Column @CreationTimestamp private LocalDateTime createdAt;
 }

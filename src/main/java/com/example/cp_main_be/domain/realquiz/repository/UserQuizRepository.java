@@ -2,6 +2,7 @@ package com.example.cp_main_be.domain.realquiz.repository;
 
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay;
+import com.example.cp_main_be.domain.realquiz.RealQuiz;
 import com.example.cp_main_be.domain.realquiz.UserQuiz;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +13,24 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserQuizRepository extends JpaRepository<UserQuiz, Long> {
   Optional<UserQuiz> findByUser(User user);
+
+  Optional<UserQuiz> findTopByUserAndCreatedAtBetweenOrderByCreatedAtDesc(
+      User user, LocalDateTime startDate, LocalDateTime endDate);
+
+  Optional<UserQuiz> findTopByUserAndRealQuizAndCreatedAtBetweenOrderByCreatedAtDesc(
+      User user, RealQuiz realQuiz, LocalDateTime startDate, LocalDateTime endDate);
+
+  @Query(
+      "SELECT uq FROM UserQuiz uq "
+          + "WHERE uq.user = :user "
+          + "AND uq.realQuiz = :realQuiz "
+          + "AND uq.createdAt BETWEEN :startDate AND :endDate "
+          + "ORDER BY uq.createdAt DESC")
+  List<UserQuiz> findTodayUserQuizByUserAndRealQuiz(
+      @Param("user") User user,
+      @Param("realQuiz") com.example.cp_main_be.domain.realquiz.RealQuiz realQuiz,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 
   @Query(
       "SELECT uq FROM UserQuiz uq "

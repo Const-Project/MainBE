@@ -42,6 +42,9 @@ public interface DiaryRepository extends JpaRepository<Diary, Long> {
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate);
 
+  Optional<Diary> findTopByUserAndCreatedAtBetweenOrderByCreatedAtDesc(
+      User user, LocalDateTime startDate, LocalDateTime endDate);
+
   @Query(
       "SELECT new com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCountPerDay("
           + "CAST(FUNCTION('date_part', 'day', d.createdAt) AS int), COUNT(d.id)) "
