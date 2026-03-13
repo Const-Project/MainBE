@@ -10,6 +10,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
 @Configuration
@@ -52,6 +53,31 @@ public class AwsConfig {
             .region(R2_REGION)
             .forcePathStyle(true)
             .build();
+
+    try {
+      ListBucketsResponse listBucketsResponse = s3Client.listBuckets();
+      log.info(
+          "R2 listBuckets success bucketCount={}, buckets={}",
+          listBucketsResponse.buckets() != null ? listBucketsResponse.buckets().size() : 0,
+          listBucketsResponse.buckets() != null
+              ? listBucketsResponse.buckets().stream().map(bucket -> bucket.name()).toList()
+              : java.util.List.of());
+    } catch (S3Exception e) {
+      log.error(
+          "R2 listBuckets failed statusCode={}, errorCode={}, requestId={}, extendedRequestId={}, message={}",
+          e.statusCode(),
+          e.awsErrorDetails() != null ? e.awsErrorDetails().errorCode() : null,
+          e.requestId(),
+          e.extendedRequestId(),
+          e.awsErrorDetails() != null ? e.awsErrorDetails().errorMessage() : e.getMessage(),
+          e);
+    } catch (Exception e) {
+      log.error(
+          "R2 listBuckets failed exceptionType={}, message={}",
+          e.getClass().getName(),
+          e.getMessage(),
+          e);
+    }
 
     try {
       s3Client.headBucket(HeadBucketRequest.builder().bucket(bucket).build());
