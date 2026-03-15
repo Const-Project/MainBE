@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/diaries/{diaryId}/likes")
+@RequestMapping("/api/v1/diaries/{diaryId}/likes")
 public class DiaryLikeController {
 
   private final DiaryLikeService diaryLikeService;

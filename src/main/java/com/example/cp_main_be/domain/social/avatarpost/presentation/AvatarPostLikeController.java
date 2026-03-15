@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/avatar-posts/{postId}/likes")
+@RequestMapping("/api/v1/avatar-posts/{postId}/likes")
 public class AvatarPostLikeController {
 
   private final AvatarPostLikeService avatarPostLikeService;
