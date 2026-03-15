@@ -39,10 +39,8 @@ public class AuthService {
   private final GardenRepository gardenRepository;
   private final SupabaseAuthClient supabaseAuthClient;
 
-  /** 리프레시 토큰으로 액세스 토큰 재발급 + (권장) 리프레시 토큰 롤링 */
   @Transactional
   public TokenRefreshResponse refreshAccessToken(String incomingRefreshToken, String deviceId) {
-    // 1) ~ 5) 까지의 검증 로직은 동일합니다.
     try {
       if (!jwtTokenProvider.validateToken(incomingRefreshToken)) {
         throw new CustomApiException(ErrorCode.INVALID_TOKEN);
@@ -68,15 +66,11 @@ public class AuthService {
             .findByUuid(uuid)
             .orElseThrow(() -> new CustomApiException(ErrorCode.NOT_FOUND));
 
-    // 6) 새로운 Access Token만 발급합니다.
     String newAccessToken = jwtTokenProvider.generateAccessToken(uuid.toString());
-
-    // 7) 롤링 로직을 모두 제거하고, 기존 Refresh Token을 그대로 반환합니다.
     return new TokenRefreshResponse(newAccessToken, incomingRefreshToken, false);
   }
 
-  // [수정] 신규 사용자 가입 메서드
-  @Transactional // 회원가입의 모든 과정을 하나의 트랜잭션으로 묶습니다.
+  @Transactional
   public AnonymousRegistrationResponse registerNewUser(
       RegistrationRequest request, String deviceId) {
 
@@ -87,6 +81,7 @@ public class AuthService {
         User.builder()
             .uuid(newUuid)
             .nickname(nickname)
+            .nicknameSetupCompleted(true)
             .avatarList(new ArrayList<>())
             .diaries(new ArrayList<>())
             .gardens(new ArrayList<>())
@@ -134,6 +129,7 @@ public class AuthService {
             .profileImageUrl(extractProfileImageUrl(supabaseUser))
             .oauthProvider(oauthProvider)
             .oauthSubject(oauthSubject)
+            .nicknameSetupCompleted(false)
             .avatarList(new ArrayList<>())
             .diaries(new ArrayList<>())
             .gardens(new ArrayList<>())
@@ -143,17 +139,14 @@ public class AuthService {
     return issueTokens(savedUser, true, deviceId);
   }
 
-  /** 특정 리프레시 토큰 무효화(로그아웃) */
   public void revokeRefreshToken(String refreshToken) {
     refreshTokenRepository.deleteByToken(refreshToken);
   }
 
-  /** 해당 유저의 전체 리프레시 토큰 무효화(강제 로그아웃 All) */
   public void revokeAllByUser(UUID userUuid) {
     refreshTokenRepository.deleteAllByUserUuid(userUuid);
   }
 
-  /** 만료된 리프레시 토큰 청소 (스케쥴러로 주기적으로 호출) */
   public void purgeExpiredTokens() {
     refreshTokenRepository.deleteAllByExpiresAtBefore(LocalDateTime.now());
   }
@@ -162,13 +155,13 @@ public class AuthService {
     User savedUser = userRepository.save(newUser);
 
     Garden firstGarden =
-        Garden.builder().user(savedUser).slotNumber(1).isLocked(false).build(); // 1번은 기본 해금
+        Garden.builder().user(savedUser).slotNumber(1).isLocked(false).build();
     Garden secondGarden =
-        Garden.builder().user(savedUser).slotNumber(2).isLocked(true).build(); // 2번은 잠김
+        Garden.builder().user(savedUser).slotNumber(2).isLocked(true).build();
     Garden thirdGarden =
-        Garden.builder().user(savedUser).slotNumber(3).isLocked(true).build(); // 3번은 잠김
+        Garden.builder().user(savedUser).slotNumber(3).isLocked(true).build();
     Garden fourthGarden =
-        Garden.builder().user(savedUser).slotNumber(4).isLocked(true).build(); // 4번은 잠김
+        Garden.builder().user(savedUser).slotNumber(4).isLocked(true).build();
 
     gardenRepository.saveAll(List.of(firstGarden, secondGarden, thirdGarden, fourthGarden));
     wishTreeService.addPointsToWishTree(savedUser.getId(), 0L);
@@ -196,6 +189,7 @@ public class AuthService {
         .userId(user.getId())
         .nickname(user.getNickname())
         .isNewUser(isNewUser)
+        .requiresNicknameSetup(user.requiresNicknameSetup())
         .build();
   }
 

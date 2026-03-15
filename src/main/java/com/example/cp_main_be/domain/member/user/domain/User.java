@@ -66,11 +66,12 @@ public class User implements UserDetails {
   @Column(name = "oauth_subject")
   private String oauthSubject;
 
+  @Column(name = "nickname_setup_completed")
+  private Boolean nicknameSetupCompleted;
+
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   @Builder.Default
   private List<Avatar> avatarList = new ArrayList<>();
-
-  // [제거] level, experience 관련 필드와 메서드를 모두 삭제합니다.
 
   @Column(nullable = false)
   private LocalDateTime createdAt;
@@ -99,7 +100,7 @@ public class User implements UserDetails {
 
   @Builder.Default private Boolean notificationEnabled = true;
 
-  @Builder.Default private Boolean marketingConsent = false; // [추가] 마케팅 수신 동의
+  @Builder.Default private Boolean marketingConsent = false;
 
   @Builder.Default private Integer unlockableGardenCount = 0;
 
@@ -112,6 +113,7 @@ public class User implements UserDetails {
     this.updatedAt = LocalDateTime.now();
     if (this.status == null) this.status = UserStatus.ACTIVE;
     if (this.role == null) this.role = Role.USER;
+    if (this.nicknameSetupCompleted == null) this.nicknameSetupCompleted = true;
   }
 
   @PreUpdate
@@ -122,10 +124,15 @@ public class User implements UserDetails {
   public void updateProfile(String nickname, String profileImageUrl) {
     if (nickname != null) {
       this.nickname = nickname;
+      this.nicknameSetupCompleted = true;
     }
     if (profileImageUrl != null) {
       this.profileImageUrl = profileImageUrl;
     }
+  }
+
+  public boolean requiresNicknameSetup() {
+    return Boolean.FALSE.equals(this.nicknameSetupCompleted);
   }
 
   public void addGarden(Garden garden) {
@@ -150,8 +157,6 @@ public class User implements UserDetails {
     this.avatarList.add(avatar);
     avatar.setUser(this);
   }
-
-  // [제거] addExperience, levelUp 메서드 삭제
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
