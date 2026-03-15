@@ -1,6 +1,7 @@
 package com.example.cp_main_be.domain.member.notification.dto.response;
 
 import com.example.cp_main_be.domain.member.notification.domain.Notification;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +13,10 @@ public class NotificationResponse {
   private String content;
   private String url;
   private String thumbnailUrl;
+
+  @JsonProperty("isRead")
   private boolean isRead;
+
   private String notificationType;
   private LocalDateTime createdAt;
 
