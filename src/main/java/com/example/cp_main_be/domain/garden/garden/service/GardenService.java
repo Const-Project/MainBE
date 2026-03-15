@@ -163,11 +163,11 @@ public class GardenService {
         userRepository
             .findById(actorId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+    User targetUser = garden.getUser();
 
     LocalDateTime startOfToday = getStartOfToday();
 
-    checkFriendWateringLimit(actor, startOfToday);
-    checkAlreadyWateredToday(actor, garden, startOfToday);
+    checkFriendWateringLimit(actor, targetUser, startOfToday);
 
     wishTreeService.addPointsToWishTree(actor.getId(), WATERING_POINTS);
     garden.increaseWaterCount();
@@ -184,21 +184,13 @@ public class GardenService {
     friendWateringLogRepository.save(log);
   }
 
-  private void checkFriendWateringLimit(User actor, LocalDateTime startOfWateringDay) {
+  private void checkFriendWateringLimit(
+      User actor, User targetUser, LocalDateTime startOfWateringDay) {
     long todayWateringCount =
-        friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(actor, startOfWateringDay);
+        friendWateringLogRepository.countByWaterGiverAndTargetUserAndWateredAtAfter(
+            actor, targetUser, startOfWateringDay);
     if (todayWateringCount >= MAX_FRIEND_WATERING_PER_DAY) {
       throw new CustomApiException(ErrorCode.FRIEND_WATERING_LIMIT_EXCEEDED);
-    }
-  }
-
-  private void checkAlreadyWateredToday(
-      User actor, Garden garden, LocalDateTime startOfWateringDay) {
-    boolean alreadyWatered =
-        friendWateringLogRepository.existsByWaterGiverAndWateredGardenAndWateredAtAfter(
-            actor, garden, startOfWateringDay);
-    if (alreadyWatered) {
-      throw new CustomApiException(ErrorCode.ALREADY_WATERED_GARDEN);
     }
   }
 

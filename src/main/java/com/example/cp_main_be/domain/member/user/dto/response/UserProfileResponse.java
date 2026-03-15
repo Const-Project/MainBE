@@ -20,7 +20,7 @@ public class UserProfileResponse {
   private FollowStatus followStatus;
 
   //  private int profileUserLevel; // 프로필 주인의 레벨 추가
-  private Long leftWaterCountForOthers; // 오늘 남에게 물을 줄 수 있는 남은 횟수 (현재 접속 유저 기준)
+  private Long leftWaterCountForOthers; // 현재 접속 유저가 이 프로필 주인에게 오늘 더 줄 수 있는 남은 횟수
 
   // 프로필 주인의 모든 정원 목록. 각 정원마다 물주기 가능 여부 포함
   private List<UserGardenDetailResponse> userGardens; // GardenResponse 대신 상세 정보를 담는 새로운 DTO

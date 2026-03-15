@@ -154,14 +154,10 @@ public class AuthService {
   private User saveAndInitializeUser(User newUser) {
     User savedUser = userRepository.save(newUser);
 
-    Garden firstGarden =
-        Garden.builder().user(savedUser).slotNumber(1).isLocked(false).build();
-    Garden secondGarden =
-        Garden.builder().user(savedUser).slotNumber(2).isLocked(true).build();
-    Garden thirdGarden =
-        Garden.builder().user(savedUser).slotNumber(3).isLocked(true).build();
-    Garden fourthGarden =
-        Garden.builder().user(savedUser).slotNumber(4).isLocked(true).build();
+    Garden firstGarden = Garden.builder().user(savedUser).slotNumber(1).isLocked(false).build();
+    Garden secondGarden = Garden.builder().user(savedUser).slotNumber(2).isLocked(true).build();
+    Garden thirdGarden = Garden.builder().user(savedUser).slotNumber(3).isLocked(true).build();
+    Garden fourthGarden = Garden.builder().user(savedUser).slotNumber(4).isLocked(true).build();
 
     gardenRepository.saveAll(List.of(firstGarden, secondGarden, thirdGarden, fourthGarden));
     wishTreeService.addPointsToWishTree(savedUser.getId(), 0L);

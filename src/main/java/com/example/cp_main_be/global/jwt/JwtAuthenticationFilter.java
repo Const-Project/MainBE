@@ -80,8 +80,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           // 임시 닉네임이 노출될 수 있으므로 닉네임 저장 API 외 접근을 차단한다.
           if (user.requiresNicknameSetup() && !isNicknameSetupAllowedRequest(request)) {
             throw new JwtAuthenticationException(
-                ErrorCode.ACCESS_DENIED,
-                new IllegalStateException("닉네임 설정이 완료되지 않은 계정입니다."));
+                ErrorCode.ACCESS_DENIED, new IllegalStateException("닉네임 설정이 완료되지 않은 계정입니다."));
           }
 
           UsernamePasswordAuthenticationToken authentication =

@@ -216,21 +216,11 @@ public class UserService {
 
     LocalDateTime startOfWateringDay = TimeUtil.getStartOfCurrentWateringDay();
 
-    int profileUserWateringCount =
-        friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(
-            profileUser, startOfWateringDay);
-    long leftWaterCountForProfileUser =
-        Math.max(0, (long) MAX_FRIEND_WATERING_PER_DAY - profileUserWateringCount);
-
-    int currentUserWateringCount =
-        friendWateringLogRepository.countByWaterGiverAndWateredAtAfter(
-            currentUser, startOfWateringDay);
+    long currentUserWateringCountForProfileUser =
+        friendWateringLogRepository.countByWaterGiverAndTargetUserAndWateredAtAfter(
+            currentUser, profileUser, startOfWateringDay);
     long leftWaterCountForCurrentUser =
-        Math.max(0, (long) MAX_FRIEND_WATERING_PER_DAY - currentUserWateringCount);
-
-    Set<Long> wateredGardenIds =
-        friendWateringLogRepository.findWateredGardenIdsByGiverAndDate(
-            currentUser.getId(), startOfWateringDay);
+        Math.max(0, (long) MAX_FRIEND_WATERING_PER_DAY - currentUserWateringCountForProfileUser);
 
     List<UserGardenDetailResponse> userGardens =
         profileUser.getGardens().stream()
@@ -238,9 +228,7 @@ public class UserService {
             .sorted(Comparator.comparing(Garden::getSlotNumber))
             .map(
                 garden -> {
-                  boolean alreadyWateredByMe = wateredGardenIds.contains(garden.getId());
-                  boolean isWateringAbleByMe =
-                      leftWaterCountForCurrentUser > 0 && !alreadyWateredByMe;
+                  boolean isWateringAbleByMe = leftWaterCountForCurrentUser > 0;
 
                   HomeResponseDto.AvatarInfo avatarInfoForGarden =
                       HomeResponseDto.AvatarInfo.builder()
@@ -268,5 +256,3 @@ public class UserService {
         .build();
   }
 }
-
-
