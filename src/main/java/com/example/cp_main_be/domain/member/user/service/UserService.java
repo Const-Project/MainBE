@@ -262,7 +262,8 @@ public class UserService {
         .userNickname(profileUser.getNickname())
         .profileImageUrl(profileImageUrl)
         .followStatus(followStatus)
-        .leftWaterCountForOthers(leftWaterCountForProfileUser)
+        // Return the current viewer's remaining friend-watering count for today.
+        .leftWaterCountForOthers(leftWaterCountForCurrentUser)
         .userGardens(userGardens)
         .build();
   }
