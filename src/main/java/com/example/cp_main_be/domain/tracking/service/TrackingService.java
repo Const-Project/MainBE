@@ -116,12 +116,16 @@ public class TrackingService {
     return windowEnd.toString();
   }
 
+  protected LocalDate getToday() {
+    return LocalDate.now(KOREA_ZONE);
+  }
+
   private long calculatePerfectDayCount(User user, LocalDate windowStart, LocalDate windowEnd) {
     return userDailyActivityLogRepository.countPerfectDays(user, windowStart, windowEnd);
   }
 
   private TrackingWindow resolveCurrentWindow() {
-    LocalDate today = LocalDate.now(KOREA_ZONE);
+    LocalDate today = getToday();
     LocalDate windowStart = today.minusDays(TRACKING_WINDOW_DAYS - 1L);
     return TrackingWindow.builder()
         .windowStart(windowStart)
