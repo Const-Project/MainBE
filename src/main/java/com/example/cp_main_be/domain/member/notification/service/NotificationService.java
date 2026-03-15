@@ -206,7 +206,8 @@ public class NotificationService {
   public List<NotificationResponse> getNotifications(Long userId) {
     List<Notification> notifications =
         notificationRepository.findAllByReceiverIdOrderByCreatedAtDesc(userId);
-    long unreadCount = notifications.stream().filter(notification -> !notification.isRead()).count();
+    long unreadCount =
+        notifications.stream().filter(notification -> !notification.isRead()).count();
     log.info(
         "[NOTIFICATION_FETCH] userId={}, totalCount={}, unreadCount={}",
         userId,
