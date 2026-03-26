@@ -44,10 +44,11 @@ public record PostInfoResponse(
   }
 
   public record CommentResponseDTO(
-      Long commentId, String profileImageUrl, String writer, String content) {
+      Long commentId, Long writerId, String profileImageUrl, String writer, String content) {
     public static CommentResponseDTO from(Comment comment) {
       return new CommentResponseDTO(
           comment.getId(),
+          comment.getWriter().getId(),
           comment.getWriter().getProfileImageUrl(),
           comment.getWriter().getNickname(),
           comment.getContent());

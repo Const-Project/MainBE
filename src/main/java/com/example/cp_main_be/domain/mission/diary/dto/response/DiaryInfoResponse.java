@@ -48,12 +48,13 @@ public record DiaryInfoResponse(
   }
 
   public record CommentResponseDTO(
-      Long commentId, String profileImageUrl, String writer, String content) {
+      Long commentId, Long writerId, String profileImageUrl, String writer, String content) {
     public static CommentResponseDTO from(Comment comment) {
       String profileImageUrl =
           comment.getWriter() != null ? comment.getWriter().getProfileImageUrl() : null;
       return new CommentResponseDTO(
           comment.getId(),
+          comment.getWriter() != null ? comment.getWriter().getId() : null,
           profileImageUrl,
           comment.getWriter().getNickname(),
           comment.getContent());
