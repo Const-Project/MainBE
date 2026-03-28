@@ -13,6 +13,8 @@ public interface DeviceTokenRepository extends JpaRepository<DeviceToken, Long> 
 
   Optional<DeviceToken> findByUser(User user);
 
+  void deleteByUser(User user);
+
   @Query("select count(distinct dt.user.id) from DeviceToken dt")
   long countDistinctUserIds();
 

@@ -60,6 +60,14 @@ public class NotificationController {
     return ResponseEntity.ok(ApiResponse.success(null));
   }
 
+  @Operation(summary = "알림 토큰 해제", description = "현재 사용자의 알림 토큰을 해제합니다")
+  @DeleteMapping("/token")
+  public ResponseEntity<ApiResponse<Void>> deleteNotificationToken(
+      @AuthenticationPrincipal User user) {
+    notificationService.deleteDeviceToken(user.getId());
+    return ResponseEntity.ok(ApiResponse.success(null));
+  }
+
   @Operation(summary = "알림/마케팅 설정 조회", description = "현재 알림 및 마케팅 수신 동의 설정을 조회합니다")
   @GetMapping("/settings")
   public ResponseEntity<

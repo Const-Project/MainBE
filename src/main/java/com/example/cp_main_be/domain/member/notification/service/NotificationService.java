@@ -248,6 +248,15 @@ public class NotificationService {
     deviceTokenRepository.save(deviceToken);
   }
 
+  public void deleteDeviceToken(Long userId) {
+    User user =
+        userRepository
+            .findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다."));
+
+    deviceTokenRepository.deleteByUser(user);
+  }
+
   public void updateNotificationSettings(Long userId, NotificationSettingsRequest request) {
     User user =
         userRepository
