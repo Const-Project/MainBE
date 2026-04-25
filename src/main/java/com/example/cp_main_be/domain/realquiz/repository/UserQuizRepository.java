@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -55,4 +56,8 @@ public interface UserQuizRepository extends JpaRepository<UserQuiz, Long> {
       @Param("user") User user,
       @Param("startDate") LocalDateTime startDate,
       @Param("endDate") LocalDateTime endDate);
+
+  @Modifying
+  @Query("DELETE FROM UserQuiz uq WHERE uq.user = :user")
+  void deleteAllByUser(@Param("user") User user);
 }

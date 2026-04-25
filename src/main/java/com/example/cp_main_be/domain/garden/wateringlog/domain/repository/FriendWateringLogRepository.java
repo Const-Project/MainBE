@@ -29,4 +29,10 @@ public interface FriendWateringLogRepository extends JpaRepository<FriendWaterin
   @Modifying
   @Query("DELETE FROM FriendWateringLog fwl WHERE fwl.wateredAt < :cutoffDate")
   int deleteByWateredAtBefore(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+  void deleteAllByWaterGiver(User waterGiver);
+
+  @Modifying
+  @Query("DELETE FROM FriendWateringLog fwl WHERE fwl.wateredGarden.user = :user")
+  void deleteAllByWateredGardenUser(@Param("user") User user);
 }

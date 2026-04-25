@@ -12,4 +12,8 @@ public interface GuestbookRepository extends JpaRepository<Guestbook, Long> {
       User writer, User owner, LocalDateTime startOfDay, LocalDateTime endOfDay);
 
   List<Guestbook> findAllByOwner(User user);
+
+  void deleteAllByWriter(User writer);
+
+  void deleteAllByOwner(User owner);
 }

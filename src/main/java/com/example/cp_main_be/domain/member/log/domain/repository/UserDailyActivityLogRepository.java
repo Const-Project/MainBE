@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,4 +27,8 @@ public interface UserDailyActivityLogRepository extends JpaRepository<UserDailyA
       "SELECT COUNT(DISTINCT l.user.id) FROM UserDailyActivityLog l WHERE l.date BETWEEN :startDate AND :endDate")
   long countDistinctActiveUserIds(
       @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+  @Modifying
+  @Query("DELETE FROM UserDailyActivityLog udal WHERE udal.user = :user")
+  void deleteAllByUser(@Param("user") User user);
 }

@@ -6,6 +6,7 @@ import com.example.cp_main_be.domain.mission.user_daily_mission.dto.MissionCount
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -36,4 +37,8 @@ public interface UserDailyMissionRepository extends JpaRepository<UserDailyMissi
       @Param("endDate") LocalDateTime endDate);
 
   List<UserDailyMission> findByUserIdAndCreatedAtAfter(Long userId, LocalDateTime dateTime);
+
+  @Modifying
+  @Query("DELETE FROM UserDailyMission udm WHERE udm.user = :user")
+  void deleteAllByUser(@Param("user") User user);
 }

@@ -1,211 +1,144 @@
-// package com.example.cp_main_be.domain.user.service;
-//
-// import static org.mockito.ArgumentMatchers.any;
-// import static org.mockito.BDDMockito.given;
-// import static org.mockito.Mockito.*;
-//
-// import com.example.cp_main_be.domain.member.user.domain.User;
-// import com.example.cp_main_be.domain.member.user.domain.UserStatus;
-// import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
-// import com.example.cp_main_be.domain.member.user.service.UserService;
-// import com.example.cp_main_be.global.exception.UserNotFoundException;
-// import com.example.cp_main_be.global.jwt.JwtTokenProvider;
-// import java.util.Optional;
-// import java.util.UUID;
-// import org.junit.jupiter.api.Assertions;
-// import org.junit.jupiter.api.DisplayName;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
-// import org.springframework.dao.DataIntegrityViolationException;
-//
-// @ExtendWith(MockitoExtension.class)
-// class UserServiceTest {
-//
-//  @Mock private UserRepository userRepository;
-//  @Mock private JwtTokenProvider jwtTokenProvider;
-//
-//  @InjectMocks private UserService userService;
-//
-//  @DisplayName("회원 생성시 uuid가 자동으로 생기는가")
-//  @Test
-//  void 회원_생성시_uuid가_자동으로_생기는가() {
-//    // given
-//    User user = User.builder().nickname("test").build();
-//
-//    // Simulate the @PrePersist behavior
-//    doAnswer(
-//            invocation -> {
-//              User argUser = invocation.getArgument(0);
-//              argUser.setUuid(UUID.randomUUID()); // Set UUID on the passed object
-//              return null; // saveUser is void, so return null
-//            })
-//        .when(userRepository)
-//        .save(any(User.class));
-//
-//    // when
-//    userService.saveUser(user);
-//
-//    // then
-//    Assertions.assertNotNull(user.getUuid()); // Now the 'user' object should have a UUID
-//    verify(userRepository).save(any(User.class));
-//  }
-//
-//  @DisplayName("유저 이름이 없으면 오류")
-//  @Test
-//  void 유저_이름이_없으면_오류() {
-//    // given
-//    User user =
-//        User.builder()
-//            .email("test@example.com")
-//            .passwordHash("hashedpassword")
-//            .level(1)
-//            .status(UserStatus.ACTIVE)
-//            .build();
-//    doThrow(DataIntegrityViolationException.class).when(userRepository).save(any(User.class));
-//
-//    // when & then
-//    Assertions.assertThrows(
-//        DataIntegrityViolationException.class,
-//        () -> {
-//          userService.saveUser(user);
-//        });
-//    verify(userRepository).save(any(User.class));
-//  }
-//
-//  @DisplayName("유저생성성공")
-//  @Test
-//  void 유저생성성공() {
-//    // given
-//    Long userId = 1L;
-//    UUID userUuid = UUID.randomUUID();
-//    User user = User.builder().id(userId).uuid(userUuid).nickname("test").build();
-//    given(userRepository.findById(userId)).willReturn(Optional.of(user));
-//
-//    // when
-//    User foundUser = userService.findUserById(userId);
-//
-//    // then
-//    Assertions.assertEquals(userId, foundUser.getId());
-//    Assertions.assertEquals(userUuid, foundUser.getUuid());
-//    Assertions.assertEquals("test", foundUser.getUsername());
-//    verify(userRepository).findById(userId);
-//  }
-//
-//  @DisplayName("UUID로 유저 조회 성공")
-//  @Test
-//  void findUserByUuid_success() {
-//    // given
-//    UUID userUuid = UUID.randomUUID();
-//    User user = User.builder().uuid(userUuid).nickname("testuser").build();
-//    given(userRepository.findByUuid(userUuid)).willReturn(Optional.of(user));
-//
-//    // when
-//    User foundUser = userService.findUserByUuid(userUuid);
-//
-//    // then
-//    Assertions.assertEquals(userUuid, foundUser.getUuid());
-//    verify(userRepository).findByUuid(userUuid);
-//  }
-//
-//  @DisplayName("유저 삭제 성공")
-//  @Test
-//  void deleteUser_success() {
-//    // given
-//    Long userId = 1L;
-//    User user = User.builder().id(userId).nickname("test").build();
-//    given(userRepository.findById(userId)).willReturn(Optional.of(user));
-//
-//    // when
-//    userService.deleteUser(userId);
-//
-//    // then
-//    verify(userRepository).findById(userId);
-//    verify(userRepository).delete(user);
-//  }
-//
-//  @DisplayName("유저 삭제 실패 - 유저를 찾을 수 없음")
-//  @Test
-//  void deleteUser_fail_userNotFound() {
-//    // given
-//    Long userId = 1L;
-//    given(userRepository.findById(userId)).willReturn(Optional.empty());
-//
-//    // when & then
-//    Assertions.assertThrows(UserNotFoundException.class, () -> userService.deleteUser(userId));
-//    verify(userRepository).findById(userId);
-//    verify(userRepository, org.mockito.Mockito.never()).delete(any(User.class));
-//  }
-//
-//  @DisplayName("닉네임 변경 성공")
-//  @Test
-//  void updateNickname_success() {
-//    // given
-//    Long userId = 1L;
-//    String oldNickname = "oldname";
-//    String newNickname = "newname";
-//    User user = User.builder().id(userId).nickname(oldNickname).build();
-//    given(userRepository.findById(userId)).willReturn(Optional.of(user));
-//    given(userRepository.save(any(User.class))).willReturn(user);
-//
-//    // when
-//    userService.updateNickname(userId, newNickname);
-//
-//    // then
-//    Assertions.assertEquals(newNickname, user.getUsername());
-//    verify(userRepository).findById(userId);
-//    verify(userRepository).save(user);
-//  }
-//
-//  @DisplayName("닉네임 변경 실패 - 유저를 찾을 수 없음")
-//  @Test
-//  void updateNickname_fail_userNotFound() {
-//    // given
-//    Long userId = 1L;
-//    String newNickname = "newname";
-//    given(userRepository.findById(userId)).willReturn(Optional.empty());
-//
-//    // when & then
-//    Assertions.assertThrows(
-//        UserNotFoundException.class, () -> userService.updateNickname(userId, newNickname));
-//    verify(userRepository).findById(userId);
-//    verify(userRepository, org.mockito.Mockito.never()).save(any(User.class));
-//  }
-//
-//  @DisplayName("아바타 변경 성공")
-//  @Test
-//  void updateAvatar_success() {
-//    // given
-//    Long userId = 1L;
-//    String oldAvatarUrl = "http://old.com/avatar.png";
-//    String newAvatarUrl = "http://new.com/avatar.png";
-//    User user = User.builder().id(userId).profileImageUrl(oldAvatarUrl).build();
-//    given(userRepository.findById(userId)).willReturn(Optional.of(user));
-//    given(userRepository.save(any(User.class))).willReturn(user);
-//
-//    // when
-//    userService.updateAvatar(userId, newAvatarUrl);
-//
-//    // then
-//    Assertions.assertEquals(newAvatarUrl, user.getProfileImageUrl());
-//    verify(userRepository).findById(userId);
-//    verify(userRepository).save(user);
-//  }
-//
-//  @DisplayName("아바타 변경 실패 - 유저를 찾을 수 없음")
-//  @Test
-//  void updateAvatar_fail_userNotFound() {
-//    // given
-//    Long userId = 1L;
-//    String newAvatarUrl = "http://new.com/avatar.png";
-//    given(userRepository.findById(userId)).willReturn(Optional.empty());
-//
-//    // when & then
-//    Assertions.assertThrows(
-//        UserNotFoundException.class, () -> userService.updateAvatar(userId, newAvatarUrl));
-//    verify(userRepository).findById(userId);
-//    verify(userRepository, org.mockito.Mockito.never()).save(any(User.class));
-//  }
-// }
+package com.example.cp_main_be.domain.user.service;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
+import com.example.cp_main_be.domain.delivery.domain.repository.DeliveryRepository;
+import com.example.cp_main_be.domain.garden.wateringlog.domain.repository.FriendWateringLogRepository;
+import com.example.cp_main_be.domain.member.auth.domain.repository.RefreshTokenRepository;
+import com.example.cp_main_be.domain.member.daily_question.domain.repository.DailyQuestionAnswerRepository;
+import com.example.cp_main_be.domain.member.log.domain.repository.UserDailyActivityLogRepository;
+import com.example.cp_main_be.domain.member.notification.domain.repository.DeviceTokenRepository;
+import com.example.cp_main_be.domain.member.notification.domain.repository.EmitterRepository;
+import com.example.cp_main_be.domain.member.user.domain.User;
+import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
+import com.example.cp_main_be.domain.member.user.service.UserService;
+import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
+import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImageRepository;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
+import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
+import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
+import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
+import com.example.cp_main_be.domain.social.bookmark.domain.repository.BookmarkRepository;
+import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
+import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
+import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
+import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
+import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
+import com.example.cp_main_be.domain.social.like.diary.repository.DiaryLikeRepository;
+import com.example.cp_main_be.domain.tracking.domain.repository.TrackingReportViewRepository;
+import com.example.cp_main_be.global.common.CustomApiException;
+import java.util.Optional;
+import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+  @Mock private UserRepository userRepository;
+  @Mock private AvatarRepository avatarRepository;
+  @Mock private FriendWateringLogRepository friendWateringLogRepository;
+  @Mock private FollowRepository followRepository;
+  @Mock private UserBlockRepository userBlockRepository;
+  @Mock private WishTreeService wishTreeService;
+  @Mock private RefreshTokenRepository refreshTokenRepository;
+  @Mock private DeviceTokenRepository deviceTokenRepository;
+  @Mock private GuestbookRepository guestbookRepository;
+  @Mock private EmitterRepository emitterRepository;
+  @Mock private CommentRepository commentRepository;
+  @Mock private AvatarPostLikeRepository avatarPostLikeRepository;
+  @Mock private AvatarPostRepository avatarPostRepository;
+  @Mock private FeedRepository feedRepository;
+  @Mock private DiaryLikeRepository diaryLikeRepository;
+  @Mock private DiaryImageRepository diaryImageRepository;
+  @Mock private BookmarkRepository bookmarkRepository;
+  @Mock private DeliveryRepository deliveryRepository;
+  @Mock private UserQuizRepository userQuizRepository;
+  @Mock private TrackingReportViewRepository trackingReportViewRepository;
+  @Mock private UserDailyActivityLogRepository userDailyActivityLogRepository;
+  @Mock private DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
+  @Mock private UserDailyMissionRepository userDailyMissionRepository;
+  @Mock private ReportRepository reportRepository;
+
+  @InjectMocks private UserService userService;
+
+  @DisplayName("deleteUser: 연관 데이터가 있는 사용자 탈퇴 시 모든 FK 정리 호출 후 삭제")
+  @Test
+  void deleteUser_연관_데이터_FK_모두_정리됨() {
+    Long userId = 1L;
+    UUID userUuid = UUID.randomUUID();
+    User user = User.builder().id(userId).uuid(userUuid).nickname("test").build();
+    when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+    userService.deleteUser(userId);
+
+    // 독립 데이터 정리
+    verify(deliveryRepository).deleteAllByUser(user);
+    verify(userQuizRepository).deleteAllByUser(user);
+    verify(trackingReportViewRepository).deleteAllByUser(user);
+    verify(userDailyActivityLogRepository).deleteAllByUser(user);
+    verify(dailyQuestionAnswerRepository).deleteAllByUser(user);
+    verify(userDailyMissionRepository).deleteAllByUser(user);
+    verify(reportRepository).deleteAllByUser(user);
+
+    // 차단 정보
+    verify(userBlockRepository).deleteAllByBlockerUser(user);
+    verify(userBlockRepository).deleteAllByBlockedUser(user);
+
+    // 좋아요 및 물주기 (본인이 준 것)
+    verify(avatarPostLikeRepository).deleteAllByUser(user);
+    verify(diaryLikeRepository).deleteAllByUser(user);
+    verify(friendWateringLogRepository).deleteAllByWaterGiver(user);
+
+    // 본인 게시물 관련 (타인이 남긴 데이터 포함)
+    verify(bookmarkRepository).deleteAllByAvatarPostUser(user);
+    verify(avatarPostLikeRepository).deleteAllByAvatarPostUser(user);
+    verify(commentRepository).deleteAllByAvatarPostUser(user);
+    verify(commentRepository).deleteAllByWriter(user);
+    verify(avatarPostRepository).deleteAllByUser(user);
+    verify(feedRepository).deleteAllByUser(user);
+
+    // User cascade(Garden, Diary) 전 선행 정리
+    verify(diaryLikeRepository).deleteAllByDiaryUser(user);
+    verify(diaryImageRepository).deleteAllByUser(user);
+    verify(friendWateringLogRepository).deleteAllByWateredGardenUser(user);
+
+    // 팔로우 및 방명록
+    verify(followRepository).deleteAllByFollower(user);
+    verify(followRepository).deleteAllByFollowing(user);
+    verify(guestbookRepository).deleteAllByWriter(user);
+    verify(guestbookRepository).deleteAllByOwner(user);
+
+    // 인증 토큰
+    verify(refreshTokenRepository).deleteAllByUserUuid(userUuid);
+    verify(deviceTokenRepository).deleteByUser(user);
+
+    // 유저 삭제 및 SSE 정리
+    verify(userRepository).delete(user);
+    verify(emitterRepository).deleteAllEmitterStartWithId(String.valueOf(userId));
+    verify(emitterRepository).deleteAllEventCacheStartWithId(String.valueOf(userId));
+  }
+
+  @DisplayName("deleteUser: 존재하지 않는 유저는 예외 발생 후 삭제 미호출")
+  @Test
+  void deleteUser_유저없음_예외() {
+    when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> userService.deleteUser(1L)).isInstanceOf(CustomApiException.class);
+
+    verify(userRepository, never()).delete(any(User.class));
+  }
+
+  private static <T> T any(Class<T> clazz) {
+    return org.mockito.ArgumentMatchers.any(clazz);
+  }
+}

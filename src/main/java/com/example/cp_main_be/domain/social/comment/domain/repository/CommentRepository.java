@@ -1,9 +1,11 @@
 package com.example.cp_main_be.domain.social.comment.domain.repository;
 
+import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.social.comment.domain.Comment;
 import com.example.cp_main_be.domain.social.comment.dto.CommentCountDto;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,4 +27,10 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
           + "WHERE c.diary.id IN :diaryIds "
           + "GROUP BY c.diary.id")
   List<CommentCountDto> countCommentsByDiaryIds(@Param("diaryIds") List<Long> diaryIds);
+
+  void deleteAllByWriter(User writer);
+
+  @Modifying
+  @Query("DELETE FROM Comment c WHERE c.avatarPost.user = :user")
+  void deleteAllByAvatarPostUser(@Param("user") User user);
 }

@@ -7,6 +7,9 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
 
@@ -15,4 +18,8 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
   boolean existsByUserAndAvatarPost(User user, AvatarPost avatarPost);
 
   Page<Bookmark> findAllByUserOrderByCreatedAtDesc(User user, Pageable pageable);
+
+  @Modifying
+  @Query("DELETE FROM Bookmark b WHERE b.avatarPost.user = :user")
+  void deleteAllByAvatarPostUser(@Param("user") User user);
 }

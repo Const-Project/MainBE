@@ -2,9 +2,15 @@ package com.example.cp_main_be.domain.member.user.service;
 
 import com.example.cp_main_be.domain.avatar.avatar.domain.Avatar;
 import com.example.cp_main_be.domain.avatar.avatar.domain.repository.AvatarRepository;
+import com.example.cp_main_be.domain.delivery.domain.repository.DeliveryRepository;
 import com.example.cp_main_be.domain.garden.garden.domain.Garden;
 import com.example.cp_main_be.domain.garden.wateringlog.domain.repository.FriendWateringLogRepository;
 import com.example.cp_main_be.domain.home.HomeResponseDto;
+import com.example.cp_main_be.domain.member.auth.domain.repository.RefreshTokenRepository;
+import com.example.cp_main_be.domain.member.daily_question.domain.repository.DailyQuestionAnswerRepository;
+import com.example.cp_main_be.domain.member.log.domain.repository.UserDailyActivityLogRepository;
+import com.example.cp_main_be.domain.member.notification.domain.repository.DeviceTokenRepository;
+import com.example.cp_main_be.domain.member.notification.domain.repository.EmitterRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
@@ -13,10 +19,22 @@ import com.example.cp_main_be.domain.member.user.dto.response.LevelStatusRespons
 import com.example.cp_main_be.domain.member.user.dto.response.UserGardenDetailResponse;
 import com.example.cp_main_be.domain.member.user.dto.response.UserProfileResponse;
 import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
+import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImageRepository;
+import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTree;
-import com.example.cp_main_be.domain.mission.wishTree.WishTreeService; // [추가] WishTreeService 임포트
+import com.example.cp_main_be.domain.mission.wishTree.WishTreeService;
 import com.example.cp_main_be.domain.mission.wishTree.WishTreeStage;
+import com.example.cp_main_be.domain.realquiz.repository.UserQuizRepository;
+import com.example.cp_main_be.domain.reports.domain.repository.ReportRepository;
+import com.example.cp_main_be.domain.social.avatarpost.domain.repository.AvatarPostRepository;
+import com.example.cp_main_be.domain.social.bookmark.domain.repository.BookmarkRepository;
+import com.example.cp_main_be.domain.social.comment.domain.repository.CommentRepository;
+import com.example.cp_main_be.domain.social.feed.domain.repository.FeedRepository;
 import com.example.cp_main_be.domain.social.follow.domain.repository.FollowRepository;
+import com.example.cp_main_be.domain.social.guestbook.domain.repository.GuestbookRepository;
+import com.example.cp_main_be.domain.social.like.avatar_post.repository.AvatarPostLikeRepository;
+import com.example.cp_main_be.domain.social.like.diary.repository.DiaryLikeRepository;
+import com.example.cp_main_be.domain.tracking.domain.repository.TrackingReportViewRepository;
 import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import com.example.cp_main_be.global.util.TimeUtil;
@@ -41,7 +59,25 @@ public class UserService {
   private final FriendWateringLogRepository friendWateringLogRepository;
   private final FollowRepository followRepository;
   private final UserBlockRepository userBlockRepository;
-  private final WishTreeService wishTreeService; // [추가] WishTreeService 주입
+  private final WishTreeService wishTreeService;
+  private final RefreshTokenRepository refreshTokenRepository;
+  private final DeviceTokenRepository deviceTokenRepository;
+  private final GuestbookRepository guestbookRepository;
+  private final EmitterRepository emitterRepository;
+  private final CommentRepository commentRepository;
+  private final AvatarPostLikeRepository avatarPostLikeRepository;
+  private final AvatarPostRepository avatarPostRepository;
+  private final FeedRepository feedRepository;
+  private final DiaryLikeRepository diaryLikeRepository;
+  private final DiaryImageRepository diaryImageRepository;
+  private final BookmarkRepository bookmarkRepository;
+  private final DeliveryRepository deliveryRepository;
+  private final UserQuizRepository userQuizRepository;
+  private final TrackingReportViewRepository trackingReportViewRepository;
+  private final UserDailyActivityLogRepository userDailyActivityLogRepository;
+  private final DailyQuestionAnswerRepository dailyQuestionAnswerRepository;
+  private final UserDailyMissionRepository userDailyMissionRepository;
+  private final ReportRepository reportRepository;
 
   // [수정] 경험치 추가 로직을 WishTreeService에 위임
   public void addExperience(Long actorId, Long points) {
@@ -121,7 +157,47 @@ public class UserService {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+
+    deliveryRepository.deleteAllByUser(user);
+    userQuizRepository.deleteAllByUser(user);
+    trackingReportViewRepository.deleteAllByUser(user);
+    userDailyActivityLogRepository.deleteAllByUser(user);
+    dailyQuestionAnswerRepository.deleteAllByUser(user);
+    userDailyMissionRepository.deleteAllByUser(user);
+    reportRepository.deleteAllByUser(user);
+
+    userBlockRepository.deleteAllByBlockerUser(user);
+    userBlockRepository.deleteAllByBlockedUser(user);
+
+    avatarPostLikeRepository.deleteAllByUser(user);
+    diaryLikeRepository.deleteAllByUser(user);
+    friendWateringLogRepository.deleteAllByWaterGiver(user);
+
+    bookmarkRepository.deleteAllByAvatarPostUser(user);
+    avatarPostLikeRepository.deleteAllByAvatarPostUser(user);
+    commentRepository.deleteAllByAvatarPostUser(user);
+    commentRepository.deleteAllByWriter(user);
+    avatarPostRepository.deleteAllByUser(user);
+    feedRepository.deleteAllByUser(user);
+
+    diaryLikeRepository.deleteAllByDiaryUser(user);
+    diaryImageRepository.deleteAllByUser(user);
+    friendWateringLogRepository.deleteAllByWateredGardenUser(user);
+
+    followRepository.deleteAllByFollower(user);
+    followRepository.deleteAllByFollowing(user);
+
+    guestbookRepository.deleteAllByWriter(user);
+    guestbookRepository.deleteAllByOwner(user);
+
+    refreshTokenRepository.deleteAllByUserUuid(user.getUuid());
+    deviceTokenRepository.deleteByUser(user);
+
     userRepository.delete(user);
+
+    String userIdStr = String.valueOf(userId);
+    emitterRepository.deleteAllEmitterStartWithId(userIdStr);
+    emitterRepository.deleteAllEventCacheStartWithId(userIdStr);
   }
 
   public User findById(Long id) {

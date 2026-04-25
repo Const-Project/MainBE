@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,4 +27,8 @@ public interface DailyQuestionAnswerRepository extends JpaRepository<DailyQuesti
 
   List<DailyQuestionAnswer> findAllByUserAndAnsweredDateBetween(
       User user, LocalDate startDate, LocalDate endDate);
+
+  @Modifying
+  @Query("DELETE FROM DailyQuestionAnswer dqa WHERE dqa.user = :user")
+  void deleteAllByUser(@Param("user") User user);
 }

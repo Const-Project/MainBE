@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,6 +21,12 @@ public interface AvatarPostLikeRepository extends JpaRepository<AvatarPostLike, 
   long countByAvatarPost(AvatarPost avatarPost);
 
   void deleteByUserAndAvatarPost(User user, AvatarPost avatarPost);
+
+  void deleteAllByUser(User user);
+
+  @Modifying
+  @Query("DELETE FROM AvatarPostLike apl WHERE apl.avatarPost.user = :user")
+  void deleteAllByAvatarPostUser(@Param("user") User user);
 
   @Query(
       "SELECT l.avatarPost.id, COUNT(l.id) FROM AvatarPostLike l WHERE l.avatarPost.id IN :postIds GROUP BY l.avatarPost.id")
