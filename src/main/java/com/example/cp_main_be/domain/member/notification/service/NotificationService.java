@@ -235,6 +235,13 @@ public class NotificationService {
     debugEvent("READ_OK", "notificationId={}, userId={}", notificationId, userId);
   }
 
+  @Transactional
+  public int readAllNotifications(Long userId) {
+    int updatedCount = notificationRepository.markAllAsReadByReceiverId(userId);
+    debugEvent("READ_ALL_OK", "userId={}, updatedCount={}", userId, updatedCount);
+    return updatedCount;
+  }
+
   public void registerOrUpdateDeviceToken(Long userId, NotificationTokenRequest request) {
     User user =
         userRepository

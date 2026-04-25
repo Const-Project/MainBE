@@ -44,6 +44,14 @@ public class NotificationController {
         ApiResponse.success(notificationService.getNotifications(user.getId())));
   }
 
+  @Operation(summary = "전체 알림 읽음 처리", description = "현재 사용자의 미확인 알림을 한 번에 읽음 처리합니다")
+  @PatchMapping("/read-all")
+  public ResponseEntity<ApiResponse<Integer>> readAllNotifications(
+      @AuthenticationPrincipal User user) {
+    return ResponseEntity.ok(
+        ApiResponse.success(notificationService.readAllNotifications(user.getId())));
+  }
+
   @Operation(summary = "알림 읽음 처리", description = "내 알림을 읽음 처리합니다")
   @PatchMapping("/{id}/read")
   public ResponseEntity<ApiResponse<Void>> readNotification(

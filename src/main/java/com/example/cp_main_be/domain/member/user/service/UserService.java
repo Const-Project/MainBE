@@ -228,7 +228,10 @@ public class UserService {
             .sorted(Comparator.comparing(Garden::getSlotNumber))
             .map(
                 garden -> {
-                  boolean isWateringAbleByMe = leftWaterCountForCurrentUser > 0;
+                  boolean isWateringAbleByMe =
+                      !profileUser.getId().equals(currentUserId)
+                          && isFollowing
+                          && leftWaterCountForCurrentUser > 0;
 
                   HomeResponseDto.AvatarInfo avatarInfoForGarden =
                       HomeResponseDto.AvatarInfo.builder()
