@@ -50,9 +50,25 @@ aws:
   s3:
     bucket: cp-main-bucket
 
-fastapi:
-  server:
-    url: ${FASTAPI_URL}
+google:
+  gemini:
+    api-key: ${GEMINI_API_KEY}
+    image-model: ${GEMINI_IMAGE_MODEL:gemini-2.5-flash-image}
+    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+
+replicate:
+  api:
+    token: ${REPLICATE_API_TOKEN}
+    base-url: ${REPLICATE_BASE_URL:https://api.replicate.com}
+  rembg:
+    model: ${REPLICATE_REMBG_MODEL:cjwbw/rembg}
+    version: ${REPLICATE_REMBG_VERSION:}
+
+avatar:
+  generation:
+    timeout-seconds: ${AVATAR_GENERATION_TIMEOUT_SECONDS:300}
+  reference:
+    validate: true
 
 logging:
   level:
@@ -109,6 +125,17 @@ supabase:
 # 로컬용 JWT 설정
 jwt:
   secret: ${LOCAL_JWT_SECRET} # .env에서 가져옵니다
+
+# 로컬 개발 시 AI 기능 키가 없어도 기동 가능하도록 설정
+google:
+  gemini:
+    api-key: ${GEMINI_API_KEY:local-dummy-key}
+replicate:
+  api:
+    token: ${REPLICATE_API_TOKEN:local-dummy-token}
+avatar:
+  reference:
+    validate: false
 ---
 # ==========================================
 # Prod Profile (Railway + Supabase)
