@@ -230,6 +230,10 @@ public class ImageProcessingService {
         (rembgVersion != null && !rembgVersion.isBlank())
             ? replicateBaseUrl + "/v1/predictions"
             : replicateBaseUrl + "/v1/models/" + rembgModel + "/predictions";
+    log.info(
+        "[AVATAR_AI] stage=rembg_create_request_uri uri={}, versionPresent={}",
+        predictionsUri,
+        rembgVersion != null && !rembgVersion.isBlank());
 
     ReplicatePredictionResponse prediction =
         webClient

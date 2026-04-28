@@ -62,7 +62,7 @@ replicate:
     base-url: ${REPLICATE_BASE_URL:https://api.replicate.com}
   rembg:
     model: ${REPLICATE_REMBG_MODEL:cjwbw/rembg}
-    version: ${REPLICATE_REMBG_VERSION:}
+    version: ${REPLICATE_REMBG_VERSION:fb8af171cfa1616ddcf1242c093f9c46bcada5ad4cf6f2fbe8b81b330ec5c003}
 
 avatar:
   generation:
