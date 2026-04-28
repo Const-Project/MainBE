@@ -4,6 +4,7 @@ import com.example.cp_main_be.global.common.CustomApiException;
 import com.example.cp_main_be.global.common.ErrorCode;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -12,6 +13,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class S3StorageService implements StorageService {
 
   private final S3Client s3Client;
@@ -28,27 +30,50 @@ public class S3StorageService implements StorageService {
     // 1. 파일의 고유한 이름 생성 (파일 충돌 방지)
     String uniqueFileName = createUniqueFileName(originalFileName);
     String objectKey = folderPath + uniqueFileName; // 예: "avatars/uuid-image.png"
+    String contentType = getContentType(originalFileName);
 
     try {
+      log.info(
+          "[AVATAR_STORAGE] stage=upload_start bucket={}, key={}, contentType={}, bytes={}, originalFilename={}",
+          bucket,
+          objectKey,
+          contentType,
+          fileBytes.length,
+          originalFileName);
+
       // 2. S3에 업로드할 요청 객체 생성
       PutObjectRequest putObjectRequest =
           PutObjectRequest.builder()
               .bucket(bucket)
               .key(objectKey)
-              .contentType(getContentType(originalFileName)) // 파일 확장자에 맞는 Content-Type 설정
+              .contentType(contentType) // 파일 확장자에 맞는 Content-Type 설정
               .build();
 
       // 3. [수정] S3 클라이언트를 통해 파일 업로드 (byte[]를 직접 사용)
       s3Client.putObject(putObjectRequest, RequestBody.fromBytes(fileBytes));
 
       // 4. 업로드된 파일의 URL 반환
-      return s3Client
-          .utilities()
-          .getUrl(builder -> builder.bucket(bucket).key(objectKey))
-          .toExternalForm();
+      String uploadedUrl =
+          s3Client
+              .utilities()
+              .getUrl(builder -> builder.bucket(bucket).key(objectKey))
+              .toExternalForm();
+      log.info(
+          "[AVATAR_STORAGE] stage=upload_completed bucket={}, key={}, url={}",
+          bucket,
+          objectKey,
+          uploadedUrl);
+      return uploadedUrl;
 
     } catch (Exception e) {
       // 업로드 중 에러 발생 시
+      log.error(
+          "[AVATAR_STORAGE] stage=upload_failed bucket={}, key={}, errorType={}, message={}",
+          bucket,
+          objectKey,
+          e.getClass().getSimpleName(),
+          e.getMessage(),
+          e);
       throw new CustomApiException(ErrorCode.UPLOAD_FAILED);
     }
   }

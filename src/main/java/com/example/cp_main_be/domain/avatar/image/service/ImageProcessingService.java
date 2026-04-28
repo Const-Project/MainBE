@@ -91,24 +91,59 @@ public class ImageProcessingService {
 
   public String processImageWithAi(MultipartFile imageFile) {
     try {
+      log.info(
+          "[AVATAR_AI] stage=process_start originalFilename={}, contentType={}, size={}",
+          imageFile.getOriginalFilename(),
+          imageFile.getContentType(),
+          imageFile.getSize());
+
       byte[] userImageBytes = imageFile.getBytes();
       String userMimeType = imageFile.getContentType();
+      log.info(
+          "[AVATAR_AI] stage=user_image_loaded bytes={}, mimeType={}",
+          userImageBytes.length,
+          userMimeType);
+
       byte[] referenceImageBytes =
           new ClassPathResource(REFERENCE_IMAGE_PATH).getInputStream().readAllBytes();
+      log.info(
+          "[AVATAR_AI] stage=reference_image_loaded path={}, bytes={}",
+          REFERENCE_IMAGE_PATH,
+          referenceImageBytes.length);
 
       byte[] generatedImageBytes = callGemini(userImageBytes, userMimeType, referenceImageBytes);
-      byte[] rembgBytes = callRembgAndDownload(generatedImageBytes);
+      log.info("[AVATAR_AI] stage=gemini_completed bytes={}", generatedImageBytes.length);
 
-      return storageService.uploadFile(rembgBytes, "avatars/", imageFile.getOriginalFilename());
+      byte[] rembgBytes = callRembgAndDownload(generatedImageBytes);
+      log.info("[AVATAR_AI] stage=rembg_completed bytes={}", rembgBytes.length);
+
+      String imageUrl =
+          storageService.uploadFile(rembgBytes, "avatars/", imageFile.getOriginalFilename());
+      log.info("[AVATAR_AI] stage=storage_upload_completed imageUrl={}", imageUrl);
+      return imageUrl;
     } catch (CustomApiException e) {
+      log.warn(
+          "[AVATAR_AI] stage=process_failed errorType=CustomApiException message={}",
+          e.getMessage());
       throw e;
     } catch (Exception e) {
-      log.warn("AI 아바타 생성 실패. 원인: {}", e.getMessage());
+      log.warn(
+          "[AVATAR_AI] stage=process_failed errorType={} message={}",
+          e.getClass().getSimpleName(),
+          e.getMessage(),
+          e);
       throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
     }
   }
 
   private byte[] callGemini(byte[] userImageBytes, String userMimeType, byte[] referenceBytes) {
+    log.info(
+        "[AVATAR_AI] stage=gemini_request_start model={}, userBytes={}, referenceBytes={}, mimeType={}",
+        geminiModel,
+        userImageBytes.length,
+        referenceBytes.length,
+        userMimeType);
+
     String userBase64 = Base64.getEncoder().encodeToString(userImageBytes);
     String refBase64 = Base64.getEncoder().encodeToString(referenceBytes);
 
@@ -153,8 +188,13 @@ public class ImageProcessingService {
             .timeout(Duration.ofSeconds(60))
             .block();
 
+    log.info(
+        "[AVATAR_AI] stage=gemini_response_received hasResponse={}, candidateCount={}",
+        response != null,
+        response != null && response.candidates() != null ? response.candidates().size() : null);
+
     if (response == null || response.candidates() == null || response.candidates().isEmpty()) {
-      log.error("Gemini 응답 없음 (null/empty candidates)");
+      log.error("[AVATAR_AI] stage=gemini_failed reason=null_or_empty_candidates");
       throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
     }
 
@@ -166,12 +206,19 @@ public class ImageProcessingService {
         .map(p -> Base64.getDecoder().decode(p.inlineData().data()))
         .orElseThrow(
             () -> {
-              log.error("Gemini 응답에 이미지 part 없음 (safety block 또는 텍스트 전용 응답)");
+              log.error("[AVATAR_AI] stage=gemini_failed reason=no_image_part");
               return new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
             });
   }
 
   private byte[] callRembgAndDownload(byte[] imageBytes) {
+    log.info(
+        "[AVATAR_AI] stage=rembg_create_request_start baseUrl={}, model={}, versionPresent={}, inputBytes={}",
+        replicateBaseUrl,
+        rembgModel,
+        rembgVersion != null && !rembgVersion.isBlank(),
+        imageBytes.length);
+
     String dataUri = "data:image/png;base64," + Base64.getEncoder().encodeToString(imageBytes);
 
     Object requestBody =
@@ -209,9 +256,13 @@ public class ImageProcessingService {
             .block();
 
     if (prediction == null || prediction.id() == null) {
-      log.error("Replicate prediction 생성 실패 (null/empty id)");
+      log.error("[AVATAR_AI] stage=rembg_create_failed reason=null_or_empty_id");
       throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
     }
+    log.info(
+        "[AVATAR_AI] stage=rembg_prediction_created predictionId={}, status={}",
+        prediction.id(),
+        prediction.status());
 
     String outputUrl =
         fetchPrediction(prediction.id())
@@ -232,9 +283,15 @@ public class ImageProcessingService {
             .block();
 
     if (outputUrl == null || outputUrl.isBlank()) {
-      log.error("Replicate output URL이 비어 있음");
+      log.error(
+          "[AVATAR_AI] stage=rembg_failed reason=empty_output_url predictionId={}",
+          prediction.id());
       throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
     }
+    log.info(
+        "[AVATAR_AI] stage=rembg_output_ready predictionId={}, outputUrl={}",
+        prediction.id(),
+        outputUrl);
 
     byte[] resultBytes =
         webClient
@@ -247,9 +304,15 @@ public class ImageProcessingService {
             .block();
 
     if (resultBytes == null || resultBytes.length == 0) {
-      log.error("Replicate 결과 이미지 다운로드 실패");
+      log.error(
+          "[AVATAR_AI] stage=rembg_download_failed reason=empty_result predictionId={}",
+          prediction.id());
       throw new CustomApiException(ErrorCode.AI_AVATAR_FAILED);
     }
+    log.info(
+        "[AVATAR_AI] stage=rembg_download_completed predictionId={}, bytes={}",
+        prediction.id(),
+        resultBytes.length);
 
     return resultBytes;
   }
