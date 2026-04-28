@@ -1,0 +1,1 @@
+ALTER TABLE avatar ALTER COLUMN master_id DROP NOT NULL;

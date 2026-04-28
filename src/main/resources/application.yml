@@ -46,6 +46,7 @@ cloudflare:
     access-key: ${R2_ACCESS_KEY}
     secret-key: ${R2_SECRET_KEY}
     account-id: ${R2_ACCOUNT_ID}
+    public-url: ${R2_PUBLIC_URL:}
 aws:
   s3:
     bucket: cp-main-bucket

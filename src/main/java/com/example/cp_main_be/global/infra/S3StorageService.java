@@ -21,6 +21,9 @@ public class S3StorageService implements StorageService {
   @Value("${cloudflare.r2.bucket}")
   private String bucket;
 
+  @Value("${cloudflare.r2.public-url:}")
+  private String publicUrl;
+
   @Override
   public String uploadFile(byte[] fileBytes, String folderPath, String originalFileName) {
     if (fileBytes == null || fileBytes.length == 0) {
@@ -53,11 +56,7 @@ public class S3StorageService implements StorageService {
       s3Client.putObject(putObjectRequest, RequestBody.fromBytes(fileBytes));
 
       // 4. 업로드된 파일의 URL 반환
-      String uploadedUrl =
-          s3Client
-              .utilities()
-              .getUrl(builder -> builder.bucket(bucket).key(objectKey))
-              .toExternalForm();
+      String uploadedUrl = buildPublicUrl(objectKey);
       log.info(
           "[AVATAR_STORAGE] stage=upload_completed bucket={}, key={}, url={}",
           bucket,
@@ -76,6 +75,17 @@ public class S3StorageService implements StorageService {
           e);
       throw new CustomApiException(ErrorCode.UPLOAD_FAILED);
     }
+  }
+
+  private String buildPublicUrl(String objectKey) {
+    if (publicUrl != null && !publicUrl.isBlank()) {
+      return publicUrl.replaceAll("/+$", "") + "/" + objectKey;
+    }
+
+    return s3Client
+        .utilities()
+        .getUrl(builder -> builder.bucket(bucket).key(objectKey))
+        .toExternalForm();
   }
 
   /** 원본 파일 이름에서 확장자를 추출하고, UUID를 결합하여 고유한 파일 이름을 생성합니다. */

@@ -46,22 +46,13 @@ public class AvatarService {
             .findById(userId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
 
-    AvatarMaster master;
+    AvatarMaster master = null;
     if (masterId != null) {
       // 1. 기존 목록에서 선택한 경우: 전달받은 masterId로 AvatarMaster를 찾습니다.
       master =
           avatarMasterRepository
               .findById(masterId)
               .orElseThrow(() -> new CustomApiException(ErrorCode.AVATAR_MASTER_NOT_FOUND));
-    } else {
-      // 2. AI로 생성한 경우: 설정된 AI 아바타 마스터 ID로 AvatarMaster를 찾습니다.
-      master =
-          avatarMasterRepository
-              .findById(aiAvatarMasterId)
-              .orElseThrow(
-                  () ->
-                      new CustomApiException(
-                          ErrorCode.AVATAR_MASTER_NOT_FOUND, "AI 아바타 원본을 찾을 수 없습니다."));
     }
 
     Avatar newAvatar =

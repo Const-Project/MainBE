@@ -273,7 +273,10 @@ public class UserService {
                   if (avatar.getImageUrl() != null && !avatar.getImageUrl().isBlank()) {
                     return avatar.getImageUrl();
                   }
-                  return avatar.getAvatarMaster().getDefaultImageUrl();
+                  if (avatar.getAvatarMaster() != null) {
+                    return avatar.getAvatarMaster().getDefaultImageUrl();
+                  }
+                  return null;
                 })
             .orElse(profileUser.getProfileImageUrl());
 
@@ -313,7 +316,7 @@ public class UserService {
                       HomeResponseDto.AvatarInfo.builder()
                           .avatarId(garden.getAvatar().getId())
                           .avatarName(garden.getAvatar().getNickname())
-                          .avatarImageUrl(garden.getAvatar().getAvatarMaster().getDefaultImageUrl())
+                          .avatarImageUrl(resolveAvatarImageUrl(garden.getAvatar()))
                           .build();
 
                   return UserGardenDetailResponse.builder()
@@ -333,5 +336,15 @@ public class UserService {
         .leftWaterCountForOthers(leftWaterCountForCurrentUser)
         .userGardens(userGardens)
         .build();
+  }
+
+  private String resolveAvatarImageUrl(Avatar avatar) {
+    if (avatar.getImageUrl() != null && !avatar.getImageUrl().isBlank()) {
+      return avatar.getImageUrl();
+    }
+    if (avatar.getAvatarMaster() != null) {
+      return avatar.getAvatarMaster().getDefaultImageUrl();
+    }
+    return null;
   }
 }
