@@ -168,6 +168,10 @@ public class DiaryService {
     DiaryImage oldImage = diary.getDiaryImage();
     Long newImageId = request.getImageId();
 
+    if (newImageId == null) {
+      return diary;
+    }
+
     // Case 1: 이미지가 변경되지 않은 경우 (둘 다 없거나, ID가 같음)
     if (Objects.equals(oldImage != null ? oldImage.getId() : null, newImageId)) {
       return diary;
