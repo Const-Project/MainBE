@@ -114,13 +114,41 @@ public class NotificationService {
       NotificationType notificationType,
       String url,
       String thumbnailUrl) {
+    Notification notification =
+        createAndSendInAppNotification(receiver, sender, notificationType, url, thumbnailUrl);
+    if (notification == null) {
+      return;
+    }
+
+    try {
+      sendPushNotification(receiver, notification);
+    } catch (Exception e) {
+      log.error("푸시 알림 전송 중 예외 발생 (트랜잭션 롤백 방지용 격리)", e);
+    }
+  }
+
+  public void sendInAppOnly(
+      User receiver,
+      User sender,
+      NotificationType notificationType,
+      String url,
+      String thumbnailUrl) {
+    createAndSendInAppNotification(receiver, sender, notificationType, url, thumbnailUrl);
+  }
+
+  private Notification createAndSendInAppNotification(
+      User receiver,
+      User sender,
+      NotificationType notificationType,
+      String url,
+      String thumbnailUrl) {
     if (!Boolean.TRUE.equals(receiver.getNotificationEnabled())) {
       debugEvent(
           "NOTIFICATION_SKIPPED",
           "userId={}, type={}, reason=notificationDisabled",
           receiver.getId(),
           notificationType);
-      return;
+      return null;
     }
     if (notificationType.isMarketing() && !Boolean.TRUE.equals(receiver.getMarketingConsent())) {
       debugEvent(
@@ -128,7 +156,7 @@ public class NotificationService {
           "userId={}, type={}, reason=marketingConsentDisabled",
           receiver.getId(),
           notificationType);
-      return;
+      return null;
     }
 
     Notification notification =
@@ -150,11 +178,8 @@ public class NotificationService {
           emitterRepository.saveEventCache(key, notification);
           sendNotification(emitter, eventId, key, NotificationResponse.from(notification));
         });
-    try {
-      sendPushNotification(receiver, notification);
-    } catch (Exception e) {
-      log.error("푸시 알림 전송 중 예외 발생 (트랜잭션 롤백 방지용 격리)", e);
-    }
+
+    return notification;
   }
 
   private void sendNotification(SseEmitter emitter, String eventId, String emitterId, Object data) {

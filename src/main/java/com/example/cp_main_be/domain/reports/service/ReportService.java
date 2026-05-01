@@ -90,7 +90,7 @@ public class ReportService {
       blockService.blockUser(reporter, reportedUserId);
     }
 
-    notificationService.send(
+    notificationService.sendInAppOnly(
         reportedUser,
         null, // sender는 null (익명/시스템)
         com.example.cp_main_be.domain.member.notification.domain.NotificationType.REPORT_RECEIVED,
@@ -99,7 +99,7 @@ public class ReportService {
         );
 
     // 신고자에게 접수 완료 알림 발송
-    notificationService.send(
+    notificationService.sendInAppOnly(
         reporter,
         null, // sender는 null (익명/시스템)
         com.example.cp_main_be.domain.member.notification.domain.NotificationType.REPORT_SUBMITTED,
