@@ -150,7 +150,11 @@ public class NotificationService {
           emitterRepository.saveEventCache(key, notification);
           sendNotification(emitter, eventId, key, NotificationResponse.from(notification));
         });
-    sendPushNotification(receiver, notification);
+    try {
+      sendPushNotification(receiver, notification);
+    } catch (Exception e) {
+      log.error("푸시 알림 전송 중 예외 발생 (트랜잭션 롤백 방지용 격리)", e);
+    }
   }
 
   private void sendNotification(SseEmitter emitter, String eventId, String emitterId, Object data) {
@@ -320,7 +324,8 @@ public class NotificationService {
             maskToken(deviceToken.getToken()));
         log.info("푸시 알림 전송 성공: {}", notification.getContent());
       } catch (FirebaseMessagingException e) {
-        if ("UNREGISTERED".equals(e.getMessagingErrorCode().name())) {
+        if (e.getMessagingErrorCode() != null
+            && "UNREGISTERED".equals(e.getMessagingErrorCode().name())) {
           log.warn(
               "Device token is no longer valid. Deleting token: {}",
               maskToken(deviceToken.getToken()));
