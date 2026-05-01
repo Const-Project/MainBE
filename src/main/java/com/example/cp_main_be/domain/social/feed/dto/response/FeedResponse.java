@@ -2,7 +2,7 @@ package com.example.cp_main_be.domain.social.feed.dto.response;
 
 import com.example.cp_main_be.domain.mission.diary.domain.Diary;
 import com.example.cp_main_be.domain.social.avatarpost.domain.AvatarPost;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 /**
@@ -10,7 +10,11 @@ import java.time.LocalDateTime;
  * 일관성을 높입니다.
  */
 public record FeedResponse(
-    Long postId, PostType postType, String imageUrl, @JsonIgnore LocalDateTime createdAt) {
+    Long postId,
+    PostType postType,
+    String imageUrl,
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        LocalDateTime createdAt) {
 
   public static FeedResponse from(Diary diary) {
     String imageUrl = diary.getDiaryImage() != null ? diary.getDiaryImage().getImageUrl() : null;
