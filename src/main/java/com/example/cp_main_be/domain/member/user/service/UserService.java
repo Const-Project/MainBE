@@ -11,6 +11,7 @@ import com.example.cp_main_be.domain.member.daily_question.domain.repository.Dai
 import com.example.cp_main_be.domain.member.log.domain.repository.UserDailyActivityLogRepository;
 import com.example.cp_main_be.domain.member.notification.domain.repository.DeviceTokenRepository;
 import com.example.cp_main_be.domain.member.notification.domain.repository.EmitterRepository;
+import com.example.cp_main_be.domain.member.notification.domain.repository.NotificationRepository;
 import com.example.cp_main_be.domain.member.user.domain.User;
 import com.example.cp_main_be.domain.member.user.domain.repository.UserRepository;
 import com.example.cp_main_be.domain.member.user.dto.request.AvatarChangeRequest;
@@ -19,6 +20,7 @@ import com.example.cp_main_be.domain.member.user.dto.response.LevelStatusRespons
 import com.example.cp_main_be.domain.member.user.dto.response.UserGardenDetailResponse;
 import com.example.cp_main_be.domain.member.user.dto.response.UserProfileResponse;
 import com.example.cp_main_be.domain.member.userblock.UserBlockRepository;
+import com.example.cp_main_be.domain.mission.diary.domain.repository.DiaryRepository;
 import com.example.cp_main_be.domain.mission.diaryimage.domain.DiaryImageRepository;
 import com.example.cp_main_be.domain.mission.user_daily_mission.domain.repository.UserDailyMissionRepository;
 import com.example.cp_main_be.domain.mission.wishTree.WishTree;
@@ -62,6 +64,7 @@ public class UserService {
   private final WishTreeService wishTreeService;
   private final RefreshTokenRepository refreshTokenRepository;
   private final DeviceTokenRepository deviceTokenRepository;
+  private final NotificationRepository notificationRepository;
   private final GuestbookRepository guestbookRepository;
   private final EmitterRepository emitterRepository;
   private final CommentRepository commentRepository;
@@ -70,6 +73,7 @@ public class UserService {
   private final FeedRepository feedRepository;
   private final DiaryLikeRepository diaryLikeRepository;
   private final DiaryImageRepository diaryImageRepository;
+  private final DiaryRepository diaryRepository;
   private final BookmarkRepository bookmarkRepository;
   private final DeliveryRepository deliveryRepository;
   private final UserQuizRepository userQuizRepository;
@@ -164,6 +168,7 @@ public class UserService {
 
     user.getGardens().forEach(garden -> garden.updateAvatar(null));
 
+    notificationRepository.deleteAllByReceiver(user);
     deliveryRepository.deleteAllByUser(user);
     userQuizRepository.deleteAllByUser(user);
     trackingReportViewRepository.deleteAllByUser(user);
@@ -177,6 +182,7 @@ public class UserService {
 
     avatarPostLikeRepository.deleteAllByUser(user);
     diaryLikeRepository.deleteAllByUser(user);
+    bookmarkRepository.deleteAllByUser(user);
     friendWateringLogRepository.deleteAllByWaterGiver(user);
 
     bookmarkRepository.deleteAllByAvatarPostUser(user);
@@ -187,7 +193,9 @@ public class UserService {
     feedRepository.deleteAllByUser(user);
 
     diaryLikeRepository.deleteAllByDiaryUser(user);
+    commentRepository.deleteAllByDiaryUser(user);
     diaryImageRepository.deleteAllByUser(user);
+    diaryRepository.deleteAllByUser(user);
     friendWateringLogRepository.deleteAllByWateredGardenUser(user);
 
     followRepository.deleteAllByFollower(user);
@@ -199,6 +207,7 @@ public class UserService {
     refreshTokenRepository.deleteAllByUserUuid(user.getUuid());
     deviceTokenRepository.deleteByUser(user);
 
+    avatarRepository.deleteAllByUser(user);
     userRepository.delete(user);
 
     String userIdStr = String.valueOf(userId);

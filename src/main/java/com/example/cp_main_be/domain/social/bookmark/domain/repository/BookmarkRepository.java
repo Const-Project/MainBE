@@ -22,4 +22,8 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
   @Modifying
   @Query("DELETE FROM Bookmark b WHERE b.avatarPost.user = :user")
   void deleteAllByAvatarPostUser(@Param("user") User user);
+
+  @Modifying
+  @Query("DELETE FROM Bookmark b WHERE b.user = :user")
+  void deleteAllByUser(@Param("user") User user);
 }

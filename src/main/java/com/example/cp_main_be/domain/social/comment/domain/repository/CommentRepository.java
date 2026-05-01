@@ -33,4 +33,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
   @Modifying
   @Query("DELETE FROM Comment c WHERE c.avatarPost.user = :user")
   void deleteAllByAvatarPostUser(@Param("user") User user);
+
+  @Modifying
+  @Query("DELETE FROM Comment c WHERE c.diary.user = :user")
+  void deleteAllByDiaryUser(@Param("user") User user);
 }
