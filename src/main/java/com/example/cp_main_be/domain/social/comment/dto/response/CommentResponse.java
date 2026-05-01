@@ -9,7 +9,9 @@ import lombok.Setter;
 @Setter
 public class CommentResponse {
   private Long id;
+  private Long commentId;
   private Long writerId;
+  private String profileImageUrl;
   private String writer;
   private String content;
   private Long targetId;
@@ -19,7 +21,9 @@ public class CommentResponse {
   public static CommentResponse from(Comment comment, Long targetId, String targetType) {
     CommentResponse response = new CommentResponse();
     response.setId(comment.getId());
+    response.setCommentId(comment.getId());
     response.setWriterId(comment.getWriter().getId());
+    response.setProfileImageUrl(comment.getWriter().getProfileImageUrl());
     response.setWriter(comment.getWriter().getNickname());
     response.setContent(comment.getContent());
     response.setTargetId(targetId);
