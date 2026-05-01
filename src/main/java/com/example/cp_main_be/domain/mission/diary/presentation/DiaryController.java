@@ -32,7 +32,7 @@ public class DiaryController {
   public ResponseEntity<ApiResponse<DiaryResponse>> createDiary(
       @AuthenticationPrincipal User user, @RequestBody @Valid CreateDiaryRequest request) {
     Long diaryId = diaryService.createDiary(user, request);
-    Diary diary = diaryService.findDiaryById(diaryId);
+    Diary diary = diaryService.findDiaryWithDetailsById(diaryId);
     return ResponseEntity.ok(ApiResponse.success(DiaryResponse.from(diary, 0L)));
   }
 

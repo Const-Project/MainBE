@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -299,7 +300,7 @@ public class GardenService {
     log.info("Finished cleanup. Deleted {} old friend watering logs.", deletedCount);
   }
 
-  private void recordDailyActivity(User user, boolean watered, boolean sunlight) {
+  private synchronized void recordDailyActivity(User user, boolean watered, boolean sunlight) {
     LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
     com.example.cp_main_be.domain.member.log.domain.UserDailyActivityLog log =
         userDailyActivityLogRepository
@@ -316,7 +317,15 @@ public class GardenService {
     if (watered) log.updateWatered(true);
     if (sunlight) log.updateSunlight(true);
 
-    userDailyActivityLogRepository.save(log);
+    try {
+      userDailyActivityLogRepository.saveAndFlush(log);
+    } catch (DataIntegrityViolationException e) {
+      com.example.cp_main_be.domain.member.log.domain.UserDailyActivityLog existingLog =
+          userDailyActivityLogRepository.findByUserAndDate(user, today).orElseThrow(() -> e);
+      if (watered) existingLog.updateWatered(true);
+      if (sunlight) existingLog.updateSunlight(true);
+      userDailyActivityLogRepository.save(existingLog);
+    }
   }
 
   @EventListener

@@ -35,8 +35,8 @@ public class MissionAggregationService {
             .peek(
                 mission -> {
                   long currentCount = mission.getCount();
-                  if (currentCount >= 3) {
-                    mission.setCount(3L);
+                  if (currentCount >= 1) {
+                    mission.setCount(1L);
                   }
                 })
             .toList();

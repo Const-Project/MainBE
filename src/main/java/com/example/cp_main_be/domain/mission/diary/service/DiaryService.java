@@ -75,6 +75,13 @@ public class DiaryService {
         .orElseThrow(() -> new CustomApiException(ErrorCode.DIARY_NOT_FOUND));
   }
 
+  @Transactional(readOnly = true)
+  public Diary findDiaryWithDetailsById(Long diaryId) {
+    return diaryRepository
+        .findByIdWithDetails(diaryId)
+        .orElseThrow(() -> new CustomApiException(ErrorCode.DIARY_NOT_FOUND));
+  }
+
   // 일기 상세 조회 (읽기 전용)
   @Transactional(readOnly = true)
   public DiaryInfoResponse getDiaryInfo(Long diaryId, User currentUser) {

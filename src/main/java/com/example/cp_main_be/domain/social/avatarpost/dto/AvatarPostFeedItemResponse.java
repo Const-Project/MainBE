@@ -12,6 +12,7 @@ public class AvatarPostFeedItemResponse implements FeedItemResponse {
   private final String postType = "AVATAR_POST";
   private AuthorResponse author;
   private String caption;
+  private String imageUrl;
   private long likeCount;
   private long commentCount;
   private LocalDateTime createdAt;
@@ -20,6 +21,7 @@ public class AvatarPostFeedItemResponse implements FeedItemResponse {
     this.postId = post.getId();
     this.author = new AuthorResponse(post.getUser());
     this.caption = post.getCaption();
+    this.imageUrl = post.getImageUrl();
     this.likeCount = likeCount;
     this.commentCount = commentCount;
     this.createdAt = post.getCreatedAt();

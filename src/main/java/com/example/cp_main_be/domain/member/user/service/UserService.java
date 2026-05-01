@@ -130,6 +130,10 @@ public class UserService {
             .findById(avatarId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.AVATAR_NOT_FOUND));
 
+    if (!avatar.getUser().getId().equals(user.getId())) {
+      throw new CustomApiException(ErrorCode.ACCESS_DENIED, "내 아바타만 수정할 수 있습니다.");
+    }
+
     if (request.getNewAvatarUrl() != null) {
       avatar.setImageUrl(request.getNewAvatarUrl());
     }
@@ -145,7 +149,7 @@ public class UserService {
             .findById(user.getId())
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
     managedUser.updateProfile(newNickname, null);
-    userRepository.save(user);
+    userRepository.save(managedUser);
   }
 
   public void saveUser(User user) {
@@ -157,6 +161,8 @@ public class UserService {
         userRepository
             .findById(userId)
             .orElseThrow(() -> new CustomApiException(ErrorCode.USER_NOT_FOUND));
+
+    user.getGardens().forEach(garden -> garden.updateAvatar(null));
 
     deliveryRepository.deleteAllByUser(user);
     userQuizRepository.deleteAllByUser(user);

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -119,25 +120,28 @@ public class RealQuizService {
       if (realQuizList == null || realQuizList.isEmpty()) {
         throw new QuizNotFoundException("불러올 퀴즈가 존재하지 않습니다");
       }
+      Long lastQuizId =
+          userQuizRepository
+              .findTopByUserOrderByCreatedAtDesc(user)
+              .map(previousUserQuiz -> previousUserQuiz.getRealQuiz().getId())
+              .orElse(null);
+      List<RealQuiz> selectableQuizList =
+          realQuizList.size() <= 1 || lastQuizId == null
+              ? realQuizList
+              : realQuizList.stream()
+                  .filter(realQuiz -> !realQuiz.getId().equals(lastQuizId))
+                  .collect(Collectors.toList());
       Random random = new Random();
-      int rand = random.nextInt(realQuizList.size());
-      RealQuiz realQuiz = realQuizList.get(rand);
+      int rand = random.nextInt(selectableQuizList.size());
+      RealQuiz realQuiz = selectableQuizList.get(rand);
 
       // 할당한다.
       userQuiz = UserQuiz.builder().realQuiz(realQuiz).user(user).isCompleted(false).build();
       userQuizRepository.save(userQuiz);
 
       return transformToRealQuizResponseDTO(realQuiz, userQuiz);
-
     }
-    // 퀴즈가 할당된 경우
-    else {
-      RealQuiz realQuiz =
-          realQuizRepostitory
-              .findById(userQuiz.getRealQuiz().getId())
-              .orElseThrow(() -> new QuizNotFoundException("퀴즈가 존재하지 않습니다."));
-      return transformToRealQuizResponseDTO(realQuiz, userQuiz);
-    }
+    return transformToRealQuizResponseDTO(userQuiz.getRealQuiz(), userQuiz);
   }
 
   public RealQuizAnswerResponseDTO getRealQuizAnswer(
@@ -146,16 +150,13 @@ public class RealQuizService {
     LocalDateTime startOfDay = today.atStartOfDay();
     LocalDateTime endOfDay = today.atTime(23, 59, 59);
 
-    RealQuiz realQuiz =
-        realQuizRepostitory
-            .findById(quizId)
-            .orElseThrow(() -> new QuizNotFoundException("퀴즈를 찾을 수 없습니다."));
-
     UserQuiz userQuiz =
         userQuizRepository
-            .findTopByUserAndRealQuizAndCreatedAtBetweenOrderByCreatedAtDesc(
-                user, realQuiz, startOfDay, endOfDay)
-            .orElseThrow(() -> new RuntimeException("오늘 할당 된 퀴즈가 없습니다."));
+            .findTodayUserQuizWithRealQuizByUserAndRealQuizId(user, quizId, startOfDay, endOfDay)
+            .stream()
+            .findFirst()
+            .orElseThrow(() -> new QuizNotFoundException("오늘 할당 된 퀴즈가 없습니다."));
+    RealQuiz realQuiz = userQuiz.getRealQuiz();
 
     /*
      * 한글 주석:

@@ -7,6 +7,7 @@ import com.example.cp_main_be.domain.realquiz.UserQuiz;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,11 +16,27 @@ import org.springframework.data.repository.query.Param;
 public interface UserQuizRepository extends JpaRepository<UserQuiz, Long> {
   Optional<UserQuiz> findByUser(User user);
 
+  @EntityGraph(attributePaths = "realQuiz")
   Optional<UserQuiz> findTopByUserAndCreatedAtBetweenOrderByCreatedAtDesc(
       User user, LocalDateTime startDate, LocalDateTime endDate);
 
+  Optional<UserQuiz> findTopByUserOrderByCreatedAtDesc(User user);
+
   Optional<UserQuiz> findTopByUserAndRealQuizAndCreatedAtBetweenOrderByCreatedAtDesc(
       User user, RealQuiz realQuiz, LocalDateTime startDate, LocalDateTime endDate);
+
+  @Query(
+      "SELECT uq FROM UserQuiz uq "
+          + "JOIN FETCH uq.realQuiz rq "
+          + "WHERE uq.user = :user "
+          + "AND rq.id = :realQuizId "
+          + "AND uq.createdAt BETWEEN :startDate AND :endDate "
+          + "ORDER BY uq.createdAt DESC")
+  List<UserQuiz> findTodayUserQuizWithRealQuizByUserAndRealQuizId(
+      @Param("user") User user,
+      @Param("realQuizId") Long realQuizId,
+      @Param("startDate") LocalDateTime startDate,
+      @Param("endDate") LocalDateTime endDate);
 
   @Query(
       "SELECT uq FROM UserQuiz uq "

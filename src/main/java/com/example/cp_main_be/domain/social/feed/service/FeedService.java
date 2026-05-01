@@ -199,11 +199,13 @@ public class FeedService {
     RandomFeedSession session =
         new RandomFeedSession(
             diaryIds, avatarPostIds, 0, 0, Instant.now().plusSeconds(SESSION_TTL_MINUTES * 60L));
-    randomFeedSessionRepository.save(token, session);
-
     List<FeedItemResponse> items = buildRandomSessionPage(session, safeSize);
     int remaining = countSessionRemaining(session);
     boolean hasMore = remaining > 0;
+
+    if (hasMore) {
+      randomFeedSessionRepository.save(token, session);
+    }
 
     return new RandomFeedSessionResponse(token, items, hasMore, remaining);
   }
@@ -227,6 +229,8 @@ public class FeedService {
 
     if (!hasMore) {
       randomFeedSessionRepository.delete(sessionToken);
+    } else {
+      randomFeedSessionRepository.save(sessionToken, session);
     }
 
     return new RandomFeedSessionResponse(sessionToken, items, hasMore, remaining);
